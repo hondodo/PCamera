@@ -12,7 +12,6 @@ Dialog::Dialog(QWidget *parent) :
                                        "background-color: rgb(255, 255, 255);"
                                        "}"));
     this->setWindowFlags(Qt::Window);
-    player = new QMediaPlayer();
 }
 
 Dialog::~Dialog()
@@ -95,7 +94,5 @@ int Dialog::getShowingCameraCount() const
 
 void Dialog::on_pushButtonStop_clicked()
 {
-    player->setMedia(QUrl("/home/pi/Music/a.mp3"));
-    player->setVolume(80);
-    player->play();
+
 }

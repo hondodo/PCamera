@@ -30,6 +30,8 @@ SOURCES += \
     Core/ImageFormat.cpp \
     Thread/camarathread.cpp \
     #Core/cascadedetectoradapter.cpp
+    Core/facedetecthelper.cpp \
+    Core/ringhelper.cpp
 
 HEADERS += \
         dialog.h \
@@ -38,6 +40,8 @@ HEADERS += \
     Core/ImageFormat.h \
     Thread/camarathread.h \
     #Core/cascadedetectoradapter.h
+    Core/facedetecthelper.h \
+    Core/ringhelper.h
 
 FORMS += \
         dialog.ui \
@@ -53,3 +57,6 @@ else:unix: INCLUDEPATH += /usr/include/opencv\
 
 win32: LIBS += D:\Potatokid\OpenCV\buildOpenCV\lib\libopencv_*.a
 else:unix: LIBS += /usr/local/lib/libopencv_*.so\
+
+RESOURCES += \
+    prc.qrc

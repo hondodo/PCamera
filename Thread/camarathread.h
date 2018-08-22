@@ -7,6 +7,8 @@
 #include "opencv/cv.h"
 #include "Core/ImageFormat.h"
 #include "opencv2/video/background_segm.hpp"
+#include "opencv2/calib3d/calib3d.hpp"
+#include "Core/facedetecthelper.h"
 
 class CamaraThread : public QThread
 {
@@ -24,6 +26,9 @@ public:
     int getRecMinSecond() const;
     void setRecMinSecond(int value);
 
+    bool getIsDetectFace() const;
+    void setIsDetectFace(bool isDetectFace);
+
 protected:
     void run();
 
@@ -32,17 +37,20 @@ signals:
     void onTip(QString const &tip);
     void onNotify();
     void onConnectChanged(bool connected);
+    void onFaceDetected(int faceCount);
 
 public slots:
 
 private:
     bool _isRunning;
+    bool _isDetectFace;
     int camaraId;
     int recMinSecond;
     int recMaxSencond;
     QTime time;
     bool _isConnect;
     QString recDir;
+    FaceDetectHelper faceHelper;
 };
 
 #endif // CAMARATHREAD_H

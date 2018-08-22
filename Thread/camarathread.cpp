@@ -7,6 +7,7 @@ CamaraThread::CamaraThread(QObject *parent) : QThread(parent)
 {
     _isRunning = false;
     _isConnect = false;
+    _isDetectFace = false;
     camaraId = 0;
     time.start();
     recDir = "REC";
@@ -41,6 +42,9 @@ void CamaraThread::run()
     mog->setNMixtures(2);
     mog->setDetectShadows(0);
     std::vector<std::vector<cv::Point> > cnts;
+
+    vector<Rect_<int> > faces;
+    vector<Rect_<int> > eyes;
 
     VideoWriter capWriter;
     int fps = capture.get(CAP_PROP_FPS);
@@ -83,6 +87,9 @@ void CamaraThread::run()
     int maxFrame = fps * recMaxSencond;
     int frameIndex = 0;
     bool isRecording = false;
+
+    bool canDetectFace = faceHelper.init("D:/Potatokid/OpenCV/sources/data/haarcascades/haarcascade_frontalcatface.xml",
+                                         "");
     while (_isRunning)
     {
         Mat cap;
@@ -157,6 +164,17 @@ void CamaraThread::run()
                 }
             }
 
+            if(_isDetectFace && canDetectFace)
+            {
+                faceHelper.detectFaces(cap, faces);
+                faceHelper.detectEyes(cap, eyes);
+                if(!faces.empty() && (int)faces.size() > 0)
+                {
+                    emit onFaceDetected((int)faces.size());
+                }
+                faceHelper.detectFacialFeaures(cap, faces, eyes);
+            }
+
             QImage image = ImageFormat::Mat2QImage(cap);
             image = image.scaled(QSize(400, 300), Qt::KeepAspectRatio);
             onImage(image);
@@ -187,6 +205,16 @@ void CamaraThread::run()
         capWriter.release();
     }
     capture.release();
+}
+
+bool CamaraThread::getIsDetectFace() const
+{
+    return _isDetectFace;
+}
+
+void CamaraThread::setIsDetectFace(bool isDetectFace)
+{
+    _isDetectFace = isDetectFace;
 }
 
 int CamaraThread::getRecMinSecond() const

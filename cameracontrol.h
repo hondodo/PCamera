@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QDateTime>
 #include "Thread/camarathread.h"
+#include "Core/ringhelper.h"
 
 namespace Ui {
 class CameraControl;
@@ -31,10 +32,12 @@ public slots:
     void setImage(QImage const &image);
     void setTip(QString const &tip);
     void onConnectChanged(bool connected);
-
+    void onFaceDetected(int faceCount);
 
 private slots:
     void on_pushButtonConnect_clicked();
+    void on_checkBoxFace_toggled(bool checked);
+    void on_checkBoxRing_toggled(bool checked);
 
 private:
     Ui::CameraControl *ui;
@@ -44,6 +47,10 @@ private:
     CamaraThread *camThread;
     void deleteCameraThread();
     void startNewCameraThread(int id);
+    QDateTime lastDetectFaceTime;
+    RingHelper ringHelper;
+    bool _isRing;
+
 };
 
 #endif // CAMERACONTROL_H

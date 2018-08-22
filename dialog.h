@@ -2,8 +2,6 @@
 #define DIALOG_H
 
 #include <QDialog>
-#include <QMultimedia>
-#include <QMediaPlayer>
 #include <QUrl>
 #include "cameracontrol.h"
 
@@ -32,7 +30,6 @@ private:
     int getCameraCount() const;
     int getShowingCameraCount() const;
     int cameraIdIndex;
-    QMediaPlayer *player;
 };
 
 #endif // DIALOG_H
