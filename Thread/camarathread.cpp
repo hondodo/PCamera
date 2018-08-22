@@ -88,7 +88,7 @@ void CamaraThread::run()
     int frameIndex = 0;
     bool isRecording = false;
 
-    bool canDetectFace = faceHelper.init("D:/Potatokid/OpenCV/sources/data/haarcascades/haarcascade_frontalcatface.xml",
+    bool canDetectFace = faceHelper.init("/home/pi/Source/PCamera/Data/haarcascades/haarcascade_frontalcatface.xml",//"D:/Potatokid/OpenCV/sources/data/haarcascades/haarcascade_frontalcatface.xml",
                                          "");
     while (_isRunning)
     {
@@ -130,7 +130,8 @@ void CamaraThread::run()
                 rectangle(cap, rect, Scalar(0, 255, 0), 2);
             }
 
-            int recelsp = QDateTime::currentDateTime().toSecsSinceEpoch() - needRecLastTime.toSecsSinceEpoch();
+            int recelsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - needRecLastTime.toMSecsSinceEpoch();
+            recelsp = recelsp * 1000;
             if(recelsp <= recMinSecond)
             {
                 if(frameIndex > maxFrame)

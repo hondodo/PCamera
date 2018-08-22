@@ -57,6 +57,8 @@ else:unix: INCLUDEPATH += /usr/include/opencv\
 
 win32: LIBS += D:\Potatokid\OpenCV\buildOpenCV\lib\libopencv_*.a
 else:unix: LIBS += /usr/local/lib/libopencv_*.so\
+                   -lmpg123\
+                   -lao\
 
 RESOURCES += \
     prc.qrc

@@ -30,6 +30,7 @@ private:
     int getCameraCount() const;
     int getShowingCameraCount() const;
     int cameraIdIndex;
+    RingHelper ring;
 };
 
 #endif // DIALOG_H

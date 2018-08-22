@@ -94,5 +94,6 @@ int Dialog::getShowingCameraCount() const
 
 void Dialog::on_pushButtonStop_clicked()
 {
-
+    ring.setStop();
+    ring.Ring();
 }

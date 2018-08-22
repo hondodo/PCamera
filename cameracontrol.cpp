@@ -104,11 +104,12 @@ void CameraControl::onConnectChanged(bool connected)
 void CameraControl::onFaceDetected(int faceCount)
 {
     Q_UNUSED(faceCount);
-    if(QDateTime::currentDateTime().toSecsSinceEpoch() - lastDetectFaceTime.toSecsSinceEpoch() > 30)
+    if(QDateTime::currentDateTime().toMSecsSinceEpoch() - lastDetectFaceTime.toMSecsSinceEpoch() > 30 * 1000)
     {
         lastDetectFaceTime = QDateTime::currentDateTime();
         if(_isRing)
         {
+            ringHelper.setStop();
             ringHelper.Ring();
         }
     }
