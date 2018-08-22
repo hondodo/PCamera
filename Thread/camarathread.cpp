@@ -90,9 +90,13 @@ void CamaraThread::run()
 
     bool canDetectFace = faceHelper.init("/home/pi/Source/PCamera/Data/haarcascades/haarcascade_frontalcatface.xml",//"D:/Potatokid/OpenCV/sources/data/haarcascades/haarcascade_frontalcatface.xml",
                                          "");
+    QTime timera;
+    timera.start();
+    Mat cap;
     while (_isRunning)
     {
-        Mat cap;
+        timera.restart();
+
         capture >> cap;
         if (!cap.empty())
         {
@@ -101,6 +105,15 @@ void CamaraThread::run()
                 _isConnect = true;
                 emit onConnectChanged(true);
             }
+
+
+            QImage imagea = ImageFormat::Mat2QImage(cap);
+            imagea = imagea.scaled(QSize(400, 300), Qt::KeepAspectRatio);
+            onImage(imagea);
+
+            qDebug() << timera.elapsed();
+            continue;
+
             mog->apply(cap, lastMat);
             cv::threshold(lastMat, lastMat, 130, 255, cv::THRESH_BINARY);
             cv::medianBlur(lastMat, lastMat, 3);

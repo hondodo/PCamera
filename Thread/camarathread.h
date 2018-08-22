@@ -3,6 +3,8 @@
 
 #include <QThread>
 #include <QDateTime>
+#include <QTime>
+#include <QDebug>
 #include <QDir>
 #include "opencv/cv.h"
 #include "Core/ImageFormat.h"
