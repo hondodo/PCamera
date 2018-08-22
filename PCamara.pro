@@ -31,7 +31,8 @@ SOURCES += \
     Thread/camarathread.cpp \
     #Core/cascadedetectoradapter.cpp
     Core/facedetecthelper.cpp \
-    Core/ringhelper.cpp
+    Core/ringhelper.cpp \
+    Thread/cameracollectorthread.cpp
 
 HEADERS += \
         dialog.h \
@@ -41,7 +42,8 @@ HEADERS += \
     Thread/camarathread.h \
     #Core/cascadedetectoradapter.h
     Core/facedetecthelper.h \
-    Core/ringhelper.h
+    Core/ringhelper.h \
+    Thread/cameracollectorthread.h
 
 FORMS += \
         dialog.ui \

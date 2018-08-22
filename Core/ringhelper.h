@@ -1,6 +1,8 @@
 #ifndef RINGHELPER_H
 #define RINGHELPER_H
 
+#include "qsystemdetection.h"
+
 #ifdef Q_OS_WIN
 #include <QMultimedia>
 #include <QMediaPlayer>

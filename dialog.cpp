@@ -12,10 +12,22 @@ Dialog::Dialog(QWidget *parent) :
                                        "background-color: rgb(255, 255, 255);"
                                        "}"));
     this->setWindowFlags(Qt::Window);
+    th = Q_NULLPTR;
+}
+
+void Dialog::stopCameraCollectThread()
+{
+    if(th != Q_NULLPTR)
+    {
+        th->setStop();
+        th->wait(1000);
+        th->terminate();
+    }
 }
 
 Dialog::~Dialog()
 {
+    stopCameraCollectThread();
     delete ui;
 }
 
@@ -94,6 +106,7 @@ int Dialog::getShowingCameraCount() const
 
 void Dialog::on_pushButtonStop_clicked()
 {
-    ring.setStop();
-    ring.Ring();
+    stopCameraCollectThread();
+    th = new CameraCollectorThread();
+    th->start();
 }

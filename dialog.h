@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QUrl>
 #include "cameracontrol.h"
+#include "Thread/cameracollectorthread.h"
 
 namespace Ui {
 class Dialog;
@@ -30,7 +31,8 @@ private:
     int getCameraCount() const;
     int getShowingCameraCount() const;
     int cameraIdIndex;
-    RingHelper ring;
+    CameraCollectorThread *th;
+    void stopCameraCollectThread();
 };
 
 #endif // DIALOG_H
