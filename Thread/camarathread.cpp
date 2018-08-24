@@ -88,14 +88,22 @@ void CamaraThread::run()
     int frameIndex = 0;
     bool isRecording = false;
 
-    bool canDetectFace = faceHelper.init("/home/pi/Source/PCamera/Data/haarcascades/haarcascade_frontalcatface.xml",//"D:/Potatokid/OpenCV/sources/data/haarcascades/haarcascade_frontalcatface.xml",
+#ifdef Q_OS_WIN//:/Data/haarcascades/haarcascade_frontalcatface_extended.xml
+    bool canDetectFace = faceHelper.init("D:/Potatokid/OpenCV/sources/data/haarcascades/haarcascade_frontalface_alt.xml",
                                          "");
-    QTime timera;
-    timera.start();
+#else
+    bool canDetectFace = faceHelper.init("/home/pi/Source/PCamera/Data/haarcascades/haarcascade_frontalcatface.xml",
+                                         "");
+#endif
+    //QTime timera;
+    //timera.start();
     Mat cap;
+
+    double scale = 2.0;
+
     while (_isRunning)
     {
-        timera.restart();
+        //timera.restart();
 
         capture >> cap;
         if (!cap.empty())
@@ -106,13 +114,15 @@ void CamaraThread::run()
                 emit onConnectChanged(true);
             }
 
-
+            //resize(cap, smallcap, Size(cap.rows / scale, cap.cols / scale), 0, 0, CV_8SC1);
+            /*
             QImage imagea = ImageFormat::Mat2QImage(cap);
             imagea = imagea.scaled(QSize(400, 300), Qt::KeepAspectRatio);
             onImage(imagea);
 
             qDebug() << timera.elapsed();
             continue;
+            */
 
             mog->apply(cap, lastMat);
             cv::threshold(lastMat, lastMat, 130, 255, cv::THRESH_BINARY);
@@ -180,13 +190,15 @@ void CamaraThread::run()
 
             if(_isDetectFace && canDetectFace)
             {
-                faceHelper.detectFaces(cap, faces);
-                faceHelper.detectEyes(cap, eyes);
+                Mat small;
+                resize(cap, small, Size(cap.rows / scale, cap.cols / scale), 0, 0, CV_8SC1);
+                faceHelper.detectFaces(small, faces);
+                faceHelper.detectEyes(small, eyes);
                 if(!faces.empty() && (int)faces.size() > 0)
                 {
                     emit onFaceDetected((int)faces.size());
+                    faceHelper.detectFacialFeaures(cap, faces, eyes);
                 }
-                faceHelper.detectFacialFeaures(cap, faces, eyes);
             }
 
             QImage image = ImageFormat::Mat2QImage(cap);

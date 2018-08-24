@@ -34,6 +34,14 @@ void CameraCollectorThread::run()
     //    qDebug() << "1 not opened";
     //    return;
     //}
+
+
+    capture0.set(CV_CAP_PROP_BUFFERSIZE, 3);
+    capture0.set(CV_CAP_PROP_FRAME_WIDTH, 600);
+    capture0.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+    capture0.set(CV_CAP_PROP_FPS, 25);
+    int fa = capture0.get(CV_CAP_PROP_FPS);
+    qDebug() << "frame" << fa;
     Mat mat0, mat1;
     QTime timer;
     timer.start();
@@ -44,7 +52,7 @@ void CameraCollectorThread::run()
         capture0.read(mat0);
         //capture1.read(mat1);
         qDebug() << timer.elapsed();
-        this->msleep(30);
+        this->msleep(10);
     }
     capture0.release();
 }

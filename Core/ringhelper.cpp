@@ -3,7 +3,7 @@
 RingHelper::RingHelper()
 {
 #ifdef Q_OS_WIN
-    player = new QMediaPlayer();
+    player = Q_NULLPTR;
 #endif
     _isRinging = false;
 }
@@ -17,15 +17,19 @@ void RingHelper::setStop()
 {
     _isRinging = false;
 #ifdef Q_OS_WIN
-    player->stop();
-    player->deleteLater();
+    if(player != Q_NULLPTR)
+    {
+        player->stop();
+        player->deleteLater();
+        player = Q_NULLPTR;
+    }
 #endif
 }
 
 void RingHelper::Ring()
 {
 #ifdef Q_OS_WIN
-    player->stop();
+    player = new QMediaPlayer();
     player->setMedia(QUrl("D:/a.mp3"));
     player->setVolume(80);
     player->play();
