@@ -13,6 +13,8 @@ Dialog::Dialog(QWidget *parent) :
                                        "}"));
     this->setWindowFlags(Qt::Window);
     th = Q_NULLPTR;
+    oledVol = 0x20;
+    oled.Init(0x3c);
 }
 
 void Dialog::stopCameraCollectThread()
@@ -109,4 +111,98 @@ void Dialog::on_pushButtonStop_clicked()
     stopCameraCollectThread();
     th = new CameraCollectorThread();
     th->start();
+}
+
+void Dialog::on_pushButtonOLedOn_clicked()
+{
+    oled.DisplayOn();
+}
+
+void Dialog::on_pushButtonOLedOff_clicked()
+{
+    oled.DisplayOff();
+}
+
+void Dialog::on_pushButtonOLedAdd_clicked()
+{
+    oledVol++;
+    if(oledVol > 0xff)
+    {
+        oledVol = 0x00;
+    }
+    oled.SetVcomh(oledVol);
+    qDebug() << oledVol;
+}
+
+void Dialog::on_pushButtonOLedMut_clicked()
+{
+    oledVol--;
+    if(oledVol < 0x00)
+    {
+        oledVol = 0xff;
+    }
+    oled.SetVcomh(oledVol);
+    qDebug() << oledVol;
+}
+
+void Dialog::on_pushButtonCleanOLed_clicked()
+{
+    oled.CleanScreen();
+    oled.WriteCMD(0x00, 0xb0);
+}
+
+void Dialog::on_pushButtonTes_clicked()
+{
+    //QImage image(128, 64, QImage::Format_ARGB32);
+    //QPainter painter(&image);
+    //painter.fillRect(QRect(0, 0, 128, 64), Qt::white);
+    //QPen pen(Qt::black);
+    //pen.setWidth(2);
+    //painter.setPen(pen);
+    //painter.drawLine(0, 0, 128, 64);
+    //image.save("/home/pi/Pictures/hi.png");
+    //oled.WriteImage(&image);
+    //return;
+
+    QImage img;
+    if(img.load("/home/pi/Pictures/bdlogo.png"))
+    {
+        oled.WriteImage(&img);
+    }
+    return;
+    //for(int i = 0; i < 8; i++)
+    //{
+        oled.WriteCMD(0x00, 0xb0);
+        //oled.WriteCMD(0x00, 0x00);
+        //oled.WriteCMD(0x00, 0x10);
+        //for(int j = 0; j < 16; j++)
+       // {
+    oled.WriteCMD(0x40, 0x08);
+    oled.WriteCMD(0x40, 0xf8);
+    oled.WriteCMD(0x40, 0x88);
+    oled.WriteCMD(0x40, 0x88);
+    oled.WriteCMD(0x40, 0x88);
+    oled.WriteCMD(0x40, 0x70);
+    oled.WriteCMD(0x40, 0x00);
+    oled.WriteCMD(0x40, 0x00);
+
+    for(int j = 0; j < (128 - 8); j++)
+    {
+        oled.WriteCMD(0x40, 0x00);
+    }
+
+    oled.WriteCMD(0x00, 0xb0 + 1);
+    //oled.WriteCMD(0x00, 0x00);
+    //oled.WriteCMD(0x00, 0x10);
+
+    oled.WriteCMD(0x40, 0x20);
+    oled.WriteCMD(0x40, 0x3f);
+    oled.WriteCMD(0x40, 0x20);
+    oled.WriteCMD(0x40, 0x20);
+    oled.WriteCMD(0x40, 0x20);
+    oled.WriteCMD(0x40, 0x11);
+    oled.WriteCMD(0x40, 0x0e);
+    oled.WriteCMD(0x40, 0x00);
+        //}
+    //}
 }

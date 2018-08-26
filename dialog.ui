@@ -46,6 +46,48 @@
           </property>
          </widget>
         </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonOLedOn">
+          <property name="text">
+           <string>OLed On</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonOLedOff">
+          <property name="text">
+           <string>OLed Off</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonCleanOLed">
+          <property name="text">
+           <string>CleanOLed</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonTes">
+          <property name="text">
+           <string>Test</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonOLedAdd">
+          <property name="text">
+           <string>+</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="pushButtonOLedMut">
+          <property name="text">
+           <string>-</string>
+          </property>
+         </widget>
+        </item>
        </layout>
       </item>
      </layout>
@@ -62,7 +104,7 @@
         <x>0</x>
         <y>0</y>
         <width>775</width>
-        <height>458</height>
+        <height>440</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout_3">

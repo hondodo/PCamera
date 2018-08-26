@@ -32,7 +32,8 @@ SOURCES += \
     #Core/cascadedetectoradapter.cpp
     Core/facedetecthelper.cpp \
     Core/ringhelper.cpp \
-    Thread/cameracollectorthread.cpp
+    Thread/cameracollectorthread.cpp \
+    Core/oled12864.cpp
 
 HEADERS += \
         dialog.h \
@@ -43,7 +44,8 @@ HEADERS += \
     #Core/cascadedetectoradapter.h
     Core/facedetecthelper.h \
     Core/ringhelper.h \
-    Thread/cameracollectorthread.h
+    Thread/cameracollectorthread.h \
+    Core/oled12864.h
 
 FORMS += \
         dialog.ui \
@@ -61,6 +63,7 @@ win32: LIBS += D:\Potatokid\OpenCV\buildOpenCV\lib\libopencv_*.a
 else:unix: LIBS += /usr/local/lib/libopencv_*.so\
                    -lmpg123\
                    -lao\
+                   -lwiringPi
 
 RESOURCES += \
     prc.qrc
