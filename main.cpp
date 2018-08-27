@@ -1,5 +1,6 @@
 #include "dialog.h"
 #include <QApplication>
+#include "maindialog.h"
 
 int main(int argc, char *argv[])
 {
@@ -7,7 +8,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
 #endif
     QApplication a(argc, argv);
-    Dialog w;
+    MainDialog w;
     w.show();
     return a.exec();
 }

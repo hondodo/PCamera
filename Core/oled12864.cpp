@@ -77,7 +77,7 @@ void OLed12864::CleanScreen()
 #endif
 }
 
-void OLed12864::WriteImage(QImage *image)
+void OLed12864::WriteImage(const QImage *image)
 {
     if(image != Q_NULLPTR && !image->isNull())
     {

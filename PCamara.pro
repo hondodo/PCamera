@@ -33,7 +33,8 @@ SOURCES += \
     Core/facedetecthelper.cpp \
     Core/ringhelper.cpp \
     Thread/cameracollectorthread.cpp \
-    Core/oled12864.cpp
+    Core/oled12864.cpp \
+    maindialog.cpp
 
 HEADERS += \
         dialog.h \
@@ -45,11 +46,13 @@ HEADERS += \
     Core/facedetecthelper.h \
     Core/ringhelper.h \
     Thread/cameracollectorthread.h \
-    Core/oled12864.h
+    Core/oled12864.h \
+    maindialog.h
 
 FORMS += \
         dialog.ui \
     cameracontrol.ui \
+    maindialog.ui
 
 
 win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include

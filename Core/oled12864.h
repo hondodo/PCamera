@@ -21,7 +21,7 @@ public:
     void DisplayOn();
     void SetVcomh(int value);
     void CleanScreen();
-    void WriteImage(QImage *image);
+    void WriteImage(const QImage *image);
 
 private:
     int fd;

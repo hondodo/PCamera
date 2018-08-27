@@ -89,6 +89,7 @@ void CameraControl::setImage(const QImage &image)
 {
     ui->labelCamara->setPixmap(QPixmap::fromImage(image));
     updateTime(QDateTime::currentDateTime());
+    emit onImage(image);
 }
 
 void CameraControl::setTip(const QString &tip)

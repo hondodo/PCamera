@@ -26,6 +26,8 @@ public:
     void setCameraId(int value);
 
     void reConnect();
+    void startNewCameraThread(int id);
+    void setDefaultText();
 
 public slots:
     void updateTime(QDateTime time);
@@ -39,14 +41,17 @@ private slots:
     void on_checkBoxFace_toggled(bool checked);
     void on_checkBoxRing_toggled(bool checked);
 
+signals:
+    void onImage(QImage const &image);
+
 private:
     Ui::CameraControl *ui;
-    void setDefaultText();
+
     int CameraId;
     QLabel *timeLabel;
     CamaraThread *camThread;
     void deleteCameraThread();
-    void startNewCameraThread(int id);
+
     QDateTime lastDetectFaceTime;
     RingHelper ringHelper;
     bool _isRing;
