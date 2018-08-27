@@ -31,6 +31,9 @@ public:
     bool getIsDetectFace() const;
     void setIsDetectFace(bool isDetectFace);
 
+    QSize getTargetSize() const;
+    void setTargetSize(const QSize &value);
+
 protected:
     void run();
 
@@ -53,6 +56,8 @@ private:
     bool _isConnect;
     QString recDir;
     FaceDetectHelper faceHelper;
+    QSize targetSize;
+    void drawTime(cv::InputOutputArray img);
 };
 
 #endif // CAMARATHREAD_H

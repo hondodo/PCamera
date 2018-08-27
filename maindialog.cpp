@@ -13,6 +13,11 @@ MainDialog::MainDialog(QWidget *parent) :
 
     ui->widgetCameraA->setDefaultText();
     ui->widgetCameraA->startNewCameraThread(0);
+    ui->widgetCameraA->setIsFacing(true);
+    ui->widgetCameraA->setIsRinging(true);
+
+    ui->widgetCameraB->setDefaultText();
+    //ui->widgetCameraB->startNewCameraThread(1);
 
     oled.Init(0x3c);
     oled.DisplayOn();
@@ -21,12 +26,23 @@ MainDialog::MainDialog(QWidget *parent) :
     lastShowLed = QDateTime::currentDateTime();
     connect(ui->widgetCameraA, SIGNAL(onImage(QImage)),
             this, SLOT(onImage(QImage)));
+
+    this->setWindowFlags(Qt::Window);
+    this->showMaximized();
 }
 
 MainDialog::~MainDialog()
 {
     oled.DisplayOff();
     delete ui;
+}
+
+void MainDialog::resizeEvent(QResizeEvent *)
+{
+    int totalhight = ui->widgetMain->height();
+    int bigheight = totalhight / 3 * 2;
+    ui->widgetCameraA->setMinimumHeight(bigheight);
+    ui->widgetCameraA->setMaximumHeight(bigheight);
 }
 
 void MainDialog::onImage(const QImage &image)

@@ -4,8 +4,10 @@
 #include <QWidget>
 #include <QLabel>
 #include <QDateTime>
+#include <QPaintEvent>
+#include <QPainter>
 #include "Thread/camarathread.h"
-#include "Core/ringhelper.h"
+#include "Thread/ringthread.h"
 
 namespace Ui {
 class CameraControl;
@@ -28,6 +30,16 @@ public:
     void reConnect();
     void startNewCameraThread(int id);
     void setDefaultText();
+
+    bool getIsFacing() const;
+    void setIsFacing(bool value);
+
+    bool getIsRinging() const;
+    void setIsRinging(bool value);
+
+protected:
+    void resizeEvent(QResizeEvent *);
+    void paintEvent(QPaintEvent *event);
 
 public slots:
     void updateTime(QDateTime time);
@@ -53,9 +65,12 @@ private:
     void deleteCameraThread();
 
     QDateTime lastDetectFaceTime;
-    RingHelper ringHelper;
+    //RingHelper ringHelper;
     bool _isRing;
-
+    RingThread *ringThread;
+    void deleteRingThread();
+    void startNewRingThread();
+    QImage imageCache;
 };
 
 #endif // CAMERACONTROL_H

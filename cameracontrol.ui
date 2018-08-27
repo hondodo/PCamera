@@ -14,7 +14,8 @@
    <string>Form</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QLabel#labelCamara
+   <string notr="true">
+QLabel#labelCamara
 {
 background-color: rgb(0, 0, 0);
 color: rgb(255, 255, 255);

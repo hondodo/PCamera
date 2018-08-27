@@ -34,7 +34,8 @@ SOURCES += \
     Core/ringhelper.cpp \
     Thread/cameracollectorthread.cpp \
     Core/oled12864.cpp \
-    maindialog.cpp
+    maindialog.cpp \
+    Thread/ringthread.cpp
 
 HEADERS += \
         dialog.h \
@@ -47,7 +48,8 @@ HEADERS += \
     Core/ringhelper.h \
     Thread/cameracollectorthread.h \
     Core/oled12864.h \
-    maindialog.h
+    maindialog.h \
+    Thread/ringthread.h
 
 FORMS += \
         dialog.ui \

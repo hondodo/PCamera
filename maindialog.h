@@ -17,6 +17,9 @@ public:
     explicit MainDialog(QWidget *parent = 0);
     ~MainDialog();
 
+protected:
+    void resizeEvent(QResizeEvent *);
+
 private slots:
     void onImage(QImage const &image);
 

@@ -11,8 +11,9 @@ CamaraThread::CamaraThread(QObject *parent) : QThread(parent)
     camaraId = 0;
     time.start();
     recDir = "REC";
-    recMinSecond = 10;
-    recMaxSencond = 600;
+    recMinSecond = 10 * 1000;
+    recMaxSencond = 600 * 1000;
+    targetSize = QSize(400, 300);
 }
 
 void CamaraThread::setStop()
@@ -51,6 +52,19 @@ void CamaraThread::run()
     int els = 40;
     int width = capture.get(CAP_PROP_FRAME_WIDTH);
     int height = capture.get(CAP_PROP_FRAME_HEIGHT);
+
+    int defwidth = 1280;
+    int defheight = 720;
+    if(capture.set(CAP_PROP_FRAME_WIDTH, defwidth) && capture.set(CAP_PROP_FRAME_HEIGHT, defheight))
+    {
+        width = defwidth;
+        height = defheight;
+    }
+    else
+    {
+        capture.set(CAP_PROP_FRAME_WIDTH, width);
+        capture.set(CAP_PROP_FRAME_HEIGHT, height);
+    }
 
     while(recDir.endsWith("/"))
     {
@@ -95,11 +109,20 @@ void CamaraThread::run()
     bool canDetectFace = faceHelper.init("/home/pi/Source/PCamera/Data/haarcascades/haarcascade_frontalcatface.xml",
                                          "");
 #endif
-    //QTime timera;
-    //timera.start();
-    Mat cap;
 
-    double scale = 2.0;
+    Mat cap, small, smallmog;
+
+    double scale = width / 480.0;
+    if(scale < 1.0)
+    {
+        scale = 1.0;
+    }
+
+    double scalemog = width / 200.0;
+    if(scalemog < 1.0)
+    {
+        scalemog = 1.0;
+    }
 
     while (_isRunning)
     {
@@ -114,17 +137,12 @@ void CamaraThread::run()
                 emit onConnectChanged(true);
             }
 
-            //resize(cap, smallcap, Size(cap.rows / scale, cap.cols / scale), 0, 0, CV_8SC1);
-            /*
-            QImage imagea = ImageFormat::Mat2QImage(cap);
-            imagea = imagea.scaled(QSize(400, 300), Qt::KeepAspectRatio);
-            onImage(imagea);
+            resize(cap, small, Size(cap.rows / scale, cap.cols / scale), 0, 0, CV_8SC1);
+            cvtColor(small, small, CV_BGR2GRAY);
+            resize(cap, smallmog, Size(cap.rows / scalemog, cap.cols / scalemog),
+                   0, 0, CV_8SC1);
 
-            qDebug() << timera.elapsed();
-            continue;
-            */
-
-            mog->apply(cap, lastMat);
+            mog->apply(smallmog, lastMat);
             cv::threshold(lastMat, lastMat, 130, 255, cv::THRESH_BINARY);
             cv::medianBlur(lastMat, lastMat, 3);
             cv::erode(lastMat, lastMat, cv::Mat());
@@ -137,7 +155,7 @@ void CamaraThread::run()
             {
                 vector<Point> c = cnts[i];
                 area = contourArea(c);
-                if (area < 1000)
+                if (area < 100)
                 {
                     continue;
                 }
@@ -153,8 +171,10 @@ void CamaraThread::run()
                 rectangle(cap, rect, Scalar(0, 255, 0), 2);
             }
 
+            drawTime(cap);
+
             int recelsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - needRecLastTime.toMSecsSinceEpoch();
-            recelsp = recelsp * 1000;
+            recelsp = recelsp;
             if(recelsp <= recMinSecond)
             {
                 if(frameIndex > maxFrame)
@@ -184,14 +204,13 @@ void CamaraThread::run()
                 if(isRecording)
                 {
                     isRecording = false;
+                    frameIndex = 0;
                     capWriter.release();
                 }
             }
 
             if(_isDetectFace && canDetectFace)
             {
-                Mat small;
-                resize(cap, small, Size(cap.rows / scale, cap.cols / scale), 0, 0, CV_8SC1);
                 faceHelper.detectFaces(small, faces);
                 faceHelper.detectEyes(small, eyes);
                 if(!faces.empty() && (int)faces.size() > 0)
@@ -202,7 +221,7 @@ void CamaraThread::run()
             }
 
             QImage image = ImageFormat::Mat2QImage(cap);
-            image = image.scaled(QSize(400, 300), Qt::KeepAspectRatio);
+            image = image.scaled(targetSize, Qt::KeepAspectRatio);
             onImage(image);
         }
         else
@@ -231,6 +250,38 @@ void CamaraThread::run()
         capWriter.release();
     }
     capture.release();
+}
+
+void CamaraThread::drawTime(InputOutputArray img)
+{
+    if(img.empty())
+    {
+        return;
+    }
+    std::string text = QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString();
+    int fontface = cv::FONT_HERSHEY_SIMPLEX;
+    double fontscale = 1;
+    int thickness = 2;
+    //int baseline;
+    //cv::Size textsize = cv::getTextSize(text, fontface, fontscale, thickness, &baseline);
+    cv::Point origin;
+    origin.x = 50;//img.cols() / 2 - textsize.width / 2;
+    origin.y = 50;//img.rows() / 2 + textsize.height / 2;
+    cv::Point offsetpoint;
+    offsetpoint.x = origin.x + 2;
+    offsetpoint.y = origin.y + 2;
+    cv::putText(img, text, offsetpoint, fontface, fontscale, cv::Scalar(0, 0, 0), thickness + 1, 8, 0);
+    cv::putText(img, text, origin, fontface, fontscale, cv::Scalar(255, 255, 255), thickness, 8, 0);
+}
+
+QSize CamaraThread::getTargetSize() const
+{
+    return targetSize;
+}
+
+void CamaraThread::setTargetSize(const QSize &value)
+{
+    targetSize = value;
 }
 
 bool CamaraThread::getIsDetectFace() const
