@@ -126,10 +126,20 @@ void CamaraThread::run()
 
     QTime timerFrame;
     timerFrame.start();
+    QTime timeOpenCVOP;
+    timeOpenCVOP.start();
+    QString message = "";
+    int readtime = 0;
+    int mogtime = 0;
+    int drawtimetime = 0;
+    int facetime = 0;
+    int savetime = 0;
+    int showtime = 0;
+    double framefps = 0;
     while (_isRunning)
     {
         timerFrame.restart();
-
+        timeOpenCVOP.restart();
         capture >> cap;
         if (!cap.empty())
         {
@@ -138,7 +148,8 @@ void CamaraThread::run()
                 _isConnect = true;
                 emit onConnectChanged(true);
             }
-
+            readtime = timeOpenCVOP.elapsed();
+            timeOpenCVOP.restart();
             resize(cap, small, Size(cap.rows / scale, cap.cols / scale), 0, 0, CV_8SC1);
             cvtColor(small, small, CV_BGR2GRAY);
             resize(cap, smallmog, Size(cap.rows / scalemog, cap.cols / scalemog),
@@ -172,9 +183,11 @@ void CamaraThread::run()
                 rect = boundingRect(m);
                 rectangle(cap, rect, Scalar(0, 255, 0), 2);
             }
-
+            mogtime =timeOpenCVOP.elapsed();
+            timeOpenCVOP.restart();
             drawTime(cap);
-
+            drawtimetime = timeOpenCVOP.elapsed();
+            timeOpenCVOP.restart();
             int recelsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - needRecLastTime.toMSecsSinceEpoch();
             recelsp = recelsp;
             if(recelsp <= recMinSecond)
@@ -210,6 +223,8 @@ void CamaraThread::run()
                     capWriter.release();
                 }
             }
+            savetime = timeOpenCVOP.elapsed();
+            timeOpenCVOP.restart();
 
             if(_isDetectFace && canDetectFace)
             {
@@ -221,16 +236,36 @@ void CamaraThread::run()
                     faceHelper.detectFacialFeaures(cap, faces, eyes);
                 }
             }
+            facetime = timeOpenCVOP.elapsed();
+            timeOpenCVOP.restart();
 
             QImage image = ImageFormat::Mat2QImage(cap);
             image = image.scaled(targetSize, Qt::KeepAspectRatio);
             onImage(image);
 
+            showtime = timeOpenCVOP.elapsed();
+            timeOpenCVOP.restart();
+
             int frameels = timerFrame.elapsed();
             if(frameels > 0)
             {
-                emit onTip(QString("%0 FPS@ %1").arg(QString::number(1000.0 / frameels, 'f', 2), camaraId));
+                framefps = 1000.0 / frameels;
             }
+            else
+            {
+                framefps = 0.0;
+            }
+            message = QString("R:%1M:%2D:%3F:%4S:%5H:%6@%7FPS@%8").arg(
+                        QString::number(readtime, 'f', 0),
+                        QString::number(mogtime, 'f', 0),
+                        QString::number(drawtimetime, 'f', 0),
+                        QString::number(facetime, 'f', 0),
+                        QString::number(savetime, 'f', 0),
+                        QString::number(showtime, 'f', 0),
+                        QString::number(framefps, 'f', 2),
+                        QString::number(this->camaraId, 'f', 0)
+                        );
+            emit onTip(message);
         }
         else
         {

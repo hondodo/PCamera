@@ -31,7 +31,7 @@ void OLedThread::run()
         painter.fillRect(img.rect(), Qt::black);
         painter.setPen(Qt::white);
         QFont font = painter.font();
-        font.setPixelSize(10);
+        font.setPixelSize(14);
         painter.setFont(font);
         painter.drawText(img.rect(), message);
         oled.WriteImage(&img);
