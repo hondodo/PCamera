@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include <QDateTime>
-#include "Core/oled12864.h"
+#include "Thread/oledthread.h"
 
 namespace Ui {
 class MainDialog;
@@ -22,11 +22,11 @@ protected:
 
 private slots:
     void onImage(QImage const &image);
+    void onTip(QString message);
 
 private:
     Ui::MainDialog *ui;
-    OLed12864 oled;
-    QDateTime lastShowLed;
+    OLedThread *oledThread;
 };
 
 #endif // MAINDIALOG_H

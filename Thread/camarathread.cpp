@@ -124,9 +124,11 @@ void CamaraThread::run()
         scalemog = 1.0;
     }
 
+    QTime timerFrame;
+    timerFrame.start();
     while (_isRunning)
     {
-        //timera.restart();
+        timerFrame.restart();
 
         capture >> cap;
         if (!cap.empty())
@@ -223,6 +225,12 @@ void CamaraThread::run()
             QImage image = ImageFormat::Mat2QImage(cap);
             image = image.scaled(targetSize, Qt::KeepAspectRatio);
             onImage(image);
+
+            int frameels = timerFrame.elapsed();
+            if(frameels > 0)
+            {
+                emit onTip(QString("%0 FPS@ %1").arg(QString::number(1000.0 / frameels, 'f', 2), camaraId));
+            }
         }
         else
         {

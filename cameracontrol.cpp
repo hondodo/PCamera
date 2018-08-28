@@ -168,6 +168,7 @@ void CameraControl::setImage(const QImage &image)
 void CameraControl::setTip(const QString &tip)
 {
     ui->labelCamara->setText(tip);
+    emit onTip(tip);
 }
 
 void CameraControl::onConnectChanged(bool connected)

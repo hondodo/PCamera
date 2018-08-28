@@ -55,6 +55,7 @@ private slots:
 
 signals:
     void onImage(QImage const &image);
+    void onTip(QString message);
 
 private:
     Ui::CameraControl *ui;

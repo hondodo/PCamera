@@ -17,23 +17,26 @@ MainDialog::MainDialog(QWidget *parent) :
     ui->widgetCameraA->setIsRinging(true);
 
     ui->widgetCameraB->setDefaultText();
-    //ui->widgetCameraB->startNewCameraThread(1);
 
-    oled.Init(0x3c);
-    oled.DisplayOn();
-    oled.CleanScreen();
-
-    lastShowLed = QDateTime::currentDateTime();
     connect(ui->widgetCameraA, SIGNAL(onImage(QImage)),
             this, SLOT(onImage(QImage)));
+    connect(ui->widgetCameraA, SIGNAL(onTip(QString)),
+            this, SLOT(onTip(QString)));
 
     this->setWindowFlags(Qt::Window);
     this->showMaximized();
+
+    oledThread = new OLedThread();
 }
 
 MainDialog::~MainDialog()
 {
-    oled.DisplayOff();
+    if(oledThread != NULL)
+    {
+        oledThread->setStop();
+        oledThread->wait(1000);
+        oledThread->terminate();
+    }
     delete ui;
 }
 
@@ -47,10 +50,11 @@ void MainDialog::resizeEvent(QResizeEvent *)
 
 void MainDialog::onImage(const QImage &image)
 {
-    int els = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastShowLed.toMSecsSinceEpoch();
-    if(els > 1000 || els < 0)
-    {
-        lastShowLed = QDateTime::currentDateTime();
-        oled.WriteImage(&image);
-    }
+    //oledThread->setImage(image);
+}
+
+void MainDialog::onTip(QString message)
+{
+    oledThread->setMessage(message);
+    qDebug() << message;
 }
