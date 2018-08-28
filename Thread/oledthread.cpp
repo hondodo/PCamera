@@ -3,8 +3,6 @@
 OLedThread::OLedThread(QObject *parent) : QThread(parent)
 {
     _isRunning = false;
-    oled.Init(0x3c);
-    oled.DisplayOn();
 }
 
 OLedThread::~OLedThread()
@@ -23,9 +21,14 @@ void OLedThread::run()
     _isRunning = true;
     oled.Init(0x3c);
     oled.DisplayOn();
+    oled.CleanScreen();
     while(_isRunning)
     {
-        QImage img = imageCache.copy();
+        QImage img = QImage(128, 64, QImage::Format_ARGB32);
+        QPainter painter(&img);
+        painter.fillRect(img.rect(), Qt::black);
+        painter.setPen(Qt::white);
+        painter.drawText(img.rect(), message);
         oled.WriteImage(&img);
         for(int i = 0; i < 50; i++)
         {
@@ -46,7 +49,5 @@ void OLedThread::setImage(QImage image)
 
 void OLedThread::setMessage(QString message)
 {
-    imageCache = QImage(128, 64, QImage::Format_ARGB32);
-    QPainter painter(&imageCache);
-    painter.drawText(imageCache.rect(), message);
+    this->message = message;
 }

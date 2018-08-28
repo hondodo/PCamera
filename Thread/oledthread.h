@@ -28,6 +28,7 @@ private:
     bool _isRunning;
     OLed12864 oled;
     QImage imageCache;
+    QString message;
 };
 
 #endif // OLEDTHREAD_H

@@ -27,6 +27,7 @@ MainDialog::MainDialog(QWidget *parent) :
     this->showMaximized();
 
     oledThread = new OLedThread();
+    oledThread->start();
 }
 
 MainDialog::~MainDialog()
