@@ -66,18 +66,6 @@ void CamaraThread::run()
         capture.set(CAP_PROP_FRAME_HEIGHT, height);
     }
 
-    while(recDir.endsWith("/"))
-    {
-        recDir.remove(recDir.length() - 2, 1);
-    }
-    QDir dir = QDir(recDir);
-    if(!dir.exists(recDir))
-    {
-        dir.mkpath(recDir);
-    }
-
-    QString filename = recDir + "/" + QDateTime::currentDateTime().toString("yyyyMMddHHmmss") + ".avi";
-
     if(fps <= 0)
     {
         fps = 25;
@@ -96,6 +84,13 @@ void CamaraThread::run()
     {
         height = 300;
     }
+
+    VideoProp prop;
+    prop.setFileNameTag(QString::number(camaraId));
+    prop.setFps(fps);
+    prop.setWidth(width);
+    prop.setHeight(height);
+    CameraCollectorThread::Init->addVideoProp(camaraId, prop);
 
     QDateTime needRecLastTime = QDateTime::currentDateTime().addYears(-1);
     int maxFrame = fps * recMaxSencond;
@@ -188,6 +183,8 @@ void CamaraThread::run()
             drawTime(cap);
             drawtimetime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
+
+            /*
             int recelsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - needRecLastTime.toMSecsSinceEpoch();
             recelsp = recelsp;
             if(recelsp <= recMinSecond)
@@ -200,8 +197,9 @@ void CamaraThread::run()
                 {
                     frameIndex = 0;
                     isRecording = true;
-                    filename = recDir + "/" + QDateTime::currentDateTime().toString("yyyyMMddHHmmss") +
-                            "_" + QString::number(camaraId, 'f', 0) + "_" + ".avi";
+                    //filename = recDir + "/" + QDateTime::currentDateTime().toString("yyyyMMddHHmmss") +
+                    //        "_" + QString::number(camaraId, 'f', 0) + "_" + ".avi";
+                    filename = prop.getFileName();
                     if(capWriter.isOpened())
                     {
                         capWriter.release();
@@ -223,6 +221,9 @@ void CamaraThread::run()
                     capWriter.release();
                 }
             }
+            */
+            CameraCollectorThread::Init->addRecCache(camaraId, cap);
+
             savetime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
 
@@ -241,7 +242,7 @@ void CamaraThread::run()
 
             QImage image = ImageFormat::Mat2QImage(cap);
             image = image.scaled(targetSize, Qt::KeepAspectRatio);
-            onImage(image);
+            emit onImage(image);
 
             showtime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();

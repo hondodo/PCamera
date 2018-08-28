@@ -36,7 +36,8 @@ SOURCES += \
     Core/oled12864.cpp \
     maindialog.cpp \
     Thread/ringthread.cpp \
-    Thread/oledthread.cpp
+    Thread/oledthread.cpp \
+    Core/videoprop.cpp
 
 HEADERS += \
         dialog.h \
@@ -51,7 +52,8 @@ HEADERS += \
     Core/oled12864.h \
     maindialog.h \
     Thread/ringthread.h \
-    Thread/oledthread.h
+    Thread/oledthread.h \
+    Core/videoprop.h
 
 FORMS += \
         dialog.ui \

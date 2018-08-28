@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QDateTime>
 #include "Thread/oledthread.h"
+#include "Thread/cameracollectorthread.h"
 
 namespace Ui {
 class MainDialog;

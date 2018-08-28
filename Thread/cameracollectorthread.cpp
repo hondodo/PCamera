@@ -3,9 +3,11 @@
 using namespace std;
 using namespace cv;
 
+CameraCollectorThread *CameraCollectorThread::Init = new CameraCollectorThread();
 CameraCollectorThread::CameraCollectorThread(QObject *parent) : QThread(parent)
 {
     _isRunning = false;
+    maxRecCacheCount = 25 * 60 * 2;//25fp/s * 60s * 2
 }
 
 CameraCollectorThread::~CameraCollectorThread()
@@ -16,43 +18,112 @@ CameraCollectorThread::~CameraCollectorThread()
 void CameraCollectorThread::setStop()
 {
     _isRunning = false;
+    int reccount = camIdWriterCache.count();
+    for(int i = 0; i < reccount; i++)
+    {
+        VideoWriter *vw = camIdWriterCache.values().at(i);
+        if(vw != NULL)
+        {
+            if(vw->isOpened())
+            {
+                vw->release();
+            }
+            delete vw;
+            vw = NULL;
+        }
+    }
+    camIdWriterCache.clear();
+}
+
+void CameraCollectorThread::addMogCache(int cameraId, Mat cap)
+{
+    if(!camIdMogCache.contains(cameraId))
+    {
+        cv::Mat mat = cap.clone();
+        camIdMogCache.insert(cameraId, mat);
+    }
+}
+
+void CameraCollectorThread::addFaceCache(int cameraId, Mat cap)
+{
+    if(!camIdFaceCache.contains(cameraId))
+    {
+        cv::Mat mat = cap.clone();
+        camIdFaceCache.insert(cameraId, mat);
+    }
+}
+
+void CameraCollectorThread::addRecCache(int cameraId, Mat cap)
+{
+    cv::Mat mat = cap.clone();
+    if(!camIdRecCache.contains(cameraId))
+    {
+        QQueue<cv::Mat> queue;
+        queue.enqueue(mat);
+        camIdRecCache.insert(cameraId, queue);
+    }
+    else
+    {
+        (&camIdRecCache[cameraId])->enqueue(mat);
+    }
+}
+
+void CameraCollectorThread::addVideoProp(int cameraId, VideoProp prop)
+{
+    camIdProp[cameraId] = prop;
 }
 
 void CameraCollectorThread::run()
 {
-    VideoCapture capture0;
-    capture0.open(0);
-    if (!capture0.isOpened())
-    {
-        qDebug() << "0 not opened";
-        return;
-    }
-    //VideoCapture capture1;
-    //capture1.open(1);
-    //if (!capture1.isOpened())
-    //{
-    //    qDebug() << "1 not opened";
-    //    return;
-    //}
-
-
-    capture0.set(CV_CAP_PROP_BUFFERSIZE, 3);
-    capture0.set(CV_CAP_PROP_FRAME_WIDTH, 600);
-    capture0.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
-    capture0.set(CV_CAP_PROP_FPS, 25);
-    int fa = capture0.get(CV_CAP_PROP_FPS);
-    qDebug() << "frame" << fa;
-    Mat mat0, mat1;
-    QTime timer;
-    timer.start();
     _isRunning = true;
     while (_isRunning)
     {
-        timer.restart();
-        capture0.read(mat0);
-        //capture1.read(mat1);
-        qDebug() << timer.elapsed();
-        this->msleep(10);
+        //Save
+        int recCount = camIdRecCache.count();
+        for(int i = 0; i < recCount; i++)
+        {
+            int cid = camIdRecCache.keys().at(i);
+            if(!camIdProp.contains(cid))
+            {
+                assert("no camera prop @ camera collector thread");
+            }
+            int framecount = (&camIdRecCache[cid])->count();
+            VideoProp prop = camIdProp[cid];
+            if(framecount > 0)
+            {
+                if(!camIdWriterCache.contains(cid))
+                {
+                    VideoWriter *vw = new VideoWriter();
+                    camIdWriterCache[cid] = vw;
+                }
+                VideoWriter *vw = camIdWriterCache[cid];
+                if(!vw->isOpened())
+                {
+                    vw->open(prop.getFileName().toStdString(), CV_FOURCC('D', 'I', 'V', 'X'),
+                            prop.getFps(), Size(prop.getWidth(), prop.getHeight()));
+                }
+
+                for(int j = 0; j < framecount; j++)
+                {
+                    Mat mat = (&camIdRecCache[cid])->dequeue();
+                    if(vw->isOpened())
+                    {
+                        vw->write(mat);
+                    }
+                    mat.release();
+                    if(j > maxRecCacheCount)
+                    {
+                        break;
+                    }
+                }
+
+                while((&camIdRecCache[cid])->count() > maxRecCacheCount)
+                {
+                    Mat mat = (&camIdRecCache[cid])->dequeue();
+                    mat.release();
+                }
+            }
+        }
+        this->msleep(20);
     }
-    capture0.release();
 }

@@ -13,7 +13,7 @@ MainDialog::MainDialog(QWidget *parent) :
 
     ui->widgetCameraA->setDefaultText();
     ui->widgetCameraA->startNewCameraThread(0);
-    ui->widgetCameraA->setIsFacing(true);
+    ui->widgetCameraA->setIsFacing(false);
     ui->widgetCameraA->setIsRinging(true);
 
     ui->widgetCameraB->setDefaultText();
@@ -28,6 +28,7 @@ MainDialog::MainDialog(QWidget *parent) :
 
     oledThread = new OLedThread();
     oledThread->start();
+    CameraCollectorThread::Init->start();
 }
 
 MainDialog::~MainDialog()
@@ -38,6 +39,7 @@ MainDialog::~MainDialog()
         oledThread->wait(1000);
         oledThread->terminate();
     }
+    CameraCollectorThread::Init->setStop();
     delete ui;
 }
 
