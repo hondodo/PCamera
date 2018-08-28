@@ -22,12 +22,17 @@ void OLedThread::run()
     oled.Init(0x3c);
     oled.DisplayOn();
     oled.CleanScreen();
+    QFont font = QFont();
+    font.setPixelSize(10);
     while(_isRunning)
     {
         QImage img = QImage(128, 64, QImage::Format_ARGB32);
         QPainter painter(&img);
         painter.fillRect(img.rect(), Qt::black);
         painter.setPen(Qt::white);
+        QFont font = painter.font();
+        font.setPixelSize(10);
+        painter.setFont(font);
         painter.drawText(img.rect(), message);
         oled.WriteImage(&img);
         for(int i = 0; i < 50; i++)
