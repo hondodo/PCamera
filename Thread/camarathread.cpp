@@ -55,6 +55,7 @@ void CamaraThread::run()
 
     int defwidth = 1280;
     int defheight = 720;
+    /*
     if(capture.set(CAP_PROP_FRAME_WIDTH, defwidth) && capture.set(CAP_PROP_FRAME_HEIGHT, defheight))
     {
         width = defwidth;
@@ -65,6 +66,7 @@ void CamaraThread::run()
         capture.set(CAP_PROP_FRAME_WIDTH, width);
         capture.set(CAP_PROP_FRAME_HEIGHT, height);
     }
+    */
 
     if(fps <= 0)
     {
@@ -145,6 +147,8 @@ void CamaraThread::run()
             }
             readtime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
+
+            /*
             resize(cap, small, Size(cap.rows / scale, cap.cols / scale), 0, 0, CV_8SC1);
             cvtColor(small, small, CV_BGR2GRAY);
             resize(cap, smallmog, Size(cap.rows / scalemog, cap.cols / scalemog),
@@ -183,6 +187,7 @@ void CamaraThread::run()
             drawTime(cap);
             drawtimetime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
+            */
 
             /*
             int recelsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - needRecLastTime.toMSecsSinceEpoch();
@@ -224,6 +229,7 @@ void CamaraThread::run()
             */
             CameraCollectorThread::Init->addRecCache(camaraId, cap);
 
+            /*
             savetime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
 
@@ -239,13 +245,16 @@ void CamaraThread::run()
             }
             facetime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
+            */
 
+            /*
             QImage image = ImageFormat::Mat2QImage(cap);
             image = image.scaled(targetSize, Qt::KeepAspectRatio);
             emit onImage(image);
 
             showtime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
+            */
 
             int frameels = timerFrame.elapsed();
             if(frameels > 0)
