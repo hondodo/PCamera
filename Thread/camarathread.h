@@ -48,6 +48,7 @@ signals:
 
 public slots:
     void onFace(int camId, int faceCount);
+    void onImageShow(int camId, QImage const &image);
 
 private:
     bool _isRunning;

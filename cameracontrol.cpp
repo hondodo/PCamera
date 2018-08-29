@@ -106,7 +106,7 @@ void CameraControl::paintEvent(QPaintEvent *event)
         QPainter painter(this);
         painter.fillRect(this->rect(), Qt::black);
         int x = (this->width() - imageCache.width()) / 2;
-        int y = (this->height() -imageCache.height()) / 2;
+        int y = (this->height() - imageCache.height()) / 2;
         painter.drawImage(x, y, imageCache);
     }
 }

@@ -41,6 +41,9 @@ void CameraCollectorThread::addMogCache(int cameraId, Mat cap)
     {
         cv::Mat mat = cap.clone();
         camIdMogCache.insert(cameraId, mat);
+
+        QImage image = ImageFormat::Mat2QImage(cap);
+        emit onImage(cameraId, image);
     }
 }
 
@@ -141,7 +144,7 @@ void CameraCollectorThread::run()
     {
         //Save
         saveRec();
-        //Test Face
+        //Face
         if(canDetectFace && !camIdFaceCache.isEmpty())
         {
             int count  = camIdFaceCache.count();
@@ -160,6 +163,18 @@ void CameraCollectorThread::run()
                 mat.release();
             }
             camIdFaceCache.clear();
+        }
+        //MOG
+        if(canDetectFace && !camIdMogCache.isEmpty())
+        {
+            int count  = camIdMogCache.count();
+            for(int i = 0; i < count; i++)
+            {
+                int cid = camIdMogCache.keys().at(i);
+                cv::Mat mat = camIdMogCache.value(cid);
+                mat.release();
+            }
+            camIdMogCache.clear();
         }
         this->msleep(20);
     }

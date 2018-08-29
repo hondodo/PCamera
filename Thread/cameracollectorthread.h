@@ -13,6 +13,7 @@
 #include "Core/facedetecthelper.h"
 #include "Core/videoprop.h"
 #include "Core/facedetecthelper.h"
+#include "Core/ImageFormat.h"
 
 class CameraCollectorThread : public QThread
 {
@@ -34,6 +35,7 @@ protected:
 signals:
     void onMog(int cameraId);
     void onFace(int cameraId, int count);
+    void onImage(int cameraId, const QImage &image);
 
 public slots:
 

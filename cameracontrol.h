@@ -6,6 +6,7 @@
 #include <QDateTime>
 #include <QPaintEvent>
 #include <QPainter>
+#include <QTimerEvent>
 #include "Thread/camarathread.h"
 #include "Thread/ringthread.h"
 

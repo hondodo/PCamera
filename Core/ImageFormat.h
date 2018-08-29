@@ -1,3 +1,6 @@
+#ifndef IMAGEFORMART_H
+#define IMAGEFORMART_H
+
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
@@ -27,3 +30,4 @@ class ImageFormat {
 	static cv::Mat QImage2Mat(QImage const& src);
 };
 	
+#endif

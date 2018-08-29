@@ -16,6 +16,8 @@ CamaraThread::CamaraThread(QObject *parent) : QThread(parent)
     targetSize = QSize(400, 300);
     connect(CameraCollectorThread::Init, SIGNAL(onFace(int,int)),
             this, SLOT(onFace(int,int)));
+    connect(CameraCollectorThread::Init, SIGNAL(onImage(int,QImage)),
+            this, SLOT(onImageShow(int,QImage)));
 }
 
 void CamaraThread::setStop()
@@ -230,6 +232,7 @@ void CamaraThread::run()
                 }
             }
             */
+            CameraCollectorThread::Init->addMogCache(camaraId, cap);
             CameraCollectorThread::Init->addFaceCache(camaraId, cap);
             CameraCollectorThread::Init->addRecCache(camaraId, cap);
 
@@ -252,13 +255,14 @@ void CamaraThread::run()
             */
 
             /*
+            timeOpenCVOP.restart();
             QImage image = ImageFormat::Mat2QImage(cap);
             image = image.scaled(targetSize, Qt::KeepAspectRatio);
-            emit onImage(image);*/
+            emit onImage(image);
 
             showtime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
-
+            */
 
             int frameels = timerFrame.elapsed();
             if(frameels > 0)
@@ -314,6 +318,14 @@ void CamaraThread::onFace(int camId, int faceCount)
     if(_isDetectFace && camId == camaraId)
     {
         emit onFaceDetected(faceCount);
+    }
+}
+
+void CamaraThread::onImageShow(int camId, const QImage &image)
+{
+    if(camId == camaraId)
+    {
+        emit onImage(image);
     }
 }
 
