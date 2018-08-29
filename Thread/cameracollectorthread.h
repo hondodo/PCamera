@@ -12,6 +12,7 @@
 #include "opencv2/calib3d/calib3d.hpp"
 #include "Core/facedetecthelper.h"
 #include "Core/videoprop.h"
+#include "Core/facedetecthelper.h"
 
 class CameraCollectorThread : public QThread
 {
@@ -32,7 +33,7 @@ protected:
 
 signals:
     void onMog(int cameraId);
-    void onFace(int cameraId);
+    void onFace(int cameraId, int count);
 
 public slots:
 
@@ -44,6 +45,8 @@ private:
     QMap<int, QQueue<cv::Mat> > camIdRecCache;
     QMap<int, cv::VideoWriter * > camIdWriterCache;
     QMap<int, VideoProp> camIdProp;
+    void saveRec();
+    FaceDetectHelper faceHelper;
 };
 
 #endif // CAMERACOLLECTORTHREAD_H

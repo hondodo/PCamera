@@ -47,6 +47,7 @@ signals:
     void onFaceDetected(int faceCount);
 
 public slots:
+    void onFace(int camId, int faceCount);
 
 private:
     bool _isRunning;
