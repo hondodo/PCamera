@@ -57,7 +57,8 @@ QString VideoProp::getDir() const
 void VideoProp::setDirBuildNew()
 {
     QDateTime time = QDateTime::currentDateTime();
-    dir = "./REC/" + QString("%1/%2/%3").arg(time.toString("yyyy"),
+    dir = "/media/pi/Potatokid/"       //"./REC/"
+            + QString("%1/%2/%3").arg(time.toString("yyyy"),
                                              time.toString("MM"),
                                              time.toString("dd"));
     QDir bdir(dir);

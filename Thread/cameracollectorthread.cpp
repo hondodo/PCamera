@@ -114,6 +114,7 @@ void CameraCollectorThread::saveRec()
                 {
                     break;
                 }
+                this->msleep(2);
             }
 
             while((&camIdRecCache[cid])->count() > maxRecCacheCount)
@@ -123,6 +124,7 @@ void CameraCollectorThread::saveRec()
             }
         }
     }
+    qDebug() << "save rec";
 }
 
 void CameraCollectorThread::run()
