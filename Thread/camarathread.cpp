@@ -137,6 +137,9 @@ void CamaraThread::run()
     int savetime = 0;
     int showtime = 0;
     double framefps = 0;
+
+
+    int index = 0;
     while (_isRunning)
     {
         timerFrame.restart();
@@ -235,7 +238,30 @@ void CamaraThread::run()
             CameraCollectorThread::Init->addMogCache(camaraId, cap);
             CameraCollectorThread::Init->addFaceCache(camaraId, cap);
             CameraCollectorThread::Init->addRecCache(camaraId, cap);
+            timeOpenCVOP.restart();
+            CameraCollectorThread::Init->emitOnImage(camaraId, cap);
+            showtime = timeOpenCVOP.elapsed();
+            timeOpenCVOP.restart();
+            if(index % 1 == 0)
+            {
+                timeOpenCVOP.restart();
+                CameraCollectorThread::Init->saveRec(camaraId);
+                savetime = timeOpenCVOP.elapsed();
+                timeOpenCVOP.restart();
+            }
+            if(index % fps == 0)
+            {
+                timeOpenCVOP.restart();
+                CameraCollectorThread::Init->findFace(camaraId);
+                facetime = timeOpenCVOP.elapsed();
+                timeOpenCVOP.restart();
+            }
 
+            index++;
+            if(index > 10000)
+            {
+                index = 0;
+            }
             /*
             savetime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();

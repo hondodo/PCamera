@@ -29,6 +29,13 @@ public:
     void addRecCache(int cameraId, cv::Mat cap);
     void addVideoProp(int cameraId, VideoProp prop);
 
+    void findMog(int cid);
+    void findFace(int cid);
+
+    void emitOnImage(int cameraId, cv::Mat cap);
+
+    void saveRec(int cid);
+
 protected:
     void run();
 
@@ -49,6 +56,13 @@ private:
     QMap<int, VideoProp> camIdProp;
     void saveRec();
     FaceDetectHelper faceHelper;
+
+    //------FACE-------//
+    std::vector<cv::Rect_<int> > faces;
+    std::vector<cv::Rect_<int> > eyes;
+    bool canDetectFace;
+    void findFace();
+    void findMog();
 };
 
 #endif // CAMERACOLLECTORTHREAD_H
