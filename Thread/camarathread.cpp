@@ -251,10 +251,10 @@ void CamaraThread::run()
             timeOpenCVOP.restart();
             */
 
-
+            /*
             QImage image = ImageFormat::Mat2QImage(cap);
             image = image.scaled(targetSize, Qt::KeepAspectRatio);
-            emit onImage(image);
+            emit onImage(image);*/
 
             showtime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
@@ -298,7 +298,7 @@ void CamaraThread::run()
         {}
         else
         {
-            waitKey(els - elapsed);
+            this->msleep(els - elapsed);
         }
         time.restart();
     }
