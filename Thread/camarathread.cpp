@@ -49,10 +49,10 @@ void CamaraThread::run()
     int defwidth = 960;//1280;
     int defheight = 540;//720;
 
-    //defwidth = 1280;
-    //defheight = 720;
+    defwidth = 1280;
+    defheight = 720;
 
-    /*
+
     if(capture.set(CAP_PROP_FRAME_WIDTH, defwidth) && capture.set(CAP_PROP_FRAME_HEIGHT, defheight))
     {
         width = defwidth;
@@ -63,12 +63,10 @@ void CamaraThread::run()
         capture.set(CAP_PROP_FRAME_WIDTH, width);
         capture.set(CAP_PROP_FRAME_HEIGHT, height);
     }
-    */
+
 
     width = capture.get(CAP_PROP_FRAME_WIDTH);
     height = capture.get(CAP_PROP_FRAME_HEIGHT);
-
-    qDebug() << "PROP" << width << height;
 
     int fps = capture.get(CAP_PROP_FPS);
     int els = 40;
@@ -88,7 +86,7 @@ void CamaraThread::run()
     if(width == defwidth)
     {
         faceRect.x = 615;
-        //faceRect.x = 845;
+        faceRect.x = 845;
     }
     else
     {
@@ -124,6 +122,7 @@ void CamaraThread::run()
     Mat cap;
     std::vector<cv::Rect> mogRect;
 
+    qDebug() << "PROP" << width << height << fps;
     while (_isRunning)
     {
         timerFrame.restart();
