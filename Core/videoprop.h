@@ -3,6 +3,7 @@
 
 #include <QtCore>
 #include <QDateTime>
+#include "opencv/cv.h"
 
 class VideoProp
 {
@@ -27,6 +28,9 @@ public:
     QString getFileNameTag() const;
     void setFileNameTag(const QString &value);
 
+    cv::Rect getFaceRect() const;
+    void setFaceRect(const cv::Rect &value);
+
 private:
     int width;
     int height;
@@ -34,6 +38,7 @@ private:
     QString fileName;
     QString fileNameTag;
     QString dir;
+    cv::Rect faceRect;
 };
 
 #endif // VIDEOPROP_H

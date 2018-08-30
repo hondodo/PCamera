@@ -14,8 +14,8 @@ CamaraThread::CamaraThread(QObject *parent) : QThread(parent)
     recMinSecond = 10;
     recMaxSencond = 600;
     targetSize = QSize(400, 300);
-    connect(CameraCollectorThread::Init, SIGNAL(onFace(int,int)),
-            this, SLOT(onFace(int,int)));
+    //connect(CameraCollectorThread::Init, SIGNAL(onFace(int,int)),
+    //        this, SLOT(onFace(int,int)));
     connect(CameraCollectorThread::Init, SIGNAL(onImage(int,QImage)),
             this, SLOT(onImageShow(int,QImage)));
 }
@@ -49,6 +49,9 @@ void CamaraThread::run()
     int defwidth = 960;//1280;
     int defheight = 540;//720;
 
+    //defwidth = 1280;
+    //defheight = 720;
+
     if(capture.set(CAP_PROP_FRAME_WIDTH, defwidth) && capture.set(CAP_PROP_FRAME_HEIGHT, defheight))
     {
         width = defwidth;
@@ -59,6 +62,11 @@ void CamaraThread::run()
         capture.set(CAP_PROP_FRAME_WIDTH, width);
         capture.set(CAP_PROP_FRAME_HEIGHT, height);
     }
+
+    width = capture.get(CAP_PROP_FRAME_WIDTH);
+    height = capture.get(CAP_PROP_FRAME_HEIGHT);
+
+    qDebug() << "PROP" << width << height;
 
     int fps = capture.get(CAP_PROP_FPS);
     int els = 40;
@@ -74,6 +82,20 @@ void CamaraThread::run()
     prop.setFps(fps);
     prop.setWidth(width);
     prop.setHeight(height);
+    cv::Rect faceRect;
+    if(width == defwidth)
+    {
+        faceRect.x = 615;
+        //faceRect.x = 845;
+    }
+    else
+    {
+        faceRect.x = width - 300;
+    }
+    faceRect.y = 0;
+    faceRect.width = 300;
+    faceRect.height = 300;
+    prop.setFaceRect(faceRect);
     CameraCollectorThread::Init->addVideoProp(camaraId, prop);
 
     QDateTime needRecLastTime = QDateTime::currentDateTime().addYears(-1);
@@ -119,6 +141,8 @@ void CamaraThread::run()
             drawtimetime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
 
+            rectangle(cap, prop.getFaceRect(), Scalar(0, 255, 0), 2);
+
             timeOpenCVOP.restart();
             CameraCollectorThread::Init->emitOnImage(camaraId, cap);
             showtime = timeOpenCVOP.elapsed();
@@ -128,7 +152,19 @@ void CamaraThread::run()
             {
                 timeOpenCVOP.restart();
                 CameraCollectorThread::Init->addFaceCache(camaraId, cap);
-                CameraCollectorThread::Init->findFace(camaraId);
+                std::vector<cv::Rect_<int> > faces =CameraCollectorThread::Init->findFace(camaraId);
+                if(!faces.empty() && faces.size() > 0)
+                {
+                    int count = (int)faces.size();
+                    for(int i = 0; i < count; i++)
+                    {
+                        cv::Rect_<int> rect = faces.at(i);
+                        rect.x += prop.getFaceRect().x;
+                        rect.y += prop.getFaceRect().y;
+                        rectangle(cap, rect, Scalar(0, 0, 255), 2);
+                    }
+                    emit onFaceDetected(count);
+                }
                 facetime = timeOpenCVOP.elapsed();
                 timeOpenCVOP.restart();
             }

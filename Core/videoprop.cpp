@@ -2,9 +2,13 @@
 
 VideoProp::VideoProp()
 {
-    width = 600;
+    width = 640;
     height = 480;
     fps = 25;
+    faceRect.x = width - 300;
+    faceRect.y = 0;
+    faceRect.width = 300;
+    faceRect.height = 300;
     setFileNameBuildNew();
 }
 
@@ -83,4 +87,14 @@ QString VideoProp::getFileNameTag() const
 void VideoProp::setFileNameTag(const QString &value)
 {
     fileNameTag = value;
+}
+
+cv::Rect VideoProp::getFaceRect() const
+{
+    return faceRect;
+}
+
+void VideoProp::setFaceRect(const cv::Rect &value)
+{
+    faceRect = value;
 }

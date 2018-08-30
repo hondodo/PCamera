@@ -61,9 +61,7 @@ void CameraCollectorThread::addFaceCache(int cameraId, Mat cap)
 {
     if(!camIdFaceCache.contains(cameraId))
     {
-        cv::Mat mat;
-        resize(cap, mat, Size(200, 150), 0, 0);
-        cvtColor(mat, mat, cv::COLOR_BGR2GRAY);
+        cv::Mat mat = cap.clone();
         camIdFaceCache.insert(cameraId, mat);
     }
 }
@@ -189,21 +187,41 @@ void CameraCollectorThread::saveRec()
     }
 }
 
-void CameraCollectorThread::findFace(int cid)
+std::vector<cv::Rect_<int> > CameraCollectorThread::findFace(int cid)
 {
+    std::vector<cv::Rect_<int> > result;
     if(camIdFaceCache.contains(cid))
     {
         cv::Mat mat = camIdFaceCache.value(cid);
-        faceHelper.detectFaces(mat, faces);
-        faceHelper.detectEyes(mat, eyes);
+
+        if(!camIdProp.contains(cid))
+        {
+            assert("no camera prop @ camera collector thread");
+        }
+
+        cv::Mat cut;
+
+        VideoProp prop = camIdProp[cid];
+        cv::Rect rect = prop.getFaceRect();
+        int w = rect.width + rect.x;
+        int h = rect.height + rect.y;
+        if(mat.rows >= h && mat.cols >= w)
+        {
+            cut = mat(rect);
+            cvtColor(cut, cut, cv::COLOR_BGR2GRAY);
+        }
+
+        faceHelper.detectFaces(cut, faces);
+        faceHelper.detectEyes(cut, eyes);
         if(!faces.empty() && (int)faces.size() > 0)
         {
-            qDebug() << "On Face: " << cid;
+            result = faces;
             emit onFace(cid, (int)faces.size());
         }
         mat.release();
         camIdFaceCache.remove(cid);
     }
+    return result;
 }
 
 void CameraCollectorThread::findFace()
@@ -246,7 +264,7 @@ std::vector<Rect> CameraCollectorThread::findMog(int cid)
         {
             vector<Point> c = mogobj->cnts[i];
             area = contourArea(c);
-            if (area < 100)
+            if (area < 500)
             {
                 continue;
             }
