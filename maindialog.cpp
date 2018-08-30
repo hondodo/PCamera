@@ -39,7 +39,6 @@ MainDialog::~MainDialog()
         oledThread->wait(1000);
         oledThread->terminate();
     }
-    CameraCollectorThread::Init->setStop();
     delete ui;
 }
 

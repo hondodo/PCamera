@@ -179,6 +179,44 @@ void CameraCollectorThread::findMog(int cid)
     if(camIdMogCache.contains(cid))
     {
         cv::Mat mat = camIdMogCache.value(cid);
+        if(!camIdMogObj.contains(cid))
+        {
+            MogDetectObject obj;
+            camIdMogObj[cid] = obj;
+        }
+
+        MogDetectObject *mogobj = (&camIdMogObj[cid]);
+        resize(mat, mogobj->smallMat, Size(200, 150), 0, 0);
+        mogobj->mog->apply(mogobj->smallMat, mogobj->lastMat);
+        cv::threshold(mogobj->lastMat, mogobj->lastMat, 130, 255, cv::THRESH_BINARY);
+        cv::medianBlur(mogobj->lastMat, mogobj->lastMat, 3);
+        cv::erode(mogobj->lastMat, mogobj->lastMat, cv::Mat());
+        cv::dilate(mogobj->lastMat, mogobj->lastMat, cv::Mat());
+        findContours(mogobj->lastMat, mogobj->cnts, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+        float area;
+        Rect rect;
+        std::vector<Point> m;
+        for (int i = mogobj->cnts.size() - 1; i >= 0; i--)
+        {
+            vector<Point> c = mogobj->cnts[i];
+            area = contourArea(c);
+            if (area < 100)
+            {
+                continue;
+            }
+            else
+            {
+                m = c;
+            }
+            //-------//
+            qDebug() << "on mog: " << cid;
+            emit onMog(cid);
+            break;
+            //-------//
+            rect = boundingRect(m);
+            rectangle(mat, rect, Scalar(0, 255, 0), 2);
+        }
+
         mat.release();
         camIdMogCache.remove(cid);
     }

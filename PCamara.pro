@@ -37,7 +37,8 @@ SOURCES += \
     maindialog.cpp \
     Thread/ringthread.cpp \
     Thread/oledthread.cpp \
-    Core/videoprop.cpp
+    Core/videoprop.cpp \
+    Core/mogdetectobject.cpp
 
 HEADERS += \
         dialog.h \
@@ -53,7 +54,8 @@ HEADERS += \
     maindialog.h \
     Thread/ringthread.h \
     Thread/oledthread.h \
-    Core/videoprop.h
+    Core/videoprop.h \
+    Core/mogdetectobject.h
 
 FORMS += \
         dialog.ui \

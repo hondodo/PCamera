@@ -14,6 +14,7 @@
 #include "Core/videoprop.h"
 #include "Core/facedetecthelper.h"
 #include "Core/ImageFormat.h"
+#include "Core/mogdetectobject.h"
 
 class CameraCollectorThread : public QThread
 {
@@ -54,6 +55,7 @@ private:
     QMap<int, QQueue<cv::Mat> > camIdRecCache;
     QMap<int, cv::VideoWriter * > camIdWriterCache;
     QMap<int, VideoProp> camIdProp;
+    QMap<int, MogDetectObject> camIdMogObj;
     void saveRec();
     FaceDetectHelper faceHelper;
 
