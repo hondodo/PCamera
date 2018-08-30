@@ -151,7 +151,8 @@ void CamaraThread::run()
             if(index % 1 == 0)
             {
                 timeOpenCVOP.restart();
-                int recesp = (QDateTime::currentDateTime().toSecsSinceEpoch() - needRecLastTime.toSecsSinceEpoch());
+                int recesp = (QDateTime::currentDateTime().toMSecsSinceEpoch() - needRecLastTime.toMSecsSinceEpoch());
+                recesp = recesp / 1000;
                 if(recesp < 10)
                 {
                     CameraCollectorThread::Init->addRecCache(camaraId, cap);
