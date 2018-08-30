@@ -42,14 +42,13 @@ void CamaraThread::run()
     onTip(tr("Open camera success"));
     _isRunning = true;
 
-    int fps = capture.get(CAP_PROP_FPS);
-    int els = 40;
+
     int width = capture.get(CAP_PROP_FRAME_WIDTH);
     int height = capture.get(CAP_PROP_FRAME_HEIGHT);
 
-    int defwidth = 1280;
-    int defheight = 720;
-    /*
+    int defwidth = 960;//1280;
+    int defheight = 540;//720;
+
     if(capture.set(CAP_PROP_FRAME_WIDTH, defwidth) && capture.set(CAP_PROP_FRAME_HEIGHT, defheight))
     {
         width = defwidth;
@@ -60,7 +59,9 @@ void CamaraThread::run()
         capture.set(CAP_PROP_FRAME_WIDTH, width);
         capture.set(CAP_PROP_FRAME_HEIGHT, height);
     }
-    */
+
+    int fps = capture.get(CAP_PROP_FPS);
+    int els = 40;
 
     fps = fps <= 0? 25 : fps;
     els = 1000 / fps;
