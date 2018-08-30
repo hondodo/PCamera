@@ -304,7 +304,7 @@ std::vector<Rect> CameraCollectorThread::findMog(int cid, Mat mat)
     }
 
     MogDetectObject *mogobj = (&camIdMogObj[cid]);
-    resize(mat, mogobj->smallMat, Size(200, 150), 0, 0);
+    resize(mat, mogobj->smallMat, Size(100, 75), 0, 0);
     mogobj->mog->apply(mogobj->smallMat, mogobj->lastMat);
     cv::threshold(mogobj->lastMat, mogobj->lastMat, 130, 255, cv::THRESH_BINARY);
     cv::medianBlur(mogobj->lastMat, mogobj->lastMat, 3);
@@ -318,7 +318,7 @@ std::vector<Rect> CameraCollectorThread::findMog(int cid, Mat mat)
     {
         vector<Point> c = mogobj->cnts[i];
         area = contourArea(c);
-        if (area < 500)
+        if (area < 100)
         {
             continue;
         }

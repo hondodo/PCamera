@@ -49,8 +49,8 @@ void CamaraThread::run()
     int defwidth = 960;//1280;
     int defheight = 540;//720;
 
-    defwidth = 1280;
-    defheight = 720;
+    //defwidth = 1280;
+    //defheight = 720;
 
 
     if(capture.set(CAP_PROP_FRAME_WIDTH, defwidth) && capture.set(CAP_PROP_FRAME_HEIGHT, defheight))
@@ -68,6 +68,7 @@ void CamaraThread::run()
     width = capture.get(CAP_PROP_FRAME_WIDTH);
     height = capture.get(CAP_PROP_FRAME_HEIGHT);
 
+    //capture.set(CAP_PROP_FPS, 10);
     int fps = capture.get(CAP_PROP_FPS);
     int els = 40;
 
@@ -86,7 +87,7 @@ void CamaraThread::run()
     if(width == defwidth)
     {
         faceRect.x = 615;
-        faceRect.x = 845;
+        //faceRect.x = 845;
     }
     else
     {
