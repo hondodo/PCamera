@@ -30,12 +30,12 @@ public:
     void addRecCache(int cameraId, cv::Mat cap);
     void addVideoProp(int cameraId, VideoProp prop);
 
-    void findMog(int cid);
+    std::vector<cv::Rect> findMog(int cid);
     void findFace(int cid);
-
     void emitOnImage(int cameraId, cv::Mat cap);
-
     void saveRec(int cid);
+    void endRec(int cid);
+    void newRec(int cid);
 
 protected:
     void run();

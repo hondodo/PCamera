@@ -11,8 +11,8 @@ CamaraThread::CamaraThread(QObject *parent) : QThread(parent)
     camaraId = 0;
     time.start();
     recDir = "REC";
-    recMinSecond = 10 * 1000;
-    recMaxSencond = 600 * 1000;
+    recMinSecond = 10;
+    recMaxSencond = 600;
     targetSize = QSize(400, 300);
     connect(CameraCollectorThread::Init, SIGNAL(onFace(int,int)),
             this, SLOT(onFace(int,int)));
@@ -62,24 +62,11 @@ void CamaraThread::run()
     }
     */
 
-    if(fps <= 0)
-    {
-        fps = 25;
-    }
+    fps = fps <= 0? 25 : fps;
     els = 1000 / fps;
-    if(els <= 0)
-    {
-        els = 40;
-    }
-
-    if(width < 10)
-    {
-        width = 400;
-    }
-    if(height < 10)
-    {
-        height = 300;
-    }
+    els = els <= 0? 40 : els;
+    width = width < 10? 400 : width;
+    height = height < 10? 300 : height;
 
     VideoProp prop;
     prop.setFileNameTag(QString::number(camaraId));
@@ -110,6 +97,7 @@ void CamaraThread::run()
     int index = 0;
 
     Mat cap;
+    std::vector<cv::Rect> mogRect;
 
     while (_isRunning)
     {
@@ -130,23 +118,15 @@ void CamaraThread::run()
             drawtimetime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
 
-            CameraCollectorThread::Init->addMogCache(camaraId, cap);
-            CameraCollectorThread::Init->addFaceCache(camaraId, cap);
-            CameraCollectorThread::Init->addRecCache(camaraId, cap);
             timeOpenCVOP.restart();
             CameraCollectorThread::Init->emitOnImage(camaraId, cap);
             showtime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
-            if(index % 1 == 0)
-            {
-                timeOpenCVOP.restart();
-                CameraCollectorThread::Init->saveRec(camaraId);
-                savetime = timeOpenCVOP.elapsed();
-                timeOpenCVOP.restart();
-            }
+
             if(index % fps == 0)
             {
                 timeOpenCVOP.restart();
+                CameraCollectorThread::Init->addFaceCache(camaraId, cap);
                 CameraCollectorThread::Init->findFace(camaraId);
                 facetime = timeOpenCVOP.elapsed();
                 timeOpenCVOP.restart();
@@ -154,17 +134,50 @@ void CamaraThread::run()
             if(index % 5 == 0)
             {
                 timeOpenCVOP.restart();
-                CameraCollectorThread::Init->findMog(camaraId);
+                CameraCollectorThread::Init->addMogCache(camaraId, cap);
+                mogRect = CameraCollectorThread::Init->findMog(camaraId);
+                if(!mogRect.empty() && mogRect.size() > 0)
+                {
+                    needRecLastTime = QDateTime::currentDateTime();
+                    if(!isRecording)
+                    {
+                        CameraCollectorThread::Init->newRec(camaraId);
+                        frameIndex = 0;
+                    }
+                }
                 mogtime =timeOpenCVOP.elapsed();
                 timeOpenCVOP.restart();
             }
+            if(index % 1 == 0)
+            {
+                timeOpenCVOP.restart();
+                int recesp = (QDateTime::currentDateTime().toSecsSinceEpoch() - needRecLastTime.toSecsSinceEpoch());
+                if(recesp < 10)
+                {
+                    CameraCollectorThread::Init->addRecCache(camaraId, cap);
+                    CameraCollectorThread::Init->saveRec(camaraId);
+                    isRecording = true;
+                    frameIndex++;
+                    if(frameIndex > maxFrame)
+                    {
+                        isRecording = false;
+                    }
+                }
+                else
+                {
+                    isRecording = false;
+                    frameIndex = 0;
+                    CameraCollectorThread::Init->endRec(camaraId);
+                }
+                savetime = timeOpenCVOP.elapsed();
+                timeOpenCVOP.restart();
+            }    
 
             index++;
             if(index > 10000)
             {
                 index = 0;
             }
-
 
             int frameels = timerFrame.elapsed();
             if(frameels > 0)
@@ -175,7 +188,7 @@ void CamaraThread::run()
             {
                 framefps = 0.0;
             }
-            message = QString("R:%1M:%2D:%3F:%4S:%5H:%6@%7FPS@%8").arg(
+            message = QString("R:%1M:%2D:%3F:%4S:%5H:%6@%7FPS@%8_%9").arg(
                         QString::number(readtime, 'f', 0),
                         QString::number(mogtime, 'f', 0),
                         QString::number(drawtimetime, 'f', 0),
@@ -183,7 +196,8 @@ void CamaraThread::run()
                         QString::number(savetime, 'f', 0),
                         QString::number(showtime, 'f', 0),
                         QString::number(framefps, 'f', 2),
-                        QString::number(this->camaraId, 'f', 0)
+                        QString::number(this->camaraId, 'f', 0),
+                        isRecording? "Rec" : "Stop"
                         );
             emit onTip(message);
         }

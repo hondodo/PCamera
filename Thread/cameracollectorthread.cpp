@@ -134,6 +134,51 @@ void CameraCollectorThread::saveRec(int cid)
     }
 }
 
+void CameraCollectorThread::endRec(int cid)
+{
+    if(camIdWriterCache.contains(cid))
+    {
+        VideoWriter *vw = camIdWriterCache[cid];
+        vw->release();
+        delete vw;
+        vw = NULL;
+        camIdWriterCache.remove(cid);
+    }
+}
+
+void CameraCollectorThread::newRec(int cid)
+{
+    if(!camIdProp.contains(cid))
+    {
+        assert("no camera prop @ camera collector thread");
+    }
+    (&camIdProp[cid])->setFileNameBuildNew();
+    VideoProp prop = camIdProp[cid];
+
+    if(!camIdWriterCache.contains(cid))
+    {
+        VideoWriter *vw = new VideoWriter();
+        camIdWriterCache[cid] = vw;
+        vw->open(prop.getFileName().toStdString(), CV_FOURCC('D', 'I', 'V', 'X'),
+                 prop.getFps(), Size(prop.getWidth(), prop.getHeight()));
+    }
+    else
+    {
+        VideoWriter *vw = camIdWriterCache[cid];
+        if(!vw->isOpened())
+        {
+            vw->release();
+        }
+        delete vw;
+        vw = NULL;
+        vw = new VideoWriter();
+        camIdWriterCache[cid] = vw;
+        vw->open(prop.getFileName().toStdString(), CV_FOURCC('D', 'I', 'V', 'X'),
+                 prop.getFps(), Size(prop.getWidth(), prop.getHeight()));
+    }
+
+}
+
 void CameraCollectorThread::saveRec()
 {
     int recCount = camIdRecCache.count();
@@ -174,8 +219,9 @@ void CameraCollectorThread::findFace()
     }
 }
 
-void CameraCollectorThread::findMog(int cid)
+std::vector<Rect> CameraCollectorThread::findMog(int cid)
 {
+    std::vector<Rect> result;
     if(camIdMogCache.contains(cid))
     {
         cv::Mat mat = camIdMogCache.value(cid);
@@ -208,18 +254,22 @@ void CameraCollectorThread::findMog(int cid)
             {
                 m = c;
             }
+            /*
             //-------//
             qDebug() << "on mog: " << cid;
             emit onMog(cid);
             break;
             //-------//
+            */
             rect = boundingRect(m);
-            rectangle(mat, rect, Scalar(0, 255, 0), 2);
+            //rectangle(mat, rect, Scalar(0, 255, 0), 2);
+            result.push_back(rect);
         }
 
         mat.release();
         camIdMogCache.remove(cid);
     }
+    return result;
 }
 
 void CameraCollectorThread::findMog()
