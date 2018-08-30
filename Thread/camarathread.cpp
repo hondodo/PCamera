@@ -157,18 +157,25 @@ void CamaraThread::run()
                 {
                     CameraCollectorThread::Init->addRecCache(camaraId, cap);
                     CameraCollectorThread::Init->saveRec(camaraId);
-                    isRecording = true;
-                    frameIndex++;
-                    if(frameIndex > maxFrame)
+                    if(!isRecording)
                     {
-                        isRecording = false;
+                        isRecording = true;
+                        frameIndex++;
+                        if(frameIndex > maxFrame)
+                        {
+                            isRecording = false;
+                        }
                     }
                 }
                 else
                 {
-                    isRecording = false;
-                    frameIndex = 0;
-                    CameraCollectorThread::Init->endRec(camaraId);
+                    if(isRecording)
+                    {
+                        isRecording = false;
+                        frameIndex = 0;
+                        CameraCollectorThread::Init->endRec(camaraId);
+                    }
+                    this->msleep(2);
                 }
                 savetime = timeOpenCVOP.elapsed();
                 timeOpenCVOP.restart();

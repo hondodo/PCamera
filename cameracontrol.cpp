@@ -57,7 +57,7 @@ void CameraControl::deleteCameraThread()
     if(camThread != Q_NULLPTR)
     {
         camThread->setStop();
-        camThread->wait(10000);
+        camThread->wait(1000);
         camThread->terminate();
         camThread = Q_NULLPTR;
     }
