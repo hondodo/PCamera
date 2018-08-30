@@ -58,5 +58,5 @@ void MainDialog::onImage(const QImage &image)
 void MainDialog::onTip(QString message)
 {
     oledThread->setMessage(message);
-    qDebug() << message;
+    //qDebug() << message;
 }

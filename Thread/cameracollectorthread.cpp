@@ -89,24 +89,17 @@ void CameraCollectorThread::addVideoProp(int cameraId, VideoProp prop)
 void CameraCollectorThread::saveRec(int cid)
 {
     if(!camIdRecCache.contains(cid)) return;
-    if(!camIdProp.contains(cid))
-    {
-        assert("no camera prop @ camera collector thread");
-    }
     int framecount = (&camIdRecCache[cid])->count();
-    VideoProp prop = camIdProp[cid];
     if(framecount > 0)
     {
         if(!camIdWriterCache.contains(cid))
         {
-            VideoWriter *vw = new VideoWriter();
-            camIdWriterCache[cid] = vw;
+            return;
         }
         VideoWriter *vw = camIdWriterCache[cid];
         if(!vw->isOpened())
         {
-            vw->open(prop.getFileName().toStdString(), CV_FOURCC('D', 'I', 'V', 'X'),
-                     prop.getFps(), Size(prop.getWidth(), prop.getHeight()));
+            return;
         }
 
         for(int j = 0; j < framecount; j++)
@@ -132,20 +125,35 @@ void CameraCollectorThread::saveRec(int cid)
     }
 }
 
+void CameraCollectorThread::saveRec(int cid, Mat mat)
+{
+    if(mat.empty())
+    {
+        return;
+    }
+    if(!camIdWriterCache.contains(cid))
+    {
+        return;
+    }
+    VideoWriter *vw = camIdWriterCache[cid];
+    if(vw->isOpened())
+    {
+        vw->write(mat);
+    }
+}
+
 void CameraCollectorThread::endRec(int cid)
 {
     if(camIdWriterCache.contains(cid))
     {
         VideoWriter *vw = camIdWriterCache[cid];
         vw->release();
-        delete vw;
-        vw = NULL;
-        camIdWriterCache.remove(cid);
     }
 }
 
-void CameraCollectorThread::newRec(int cid)
+bool CameraCollectorThread::newRec(int cid)
 {
+    bool result = false;
     if(!camIdProp.contains(cid))
     {
         assert("no camera prop @ camera collector thread");
@@ -153,27 +161,23 @@ void CameraCollectorThread::newRec(int cid)
     (&camIdProp[cid])->setFileNameBuildNew();
     VideoProp prop = camIdProp[cid];
 
+    VideoWriter *vw = NULL;
     if(!camIdWriterCache.contains(cid))
     {
-        VideoWriter *vw = new VideoWriter();
+        vw = new VideoWriter();
         camIdWriterCache[cid] = vw;
-        vw->open(prop.getFileName().toStdString(), CV_FOURCC('D', 'I', 'V', 'X'),
-                 prop.getFps(), Size(prop.getWidth(), prop.getHeight()));
     }
     else
     {
-        VideoWriter *vw = camIdWriterCache[cid];
-        if(!vw->isOpened())
+        vw = camIdWriterCache[cid];
+        if(vw->isOpened())
         {
             vw->release();
         }
-        delete vw;
-        vw = NULL;
-        vw = new VideoWriter();
-        camIdWriterCache[cid] = vw;
-        vw->open(prop.getFileName().toStdString(), CV_FOURCC('D', 'I', 'V', 'X'),
-                 prop.getFps(), Size(prop.getWidth(), prop.getHeight()));
     }
+    result = vw->open(prop.getFileName().toStdString(), CV_FOURCC('D', 'I', 'V', 'X'),
+             prop.getFps(), Size(prop.getWidth(), prop.getHeight()));
+    return result;
 
 }
 
@@ -287,6 +291,47 @@ std::vector<Rect> CameraCollectorThread::findMog(int cid)
         mat.release();
         camIdMogCache.remove(cid);
     }
+    return result;
+}
+
+std::vector<Rect> CameraCollectorThread::findMog(int cid, Mat mat)
+{
+    std::vector<Rect> result;
+    if(!camIdMogObj.contains(cid))
+    {
+        MogDetectObject obj;
+        camIdMogObj[cid] = obj;
+    }
+
+    MogDetectObject *mogobj = (&camIdMogObj[cid]);
+    resize(mat, mogobj->smallMat, Size(200, 150), 0, 0);
+    mogobj->mog->apply(mogobj->smallMat, mogobj->lastMat);
+    cv::threshold(mogobj->lastMat, mogobj->lastMat, 130, 255, cv::THRESH_BINARY);
+    cv::medianBlur(mogobj->lastMat, mogobj->lastMat, 3);
+    cv::erode(mogobj->lastMat, mogobj->lastMat, cv::Mat());
+    cv::dilate(mogobj->lastMat, mogobj->lastMat, cv::Mat());
+    findContours(mogobj->lastMat, mogobj->cnts, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+    float area;
+    Rect rect;
+    std::vector<Point> m;
+    for (int i = mogobj->cnts.size() - 1; i >= 0; i--)
+    {
+        vector<Point> c = mogobj->cnts[i];
+        area = contourArea(c);
+        if (area < 500)
+        {
+            continue;
+        }
+        else
+        {
+            m = c;
+        }
+        rect = boundingRect(m);
+        result.push_back(rect);
+    }
+
+    mat.release();
+    camIdMogCache.remove(cid);
     return result;
 }
 

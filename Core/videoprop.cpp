@@ -63,12 +63,12 @@ void VideoProp::setDirBuildNew()
     QDateTime time = QDateTime::currentDateTime();
 #ifdef Q_OS_WIN
     dir = "./REC/"
-            + QString("%1%2").arg(time.toString("yyyy"),
+            + QString("%1%2%3").arg(time.toString("yyyy"),
                                              time.toString("MM"),
                                              time.toString("dd"));
 #else
     dir = "/media/pi/Potatokid/"       //"./REC/"
-            + QString("%1%2").arg(time.toString("yyyy"),
+            + QString("%1%2%3").arg(time.toString("yyyy"),
                                              time.toString("MM"),
                                              time.toString("dd"));
 #endif
