@@ -22,8 +22,8 @@ void Dialog::stopCameraCollectThread()
     if(th != Q_NULLPTR)
     {
         th->setStop();
-        th->wait(1000);
-        th->terminate();
+        //th->wait(1000);
+        //th->terminate();
     }
 }
 
@@ -110,7 +110,7 @@ void Dialog::on_pushButtonStop_clicked()
 {
     stopCameraCollectThread();
     th = new CameraCollectorThread();
-    th->start();
+    //th->start();
 }
 
 void Dialog::on_pushButtonOLedOn_clicked()

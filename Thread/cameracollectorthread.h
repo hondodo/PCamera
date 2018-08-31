@@ -7,7 +7,6 @@
 #include <QDebug>
 #include <QMap>
 #include <QQueue>
-#include <QTcpServer>
 #include "opencv/cv.h"
 #include "opencv2/video/background_segm.hpp"
 #include "opencv2/calib3d/calib3d.hpp"
@@ -17,7 +16,7 @@
 #include "Core/ImageFormat.h"
 #include "Core/mogdetectobject.h"
 
-class CameraCollectorThread : public QThread
+class CameraCollectorThread : public QObject
 {
     Q_OBJECT
 public:
@@ -49,8 +48,6 @@ signals:
     void onImage(int cameraId, const QImage &image);
 
 public slots:
-    void newConnection();
-    void acceptError(QAbstractSocket::SocketError socketError);
 
 private:
     bool _isRunning;
@@ -70,8 +67,6 @@ private:
     bool canDetectFace;
     void findFace();
     void findMog();
-    //-----TCP--------//
-    QTcpServer *tcpServer;
 };
 
 #endif // CAMERACOLLECTORTHREAD_H

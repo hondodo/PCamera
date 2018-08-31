@@ -4,7 +4,7 @@ using namespace std;
 using namespace cv;
 
 CameraCollectorThread *CameraCollectorThread::Init = new CameraCollectorThread();
-CameraCollectorThread::CameraCollectorThread(QObject *parent) : QThread(parent)
+CameraCollectorThread::CameraCollectorThread(QObject *parent) : QObject(parent)
 {
     _isRunning = false;
     maxRecCacheCount = 25 * 60 * 2;//25fp/s * 60s * 2
@@ -15,17 +15,10 @@ CameraCollectorThread::CameraCollectorThread(QObject *parent) : QThread(parent)
     canDetectFace = faceHelper.init("/home/pi/Source/PCamera/Data/haarcascades/haarcascade_frontalcatface.xml",
                                     "");
 #endif
-    tcpServer = new QTcpServer();
-    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
-    connect(tcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)),
-            this, SLOT(acceptError(QAbstractSocket::SocketError)));
-    tcpServer->listen(QHostAddress::Any, 10086);
 }
 
 CameraCollectorThread::~CameraCollectorThread()
 {
-    tcpServer->close();
-    tcpServer->deleteLater();
     setStop();
 }
 
@@ -121,7 +114,7 @@ void CameraCollectorThread::saveRec(int cid)
             {
                 break;
             }
-            this->msleep(2);
+            //this->msleep(2);
         }
 
         while((&camIdRecCache[cid])->count() > maxRecCacheCount)
@@ -369,16 +362,6 @@ void CameraCollectorThread::run()
         findFace();
         //MOG
         findMog();
-        this->msleep(20);
+        //this->msleep(20);
     }
-}
-
-void CameraCollectorThread::newConnection()
-{
-
-}
-
-void CameraCollectorThread::acceptError(QAbstractSocket::SocketError socketError)
-{
-    Q_UNUSED(socketError);
 }
