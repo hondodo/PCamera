@@ -15,10 +15,17 @@ CameraCollectorThread::CameraCollectorThread(QObject *parent) : QThread(parent)
     canDetectFace = faceHelper.init("/home/pi/Source/PCamera/Data/haarcascades/haarcascade_frontalcatface.xml",
                                     "");
 #endif
+    tcpServer = new QTcpServer();
+    connect(tcpServer, SIGNAL(newConnection()), this, SLOT(newConnection()));
+    connect(tcpServer, SIGNAL(acceptError(QAbstractSocket::SocketError)),
+            this, SLOT(acceptError(QAbstractSocket::SocketError)));
+    tcpServer->listen(QHostAddress::Any, 10086);
 }
 
 CameraCollectorThread::~CameraCollectorThread()
 {
+    tcpServer->close();
+    tcpServer->deleteLater();
     setStop();
 }
 
@@ -364,4 +371,14 @@ void CameraCollectorThread::run()
         findMog();
         this->msleep(20);
     }
+}
+
+void CameraCollectorThread::newConnection()
+{
+
+}
+
+void CameraCollectorThread::acceptError(QAbstractSocket::SocketError socketError)
+{
+    Q_UNUSED(socketError);
 }
