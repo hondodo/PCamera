@@ -185,12 +185,12 @@ void MainDialog::readyRead()
         {
             text = QString(array);
         }
-        if(text == "ISTCPTURNTEXT")
+        if(text.contains("ISTCPTURNTEXT"))
         {
             isTcpTurn[client] = true;
             isRequestText[client] = true;
         }
-        else if(text == "ISTCPTURNIMAGE")
+        else if(text.contains("ISTCPTURNIMAGE"))
         {
             isTcpTurn[client] = true;
             isRequestText[client] = false;

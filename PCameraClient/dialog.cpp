@@ -288,7 +288,7 @@ void Dialog::onReadyRead(QByteArray array)
             }
             ui->labelMessage->setText(text);
         }
-        else if(array.startsWith(imageHeader))
+        else if(array.startsWith(imageHeader) && array.endsWith(imageTag))
         {
             QByteArray bytes = array.remove(0, imageHeader.length());
             bytes = bytes.remove(bytes.length() - imageTag.length(), imageTag.length());
@@ -385,11 +385,11 @@ void Dialog::onReadyReadArrray(QByteArray array)
     {}
     else
     {
-        canRequestTcp = true;
-        if((array.startsWith(textHeader) && array.endsWith(textTag)) ||
-            (array.startsWith(imageHeader) && array.endsWith(imageTag)))
+        if((array.startsWith(textHeader)) ||
+            (array.startsWith(imageHeader)))
         {
             onReadyRead(array);
         }
+        canRequestTcp = true;
     }
 }
