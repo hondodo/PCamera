@@ -110,7 +110,7 @@ void MainDialog::onImage(const QImage &image)
     {
         QBuffer buffer;
         buffer.open(QIODevice::ReadWrite);
-        image.save(&buffer, "jpg", 10);
+        image.save(&buffer, "jpg", 80);
         QByteArray pixArray;
         pixArray.append(imageHeader);
         pixArray.append(buffer.data());
@@ -149,8 +149,11 @@ void MainDialog::newConnection()
     allClient.append(client);
     connect(client, SIGNAL(readyRead()), this, SLOT(readyRead()));
     connect(client, SIGNAL(disconnected()), this, SLOT(disconnected()));
-    client->write("Hello");
+    QString ip = QString::number(client->peerAddress().toIPv4Address(), 10);
+    ip = "IP@" + ip + "@IP";
+    client->write(ip.toUtf8());
     client->flush();
+    qDebug() << client->peerAddress() << client->peerPort();
 }
 
 void MainDialog::acceptError(QAbstractSocket::SocketError socketError)
@@ -193,22 +196,9 @@ void MainDialog::onReadyRead()
 
 void MainDialog::sendMessage(QByteArray array)
 {
-//    QList<QHostAddress> list = QNetworkInterface::allAddresses();
-//    foreach (QHostAddress address, list)
-//    {
-//        udpServer->writeDatagram(array, address, udpPort);
-//        //qDebug() << address.toString();
-//    }
-//    udpServer->writeDatagram(array, QHostAddress::Any, udpPort);
-//    udpServer->writeDatagram(array, QHostAddress::AnyIPv4, udpPort);
-//    udpServer->writeDatagram(array, QHostAddress::AnyIPv6, udpPort);
-//    udpServer->writeDatagram(array, QHostAddress::Broadcast, udpPort);
-//    udpServer->writeDatagram(array, QHostAddress::LocalHost, udpPort);
-//    udpServe-r->writeDatagram(array, QHostAddress::LocalHostIPv6, udpPort);
-
-    udpServer->writeDatagram(array, QHostAddress("192.168.31.63"), udpPort);
-    udpServer->writeDatagram(array, QHostAddress("192.168.31.55"), udpPort);
-    return;
+//    udpServer->writeDatagram(array, QHostAddress("192.168.31.63"), udpPort);
+//    udpServer->writeDatagram(array, QHostAddress("192.168.31.55"), udpPort);
+//    return;
 
     if(isSending)
     {
@@ -224,8 +214,8 @@ void MainDialog::sendMessage(QByteArray array)
             QTcpSocket *client = allClient.at(i);
             if(client->isValid() && client->isOpen())
             {
-                client->write(array);
-                client->flush();
+                udpServer->writeDatagram(array, QHostAddress(client->peerAddress().toIPv4Address()), udpPort);
+                //qDebug() << client->peerAddress();
             }
             else
             {

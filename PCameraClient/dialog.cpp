@@ -34,7 +34,7 @@ Dialog::Dialog(QWidget *parent) :
     connect(tcpThread, SIGNAL(onDisconnected()), this, SLOT(onDisconnected()));
     connect(tcpThread, SIGNAL(onError(QAbstractSocket::SocketError)),
             this, SLOT(onError(QAbstractSocket::SocketError)));
-    connect(tcpThread, SIGNAL(onReadyRead(QByteArray)), this, SLOT(onReadyRead(QByteArray)));
+    connect(tcpThread, SIGNAL(onReadyRead(QString)), this, SLOT(onTcpReadyRead(QString)));
     connect(tcpThread, SIGNAL(onStateChanged(QAbstractSocket::SocketState)),
             this, SLOT(onStateChanged(QAbstractSocket::SocketState)));
     utf8Code = QTextCodec::codecForName("UTF-8");
@@ -45,6 +45,11 @@ Dialog::Dialog(QWidget *parent) :
     isCoverMessage = false;
 
     udpClient = Q_NULLPTR;
+    isHideControls = false;
+    switchControlVisible();
+    connect(ui->label, SIGNAL(clicked()), this, SLOT(onImageLabelClicked()));
+
+    setButtonConnectText();
 }
 
 Dialog::~Dialog()
@@ -90,20 +95,18 @@ void Dialog::paintEvent(QPaintEvent *)
     isPainting = false;
 }
 
-void Dialog::on_pushButtonConnect_clicked()
+void Dialog::stopUdpClient()
 {
-    QString ip = ui->lineEditIP->text().trimmed();
-    quint16 port = ui->lineEditPort->text().trimmed().toInt();
-
-    ui->labelStatus->setText(tr("Ready"));
-
     if(udpClient != Q_NULLPTR)
     {
         udpClient->abort();
         udpClient->deleteLater();
         udpClient = Q_NULLPTR;
     }
+}
 
+void Dialog::newUdpClient(QString ip, quint16 port)
+{
     udpClient = new QUdpSocket();
     connect(udpClient, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
     if(udpClient->bind(QHostAddress(ip), port))
@@ -114,23 +117,63 @@ void Dialog::on_pushButtonConnect_clicked()
     {
         qDebug() << udpClient->errorString();
         ui->labelStatus->setText(udpClient->errorString());
+        tcpThread->setStop();
+    }
+}
+
+void Dialog::newUdpClient(qint32 ip, quint16 port)
+{
+    udpClient = new QUdpSocket();
+    connect(udpClient, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    if(udpClient->bind(QHostAddress(ip), port))
+    {
+        ui->labelStatus->setText(tr("bind on ") + QString::number(ip, 10) + " " + QString::number(port));
+    }
+    else
+    {
+        qDebug() << udpClient->errorString();
+        ui->labelStatus->setText(udpClient->errorString());
+        tcpThread->setStop();
+    }
+}
+
+void Dialog::on_pushButtonConnect_clicked()
+{
+    if(tcpThread == Q_NULLPTR)
+    {
+        return;
+    }
+    if(tcpThread->getIsRunning())
+    {
+        tcpThread->setStop();
+    }
+    else
+    {
+        QString ip = ui->lineEditIP->text().trimmed();
+        quint16 port = ui->lineEditPort->text().trimmed().toInt();
+
+        ui->labelStatus->setText(tr("Ready"));
+
+        //return;
+
+        tcpThread->setIp(ip);
+        tcpThread->setPort(port);
+        tcpThread->startRun();
     }
 
-    return;
-
-    tcpThread->setIp(ip);
-    tcpThread->setPort(port);
-    tcpThread->startRun();
+    setButtonConnectText();
 }
 
 void Dialog::onConnected()
 {
     ui->labelStatus->setText(tr("connected"));
+    setButtonConnectText();
 }
 
 void Dialog::onDisconnected()
 {
     ui->labelStatus->setText(tr("disconnected"));
+    setButtonConnectText();
 }
 
 void Dialog::onStateChanged(QAbstractSocket::SocketState)
@@ -141,6 +184,30 @@ void Dialog::onStateChanged(QAbstractSocket::SocketState)
 void Dialog::onError(QAbstractSocket::SocketError)
 {
 
+}
+
+void Dialog::onTcpReadyRead(QString text)
+{
+    if(text.isNull() || text.isEmpty())
+    {}
+    else
+    {
+        if(text.startsWith("IP@") && text.contains("@IP"))
+        {
+            QString ip = text.mid(3);
+            if(ip.contains("@IP"))
+            {
+                ip = ip.mid(0, ip.indexOf("@IP"));
+                stopUdpClient();
+                qint32 ipv4 = ip.toInt();
+                newUdpClient(ipv4, 12345);
+            }
+        }
+        else
+        {
+            ui->labelStatus->setText(text);
+        }
+    }
 }
 
 void Dialog::onReadyRead(QByteArray array)
@@ -215,10 +282,31 @@ void Dialog::onReadyRead()
     }
 }
 
-
-void Dialog::on_pushButtonSend_clicked()
+void Dialog::switchControlVisible()
 {
-    QString ip = ui->lineEditSendIp->text().trimmed();
-    quint16 port = ui->lineEditSendPort->text().trimmed().toInt();
-    udpClient->writeDatagram("Hello camera", QHostAddress(ip), port);
+    ui->widgetConnect->setVisible(!isHideControls);
+    ui->labelMessage->setVisible(!isHideControls);
+    ui->labelStatus->setVisible(!isHideControls);
+}
+
+void Dialog::setButtonConnectText()
+{
+    if(tcpThread == Q_NULLPTR)
+    {
+        return;
+    }
+    if(tcpThread->getIsRunning())
+    {
+        ui->pushButtonConnect->setText(tr("Stop"));
+    }
+    else
+    {
+        ui->pushButtonConnect->setText(tr("Start"));
+    }
+}
+
+void Dialog::onImageLabelClicked()
+{
+    isHideControls = !isHideControls;
+    switchControlVisible();
 }

@@ -26,11 +26,13 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         dialog.cpp \
-    tcpclientthread.cpp
+    tcpclientthread.cpp \
+    clickablelabel.cpp
 
 HEADERS += \
         dialog.h \
-    tcpclientthread.h
+    tcpclientthread.h \
+    clickablelabel.h
 
 FORMS += \
         dialog.ui

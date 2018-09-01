@@ -14,7 +14,7 @@
    <string>Dialog</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="0">
+   <item row="1" column="0">
     <widget class="QWidget" name="widgetCamera" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -24,7 +24,7 @@
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
       <item row="0" column="0">
-       <widget class="QLabel" name="label">
+       <widget class="ClickableLabel" name="label">
         <property name="text">
          <string>Image</string>
         </property>
@@ -33,78 +33,41 @@
      </layout>
     </widget>
    </item>
-   <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QLineEdit" name="lineEditIP">
-       <property name="text">
-        <string>127.0.0.1</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLineEdit" name="lineEditPort">
-       <property name="text">
-        <string>10010</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButtonConnect">
-       <property name="text">
-        <string>Connect</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="3" column="0">
+   <item row="2" column="0">
     <widget class="QLabel" name="labelMessage">
      <property name="text">
       <string>Message</string>
      </property>
     </widget>
    </item>
-   <item row="4" column="0">
+   <item row="3" column="0">
     <widget class="QLabel" name="labelStatus">
      <property name="text">
       <string>Ready</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
-    <widget class="QWidget" name="widget" native="true">
-     <layout class="QGridLayout" name="gridLayout_2">
-      <property name="leftMargin">
-       <number>0</number>
-      </property>
-      <property name="topMargin">
-       <number>0</number>
-      </property>
-      <property name="rightMargin">
-       <number>0</number>
-      </property>
-      <property name="bottomMargin">
-       <number>0</number>
-      </property>
-      <item row="0" column="0">
-       <widget class="QLineEdit" name="lineEditSendIp">
+   <item row="0" column="0">
+    <widget class="QWidget" name="widgetConnect" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QLineEdit" name="lineEditIP">
         <property name="text">
-         <string>192.168.31.63</string>
+         <string>127.0.0.1</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QLineEdit" name="lineEditSendPort">
+      <item>
+       <widget class="QLineEdit" name="lineEditPort">
         <property name="text">
-         <string>12345</string>
+         <string>10010</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QPushButton" name="pushButtonSend">
+      <item>
+       <widget class="QPushButton" name="pushButtonConnect">
         <property name="text">
-         <string>Send</string>
+         <string>Connect</string>
         </property>
        </widget>
       </item>
@@ -114,6 +77,13 @@
   </layout>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
+ <customwidgets>
+  <customwidget>
+   <class>ClickableLabel</class>
+   <extends>QLabel</extends>
+   <header location="global">clickablelabel.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

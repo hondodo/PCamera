@@ -5,8 +5,11 @@ TcpClientThread::TcpClientThread(QObject *parent) : QObject(parent)
     ip = "127.0.0.1";//"192.168.31.111";
     port = 10086;
     _isConnected = false;
+    _isRunning = false;
     client = Q_NULLPTR;
     reConnectTimerId = 0;
+
+    utf8Code = QTextCodec::codecForName("UTF-8");
 }
 
 TcpClientThread::~TcpClientThread()
@@ -16,15 +19,7 @@ TcpClientThread::~TcpClientThread()
         killTimer(reConnectTimerId);
         reConnectTimerId = 0;
     }
-    if(client != Q_NULLPTR)
-    {
-        if(client->isOpen())
-        {
-            client->close();
-            client->abort();
-        }
-        client->deleteLater();
-    }
+    setStop();
 }
 
 void TcpClientThread::startRun()
@@ -35,6 +30,17 @@ void TcpClientThread::startRun()
 void TcpClientThread::setStop()
 {
     _isRunning = false;
+    if(client != Q_NULLPTR)
+    {
+        if(client->isOpen())
+        {
+            client->close();
+            client->abort();
+        }
+        client->deleteLater();
+        client = Q_NULLPTR;
+    }
+    emit onDisconnected();
 }
 
 void TcpClientThread::connected()
@@ -42,8 +48,6 @@ void TcpClientThread::connected()
     emit onConnected();
     _isConnected = true;
     qDebug() << "connected";
-    client->write("Hey");
-    client->flush();
 }
 
 void TcpClientThread::disconnected()
@@ -66,7 +70,31 @@ void TcpClientThread::error(QAbstractSocket::SocketError errorMsg)
 void TcpClientThread::readyRead()
 {
     QByteArray array = client->readAll();
-    emit onReadyRead(array);
+    if(array.isNull() || array.isEmpty())
+    {}
+    else
+    {
+        QString text = "";
+        if(utf8Code != 0)
+        {
+            text = utf8Code->toUnicode(array);
+        }
+        else
+        {
+            text = QString(array);
+        }
+        emit onReadyRead(text);
+    }
+}
+
+bool TcpClientThread::getIsRunning() const
+{
+    return _isRunning;
+}
+
+void TcpClientThread::setIsRunning(bool isRunning)
+{
+    _isRunning = isRunning;
 }
 
 int TcpClientThread::getPort() const
@@ -103,14 +131,42 @@ void TcpClientThread::runTcp()
     reConnectTimerId = startTimer(100);
 }
 
+void TcpClientThread::sendText(QString text)
+{
+    if(client != Q_NULLPTR && client->isValid() && client->isOpen())
+    {
+        QByteArray array;
+        array.clear();
+        if(utf8Code != 0)
+        {
+            array = utf8Code->fromUnicode(text);
+        }
+        else
+        {
+            array = text.toUtf8();
+        }
+        if(array.isNull() || array.isEmpty())
+        {}
+        else
+        {
+            client->write(array);
+            client->flush();
+        }
+    }
+}
+
 void TcpClientThread::timerEvent(QTimerEvent *event)
 {
     if(event->timerId() == reConnectTimerId)
     {
         if(_isRunning && !_isConnected)
         {
-            client->connectToHost(ip, port);
-            client->waitForConnected();
+            if(client != Q_NULLPTR)
+            {
+                emit onReadyRead(tr("try to connect"));
+                client->connectToHost(ip, port);
+                client->waitForConnected();
+            }
         }
     }
 }

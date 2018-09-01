@@ -4,6 +4,7 @@
 #include <QTcpSocket>
 #include <QObject>
 #include <QTimerEvent>
+#include <QTextCodec>
 
 class TcpClientThread : public QObject
 {
@@ -22,6 +23,10 @@ public:
     void setPort(int value);
 
     void runTcp();
+    void sendText(QString text);
+
+    bool getIsRunning() const;
+    void setIsRunning(bool isRunning);
 
 protected:
     void timerEvent(QTimerEvent *event);
@@ -31,7 +36,7 @@ signals:
     void onDisconnected();
     void onStateChanged(QAbstractSocket::SocketState);
     void onError(QAbstractSocket::SocketError);
-    void onReadyRead(QByteArray array);
+    void onReadyRead(QString array);
 
 public slots:
     void connected();
@@ -45,8 +50,10 @@ private:
     QString ip;
     int port;
     int reConnectTimerId;
+    int beatIndex;
     bool _isRunning;
     bool _isConnected;
+    QTextCodec *utf8Code;
 };
 
 #endif // TCPCLIENTTHREAD_H

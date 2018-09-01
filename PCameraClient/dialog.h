@@ -21,20 +21,24 @@ public:
     explicit Dialog(QWidget *parent = 0);
     ~Dialog();
 
+    void stopUdpClient();
+
+    void newUdpClient(QString ip, quint16 port);
+    void newUdpClient(qint32 ip, quint16 port);
+
 protected:
     void paintEvent(QPaintEvent *);
 
 private slots:
     void on_pushButtonConnect_clicked();
-
     void onConnected();
     void onDisconnected();
     void onStateChanged(QAbstractSocket::SocketState);
     void onError(QAbstractSocket::SocketError);
+    void onTcpReadyRead(QString text);
     void onReadyRead(QByteArray array);
     void onReadyRead();
-
-    void on_pushButtonSend_clicked();
+    void onImageLabelClicked();
 
 private:
     Ui::Dialog *ui;
@@ -43,8 +47,11 @@ private:
     QImage imageCache;
     bool isPainting;
     bool isCoverMessage;
+    bool isHideControls;
     TcpClientThread *tcpThread;
     QUdpSocket *udpClient;
+    void switchControlVisible();
+    void setButtonConnectText();
 };
 
 #endif // DIALOG_H
