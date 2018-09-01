@@ -75,6 +75,8 @@ MainDialog::MainDialog(QWidget *parent) :
     //connect(udpServer, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
     udpServer->bind(udpPort, QUdpSocket::ShareAddress);
     clientBeatTime.clear();
+    isTcpTurn.clear();
+    isRequestText.clear();
 }
 
 MainDialog::~MainDialog()
@@ -168,8 +170,31 @@ void MainDialog::readyRead()
     QTcpSocket *client = qobject_cast<QTcpSocket *>(QObject::sender());
     if(client != Q_NULLPTR)
     {
-        //qDebug() << client->readAll();
         clientBeatTime[client] = QDateTime::currentDateTime();
+        QByteArray array = client->readAll();
+        if(array.isNull() || array.isEmpty())
+        {
+            return;
+        }
+        QString text = "";
+        if(utf8Code != 0)
+        {
+            text = utf8Code->toUnicode(array);
+        }
+        else
+        {
+            text = QString(array);
+        }
+        if(text == "ISTCPTURNTEXT")
+        {
+            isTcpTurn[client] = true;
+            isRequestText[client] = true;
+        }
+        else if(text == "ISTCPTURNIMAGE")
+        {
+            isTcpTurn[client] = true;
+            isRequestText[client] = false;
+        }
     }
 }
 
@@ -232,7 +257,21 @@ void MainDialog::sendMessage(QByteArray array)
             if(client->isValid() && client->isOpen())
             {
                 udpServer->writeDatagram(array, QHostAddress(client->peerAddress().toIPv4Address()), udpPort);
-                //qDebug() << client->peerAddress();
+
+                if(isTcpTurn.contains(client) && isTcpTurn[client])
+                {
+                    if(isRequestText[client] && array.startsWith(textHeader))
+                    {
+                        client->write(array);
+                        client->flush();
+                    }
+                    else if(!isRequestText[client] && array.startsWith(imageHeader))
+                    {
+                        client->write(array);
+                        client->flush();
+                    }
+                    isTcpTurn[client] = false;
+                }
             }
             else
             {
@@ -248,6 +287,8 @@ void MainDialog::sendMessage(QByteArray array)
             QTcpSocket *client = allClient.at(i);
             clientBeatTime.remove(client);
             allClient.removeAll(client);
+            isTcpTurn.remove(client);
+            isRequestText.remove(client);
             if(client->isValid())
             {
                 client->close();

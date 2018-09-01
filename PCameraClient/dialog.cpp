@@ -37,6 +37,8 @@ Dialog::Dialog(QWidget *parent) :
     connect(tcpThread, SIGNAL(onReadyRead(QString)), this, SLOT(onTcpReadyRead(QString)));
     connect(tcpThread, SIGNAL(onStateChanged(QAbstractSocket::SocketState)),
             this, SLOT(onStateChanged(QAbstractSocket::SocketState)));
+    connect(tcpThread, SIGNAL(onReadyReadArrray(QByteArray)),
+            this, SLOT(onReadyReadArrray(QByteArray)));
     utf8Code = QTextCodec::codecForName("UTF-8");
 
     this->setWindowFlags(Qt::Window);
@@ -49,11 +51,31 @@ Dialog::Dialog(QWidget *parent) :
     switchControlVisible();
     connect(ui->label, SIGNAL(clicked()), this, SLOT(onImageLabelClicked()));
 
+    blackBgStyleSheet = QString("QDialog#Dialog{background-color: rgb(0, 0, 0);}");
+    whiteBgStyleSheet = QString("QDialog#Dialog{background-color: rgb(255, 255, 255);}");
+    ui->label->setText("");
+    ui->label->setAlignment(Qt::AlignCenter);
+    isClickedImage = false;
+
+    isHengPin = false;
+    hengPinSize = QSize(0, 0);
+    hengPinBigSize = QSize(0, 0);
     setButtonConnectText();
+
+    checkUdpTimerId = 0;
+    lastReceiveUdpData = QDateTime::currentDateTime().addDays(-1);
+    isConnected = false;
+    canRequestTcp = true;
+    isRequestText = true;
 }
 
 Dialog::~Dialog()
 {
+    if(checkUdpTimerId > 0)
+    {
+        killTimer(checkUdpTimerId);
+        checkUdpTimerId = 0;
+    }
     if(tcpThread != Q_NULLPTR)
     {
         tcpThread->setStop();
@@ -62,37 +84,52 @@ Dialog::~Dialog()
 }
 
 void Dialog::paintEvent(QPaintEvent *)
-{return;
+{
+    return;
     if(isPainting)
     {
         return;
     }
     isPainting = true;
-    if(imageCache.isNull())
-    {}
+    isPainting = false;
+}
+
+void Dialog::resizeEvent(QResizeEvent *)
+{
+    QSize size = QApplication::desktop()->availableGeometry().size();
+
+    if(size.width() > size.height())
+    {
+        if(!isHengPin)
+        {
+            isHengPin = true;
+            hengPinSize = QSize(0, 0);
+            hengPinBigSize = QSize(0, 0);
+        }
+    }
     else
     {
-        int w = imageCache.width();
-        int h = imageCache.height();
-        if(w > 1000 || h > 1000 || h < 1 || w < 1)
-        {
-            return;
-        }
-        QPainter painter(this);
-        int ww = ui->widgetCamera->width();
-        int wh = ui->widgetCamera->height();
-        if(ww > 2000 && wh > 2000)
-        {
-            ui->widgetCamera->resize(800, 600);
-            ww = 800;
-            wh = 600;
-        }
-        QImage image = imageCache.scaled(ww, wh, Qt::KeepAspectRatio);
-        int x = ui->widgetCamera->x() + (ww - image.width()) / 2;
-        int y = ui->widgetCamera->y() + (wh - image.height()) / 2;
-        painter.drawImage(x, y, image);
+        isHengPin = false;
     }
-    isPainting = false;
+}
+
+void Dialog::timerEvent(QTimerEvent *event)
+{
+    if(event->timerId() == checkUdpTimerId)
+    {
+        if(isConnected && canRequestTcp &&
+                tcpThread != Q_NULLPTR && tcpThread->getIsRunning())
+        {
+            int elsp = QDateTime::currentDateTime().toMSecsSinceEpoch() -
+                    lastReceiveUdpData.toMSecsSinceEpoch();
+            if(elsp < 0 || elsp > 5000)
+            {
+                tcpThread->sendText(isRequestText? "ISTCPTURNTEXT" : "ISTCPTURNIMAGE");
+                canRequestTcp = false;
+                isRequestText = !isRequestText;
+            }
+        }
+    }
 }
 
 void Dialog::stopUdpClient()
@@ -127,7 +164,8 @@ void Dialog::newUdpClient(qint32 ip, quint16 port)
     connect(udpClient, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
     if(udpClient->bind(QHostAddress(ip), port))
     {
-        ui->labelStatus->setText(tr("bind on ") + QString::number(ip, 10) + " " + QString::number(port));
+        ui->labelStatus->setText(tr("bind on ") + QString::number(ip, 10) + " "
+                                 + QString::number(port));
     }
     else
     {
@@ -162,16 +200,24 @@ void Dialog::on_pushButtonConnect_clicked()
     }
 
     setButtonConnectText();
+    canRequestTcp = true;
+    lastReceiveUdpData = QDateTime::currentDateTime().addDays(-1);
+    if(checkUdpTimerId <= 0)
+    {
+        checkUdpTimerId = startTimer(100);
+    }
 }
 
 void Dialog::onConnected()
 {
+    isConnected = true;
     ui->labelStatus->setText(tr("connected"));
     setButtonConnectText();
 }
 
 void Dialog::onDisconnected()
 {
+    isConnected = false;
     ui->labelStatus->setText(tr("disconnected"));
     setButtonConnectText();
 }
@@ -205,7 +251,7 @@ void Dialog::onTcpReadyRead(QString text)
         }
         else
         {
-            ui->labelStatus->setText(text);
+            //ui->labelStatus->setText(text);
         }
     }
 }
@@ -250,12 +296,29 @@ void Dialog::onReadyRead(QByteArray array)
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer, "JPG");
             imageCache = reader.read();
-            //this->update();
             if(!imageCache.isNull())
             {
-                imageCache = imageCache.scaled(ui->label->width() - 10,
-                                               ui->label->height() - 10,
-                                               Qt::KeepAspectRatio);
+                QSize size = QSize(ui->label->width() - 10, ui->label->height() - 10);
+                if(isHengPin)
+                {
+                    if(isHideControls)
+                    {
+                        if(hengPinBigSize.width() < 1 && hengPinBigSize.height() < 1)
+                        {
+                            hengPinBigSize = size;
+                        }
+                        size = hengPinBigSize;
+                    }
+                    else
+                    {
+                        if(hengPinSize.width() < 1 && hengPinSize.height() < 1)
+                        {
+                            hengPinSize = size;
+                        }
+                        size = hengPinSize;
+                    }
+                }
+                imageCache = imageCache.scaled(size, Qt::KeepAspectRatio);
             }
             QPixmap pix = QPixmap::fromImage(imageCache);
             if(!pix.isNull())
@@ -279,14 +342,19 @@ void Dialog::onReadyRead()
         udpClient->readDatagram(datagram.data(), datagram.size());//, &host, &port);
         onReadyRead(datagram);
         //qDebug() << host << port;
+        lastReceiveUdpData = QDateTime::currentDateTime();
     }
 }
 
 void Dialog::switchControlVisible()
 {
+    isCoverMessage = true;
     ui->widgetConnect->setVisible(!isHideControls);
     ui->labelMessage->setVisible(!isHideControls);
     ui->labelStatus->setVisible(!isHideControls);
+    isClickedImage = true;
+    this->update();
+    isCoverMessage = false;
 }
 
 void Dialog::setButtonConnectText()
@@ -309,4 +377,19 @@ void Dialog::onImageLabelClicked()
 {
     isHideControls = !isHideControls;
     switchControlVisible();
+}
+
+void Dialog::onReadyReadArrray(QByteArray array)
+{
+    if(array.isNull() || array.isEmpty())
+    {}
+    else
+    {
+        canRequestTcp = true;
+        if((array.startsWith(textHeader) && array.endsWith(textTag)) ||
+            (array.startsWith(imageHeader) && array.endsWith(imageTag)))
+        {
+            onReadyRead(array);
+        }
+    }
 }

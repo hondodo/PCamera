@@ -37,6 +37,7 @@ signals:
     void onStateChanged(QAbstractSocket::SocketState);
     void onError(QAbstractSocket::SocketError);
     void onReadyRead(QString array);
+    void onReadyReadArrray(QByteArray array);
 
 public slots:
     void connected();

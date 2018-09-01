@@ -74,16 +74,20 @@ void TcpClientThread::readyRead()
     {}
     else
     {
-        QString text = "";
-        if(utf8Code != 0)
+        emit onReadyReadArrray(array);
+        if(array.length() < 1024)
         {
-            text = utf8Code->toUnicode(array);
+            QString text = "";
+            if(utf8Code != 0)
+            {
+                text = utf8Code->toUnicode(array);
+            }
+            else
+            {
+                text = QString(array);
+            }
+            emit onReadyRead(text);
         }
-        else
-        {
-            text = QString(array);
-        }
-        emit onReadyRead(text);
     }
 }
 
