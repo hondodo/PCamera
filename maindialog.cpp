@@ -168,7 +168,7 @@ void MainDialog::readyRead()
     QTcpSocket *client = qobject_cast<QTcpSocket *>(QObject::sender());
     if(client != Q_NULLPTR)
     {
-        qDebug() << client->readAll();
+        //qDebug() << client->readAll();
         clientBeatTime[client] = QDateTime::currentDateTime();
     }
 }

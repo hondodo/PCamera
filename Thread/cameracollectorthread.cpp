@@ -318,7 +318,7 @@ std::vector<Rect> CameraCollectorThread::findMog(int cid, Mat mat)
     {
         vector<Point> c = mogobj->cnts[i];
         area = contourArea(c);
-        if (area < 100)
+        if (area < 50)
         {
             continue;
         }
