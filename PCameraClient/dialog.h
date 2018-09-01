@@ -6,6 +6,7 @@
 #include <QBuffer>
 #include <QImageReader>
 #include <QPainter>
+#include <QUdpSocket>
 #include "tcpclientthread.h"
 
 namespace Ui {
@@ -21,7 +22,7 @@ public:
     ~Dialog();
 
 protected:
-    void paintEvent(QPaintEvent *event);
+    void paintEvent(QPaintEvent *);
 
 private slots:
     void on_pushButtonConnect_clicked();
@@ -31,6 +32,9 @@ private slots:
     void onStateChanged(QAbstractSocket::SocketState);
     void onError(QAbstractSocket::SocketError);
     void onReadyRead(QByteArray array);
+    void onReadyRead();
+
+    void on_pushButtonSend_clicked();
 
 private:
     Ui::Dialog *ui;
@@ -40,6 +44,7 @@ private:
     bool isPainting;
     bool isCoverMessage;
     TcpClientThread *tcpThread;
+    QUdpSocket *udpClient;
 };
 
 #endif // DIALOG_H

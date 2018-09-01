@@ -6,6 +6,8 @@
 #include <QTcpServer>
 #include <QTcpSocket>
 #include <QTextCodec>
+#include <QUdpSocket>
+#include <QNetworkInterface>
 #include "Thread/oledthread.h"
 #include "Thread/cameracollectorthread.h"
 
@@ -31,6 +33,7 @@ private slots:
     void acceptError(QAbstractSocket::SocketError socketError);
     void readyRead();
     void disconnected();
+    void onReadyRead();
 
 private:
     Ui::MainDialog *ui;
@@ -43,6 +46,8 @@ private:
     QDateTime lastSendImage;
     bool isConverImage;
     bool isSending;
+    QUdpSocket *udpServer;
+    quint16 udpPort;
 };
 
 #endif // MAINDIALOG_H

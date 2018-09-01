@@ -43,6 +43,8 @@ Dialog::Dialog(QWidget *parent) :
     this->showMaximized();
     isPainting = false;
     isCoverMessage = false;
+
+    udpClient = Q_NULLPTR;
 }
 
 Dialog::~Dialog()
@@ -54,7 +56,7 @@ Dialog::~Dialog()
     delete ui;
 }
 
-void Dialog::paintEvent(QPaintEvent *event)
+void Dialog::paintEvent(QPaintEvent *)
 {return;
     if(isPainting)
     {
@@ -72,9 +74,17 @@ void Dialog::paintEvent(QPaintEvent *event)
             return;
         }
         QPainter painter(this);
-        QImage image = imageCache.scaled(640, 480, Qt::KeepAspectRatio);
-        int x = ui->widgetCamera->x();
-        int y = ui->widgetCamera->y();
+        int ww = ui->widgetCamera->width();
+        int wh = ui->widgetCamera->height();
+        if(ww > 2000 && wh > 2000)
+        {
+            ui->widgetCamera->resize(800, 600);
+            ww = 800;
+            wh = 600;
+        }
+        QImage image = imageCache.scaled(ww, wh, Qt::KeepAspectRatio);
+        int x = ui->widgetCamera->x() + (ww - image.width()) / 2;
+        int y = ui->widgetCamera->y() + (wh - image.height()) / 2;
         painter.drawImage(x, y, image);
     }
     isPainting = false;
@@ -83,7 +93,31 @@ void Dialog::paintEvent(QPaintEvent *event)
 void Dialog::on_pushButtonConnect_clicked()
 {
     QString ip = ui->lineEditIP->text().trimmed();
-    int port = ui->lineEditPort->text().trimmed().toInt();
+    quint16 port = ui->lineEditPort->text().trimmed().toInt();
+
+    ui->labelStatus->setText(tr("Ready"));
+
+    if(udpClient != Q_NULLPTR)
+    {
+        udpClient->abort();
+        udpClient->deleteLater();
+        udpClient = Q_NULLPTR;
+    }
+
+    udpClient = new QUdpSocket();
+    connect(udpClient, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    if(udpClient->bind(QHostAddress(ip), port))
+    {
+        ui->labelStatus->setText(tr("bind on ") + ip + " " + QString::number(port));
+    }
+    else
+    {
+        qDebug() << udpClient->errorString();
+        ui->labelStatus->setText(udpClient->errorString());
+    }
+
+    return;
+
     tcpThread->setIp(ip);
     tcpThread->setPort(port);
     tcpThread->startRun();
@@ -149,12 +183,42 @@ void Dialog::onReadyRead(QByteArray array)
             buffer.open(QIODevice::ReadOnly);
             QImageReader reader(&buffer, "JPG");
             imageCache = reader.read();
-            this->update();
+            //this->update();
+            if(!imageCache.isNull())
+            {
+                imageCache = imageCache.scaled(ui->label->width() - 10,
+                                               ui->label->height() - 10,
+                                               Qt::KeepAspectRatio);
+            }
             QPixmap pix = QPixmap::fromImage(imageCache);
-            ui->label->setPixmap(pix);
-            ui->label->update();
+            if(!pix.isNull())
+            {
+                ui->label->setPixmap(pix);
+                ui->label->update();
+            }
         }
     }
     isCoverMessage = false;
 }
 
+void Dialog::onReadyRead()
+{
+    while(udpClient->hasPendingDatagrams())
+    {
+        QByteArray datagram;
+        //QHostAddress host;
+        //quint16 port;
+        datagram.resize(udpClient->pendingDatagramSize());
+        udpClient->readDatagram(datagram.data(), datagram.size());//, &host, &port);
+        onReadyRead(datagram);
+        //qDebug() << host << port;
+    }
+}
+
+
+void Dialog::on_pushButtonSend_clicked()
+{
+    QString ip = ui->lineEditSendIp->text().trimmed();
+    quint16 port = ui->lineEditSendPort->text().trimmed().toInt();
+    udpClient->writeDatagram("Hello camera", QHostAddress(ip), port);
+}

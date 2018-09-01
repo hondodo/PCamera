@@ -69,6 +69,11 @@ MainDialog::MainDialog(QWidget *parent) :
     lastSendImage = QDateTime::currentDateTime();
     isConverImage = false;
     isSending = false;
+
+    udpPort = 12345;
+    udpServer = new QUdpSocket();
+    //connect(udpServer, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
+    udpServer->bind(udpPort, QUdpSocket::ShareAddress);
 }
 
 MainDialog::~MainDialog()
@@ -101,7 +106,7 @@ void MainDialog::onImage(const QImage &image)
     }
     isConverImage = true;
     int els = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastSendImage.toMSecsSinceEpoch();
-    if(els < 0 || els > 200)
+    if(els < 0 || els > 100)
     {
         QBuffer buffer;
         buffer.open(QIODevice::ReadWrite);
@@ -173,8 +178,38 @@ void MainDialog::disconnected()
     qDebug() << "a client disconnected";
 }
 
+void MainDialog::onReadyRead()
+{
+    while(udpServer->hasPendingDatagrams())
+    {
+        QByteArray datagram;
+        QHostAddress add;
+        quint16 port;
+        datagram.resize(udpServer->pendingDatagramSize());
+        udpServer->readDatagram(datagram.data(), datagram.size(), &add, &port);
+        qDebug() << datagram << add << port;
+    }
+}
+
 void MainDialog::sendMessage(QByteArray array)
 {
+//    QList<QHostAddress> list = QNetworkInterface::allAddresses();
+//    foreach (QHostAddress address, list)
+//    {
+//        udpServer->writeDatagram(array, address, udpPort);
+//        //qDebug() << address.toString();
+//    }
+//    udpServer->writeDatagram(array, QHostAddress::Any, udpPort);
+//    udpServer->writeDatagram(array, QHostAddress::AnyIPv4, udpPort);
+//    udpServer->writeDatagram(array, QHostAddress::AnyIPv6, udpPort);
+//    udpServer->writeDatagram(array, QHostAddress::Broadcast, udpPort);
+//    udpServer->writeDatagram(array, QHostAddress::LocalHost, udpPort);
+//    udpServe-r->writeDatagram(array, QHostAddress::LocalHostIPv6, udpPort);
+
+    udpServer->writeDatagram(array, QHostAddress("192.168.31.63"), udpPort);
+    udpServer->writeDatagram(array, QHostAddress("192.168.31.55"), udpPort);
+    return;
+
     if(isSending)
     {
         return;
