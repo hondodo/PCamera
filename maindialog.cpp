@@ -195,6 +195,11 @@ void MainDialog::readyRead()
             isTcpTurn[client] = true;
             isRequestText[client] = false;
         }
+        else
+        {
+            client->write(array);
+            client->flush();
+        }
     }
 }
 
