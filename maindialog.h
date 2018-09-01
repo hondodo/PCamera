@@ -40,6 +40,7 @@ private:
     OLedThread *oledThread;
     QTcpServer *server;
     QList<QTcpSocket *> allClient;
+    QMap<QTcpSocket *, QDateTime> clientBeatTime;
     QByteArray textHeader, imageHeader, textTag, imageTag;
     QTextCodec *utf8Code;
     void sendMessage(QByteArray array);

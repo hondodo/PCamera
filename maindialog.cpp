@@ -74,6 +74,7 @@ MainDialog::MainDialog(QWidget *parent) :
     udpServer = new QUdpSocket();
     //connect(udpServer, SIGNAL(readyRead()), this, SLOT(onReadyRead()));
     udpServer->bind(udpPort, QUdpSocket::ShareAddress);
+    clientBeatTime.clear();
 }
 
 MainDialog::~MainDialog()
@@ -154,6 +155,7 @@ void MainDialog::newConnection()
     client->write(ip.toUtf8());
     client->flush();
     qDebug() << client->peerAddress() << client->peerPort();
+    clientBeatTime[client] = QDateTime::currentDateTime();
 }
 
 void MainDialog::acceptError(QAbstractSocket::SocketError socketError)
@@ -167,6 +169,7 @@ void MainDialog::readyRead()
     if(client != Q_NULLPTR)
     {
         qDebug() << client->readAll();
+        clientBeatTime[client] = QDateTime::currentDateTime();
     }
 }
 
@@ -212,6 +215,20 @@ void MainDialog::sendMessage(QByteArray array)
         for(int i = 0; i < count; i++)
         {
             QTcpSocket *client = allClient.at(i);
+
+            if(!clientBeatTime.contains(client))
+            {
+                nullclient.append(client);
+                continue;
+            }
+            QDateTime lasttime = clientBeatTime[client];
+            int beatels = QDateTime::currentDateTime().toMSecsSinceEpoch() - lasttime.toMSecsSinceEpoch();
+            if(beatels > 60000 || beatels < 0)
+            {
+                nullclient.append(client);
+                continue;
+            }
+
             if(client->isValid() && client->isOpen())
             {
                 udpServer->writeDatagram(array, QHostAddress(client->peerAddress().toIPv4Address()), udpPort);
@@ -229,6 +246,7 @@ void MainDialog::sendMessage(QByteArray array)
         for(int i = 0; i < count; i++)
         {
             QTcpSocket *client = allClient.at(i);
+            clientBeatTime.remove(client);
             allClient.removeAll(client);
             if(client->isValid())
             {

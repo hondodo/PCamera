@@ -8,7 +8,7 @@ TcpClientThread::TcpClientThread(QObject *parent) : QObject(parent)
     _isRunning = false;
     client = Q_NULLPTR;
     reConnectTimerId = 0;
-
+    beatIndex = 0;
     utf8Code = QTextCodec::codecForName("UTF-8");
 }
 
@@ -167,6 +167,21 @@ void TcpClientThread::timerEvent(QTimerEvent *event)
                 client->connectToHost(ip, port);
                 client->waitForConnected();
             }
+        }
+        if(_isRunning && _isConnected)
+        {
+            if(client != Q_NULLPTR && client->isOpen())
+            {
+                if(beatIndex % 100 == 0)
+                {
+                    sendText("Beat");
+                }
+            }
+        }
+        beatIndex++;
+        if(beatIndex > 10000)
+        {
+            beatIndex = 0;
         }
     }
 }
