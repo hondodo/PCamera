@@ -385,10 +385,22 @@ void Dialog::onReadyReadArrray(QByteArray array)
     {}
     else
     {
-        if((array.startsWith(textHeader)) ||
-            (array.startsWith(imageHeader)))
+        if(array.startsWith(textHeader))
         {
-            onReadyRead(array);
+            if(array.contains(textTag))
+            {
+                QByteArray tmp = array.mid(0, array.indexOf(textTag) + textTag.length());
+                onReadyRead(tmp);
+            }
+        }
+        if(array.startsWith(imageHeader))
+        {
+            if(array.contains(imageTag))
+            {
+                QByteArray tmp = array;
+                tmp = array.mid(0, array.indexOf(imageTag) + imageTag.length());
+                onReadyRead(tmp);
+            }
         }
         canRequestTcp = true;
     }

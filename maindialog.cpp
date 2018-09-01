@@ -197,8 +197,6 @@ void MainDialog::readyRead()
         }
         else
         {
-            client->write(array);
-            client->flush();
         }
     }
 }
