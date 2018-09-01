@@ -65,8 +65,9 @@ Dialog::Dialog(QWidget *parent) :
     checkUdpTimerId = 0;
     lastReceiveUdpData = QDateTime::currentDateTime().addDays(-1);
     isConnected = false;
-    canRequestTcp = true;
+    canRequestTcp = false;
     isRequestText = true;
+    tcpArrayCache.clear();
 }
 
 Dialog::~Dialog()
@@ -124,6 +125,8 @@ void Dialog::timerEvent(QTimerEvent *event)
                     lastReceiveUdpData.toMSecsSinceEpoch();
             if(elsp < 0 || elsp > 5000)
             {
+                tcpArrayCache.clear();
+                isRequestText = false;//debug image
                 tcpThread->sendText(isRequestText? "ISTCPTURNTEXT" : "ISTCPTURNIMAGE");
                 canRequestTcp = false;
                 isRequestText = !isRequestText;
@@ -177,6 +180,7 @@ void Dialog::newUdpClient(qint32 ip, quint16 port)
 
 void Dialog::on_pushButtonConnect_clicked()
 {
+    canRequestTcp = false;
     if(tcpThread == Q_NULLPTR)
     {
         return;
@@ -200,7 +204,7 @@ void Dialog::on_pushButtonConnect_clicked()
     }
 
     setButtonConnectText();
-    canRequestTcp = true;
+
     lastReceiveUdpData = QDateTime::currentDateTime().addDays(-1);
     if(checkUdpTimerId <= 0)
     {
@@ -248,6 +252,7 @@ void Dialog::onTcpReadyRead(QString text)
                 qint32 ipv4 = ip.toInt();
                 newUdpClient(ipv4, 12345);
             }
+            canRequestTcp = true;
         }
         else
         {
@@ -385,6 +390,7 @@ void Dialog::onReadyReadArrray(QByteArray array)
     {}
     else
     {
+        /*
         if(array.startsWith(textHeader))
         {
             if(array.contains(textTag))
@@ -403,5 +409,22 @@ void Dialog::onReadyReadArrray(QByteArray array)
             }
         }
         canRequestTcp = true;
+        */
+        if(tcpArrayCache.isEmpty())
+        {
+            if(array.startsWith(textHeader) || array.startsWith(imageHeader))
+            {
+                tcpArrayCache.append(array);
+            }
+        }
+        else
+        {
+            tcpArrayCache.append(array);
+        }
+        if(tcpArrayCache.endsWith(textTag) || tcpArrayCache.endsWith(imageTag))
+        {
+            onReadyRead(tcpArrayCache);
+            canRequestTcp = true;
+        }
     }
 }

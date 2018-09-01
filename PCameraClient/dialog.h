@@ -68,6 +68,7 @@ private:
     QDateTime lastReceiveUdpData;
     bool canRequestTcp;
     bool isRequestText;
+    QByteArray tcpArrayCache;
 };
 
 #endif // DIALOG_H
