@@ -107,11 +107,24 @@ void Dialog::resizeEvent(QResizeEvent *)
             isHengPin = true;
             hengPinSize = QSize(0, 0);
             hengPinBigSize = QSize(0, 0);
+#ifdef Q_OS_ANDROID
+            isHideControls = true;
+            ui->widgetCamera->setMaximumSize(size);
+            ui->label->setMaximumSize(size);
+            switchControlVisible();
+#endif
         }
     }
     else
     {
         isHengPin = false;
+#ifdef Q_OS_ANDROID
+            isHideControls = false;
+            ui->widgetCamera->setMaximumSize(size);
+            ui->label->setMaximumSize(size);
+            switchControlVisible();
+
+#endif
     }
 }
 
@@ -296,41 +309,47 @@ void Dialog::onReadyRead(QByteArray array)
         }
         else if(array.startsWith(imageHeader) && array.endsWith(imageTag))
         {
-            QByteArray bytes = array.remove(0, imageHeader.length());
-            bytes = bytes.remove(bytes.length() - imageTag.length(), imageTag.length());
-            QBuffer buffer(&bytes);
-            buffer.open(QIODevice::ReadOnly);
-            QImageReader reader(&buffer, "JPG");
-            imageCache = reader.read();
-            if(!imageCache.isNull())
+            if(ui->label->isVisible())
             {
-                QSize size = QSize(ui->label->width() - 10, ui->label->height() - 10);
-                if(isHengPin)
+                QByteArray bytes = array.remove(0, imageHeader.length());
+                bytes = bytes.remove(bytes.length() - imageTag.length(), imageTag.length());
+                QBuffer buffer(&bytes);
+                buffer.open(QIODevice::ReadOnly);
+                QImageReader reader(&buffer, "JPG");
+                imageCache = reader.read();
+                if(!imageCache.isNull())
                 {
-                    if(isHideControls)
+                    QSize size = QSize(ui->label->width() - 10, ui->label->height() - 10);
+                    if(isHengPin)
                     {
-                        if(hengPinBigSize.width() < 1 && hengPinBigSize.height() < 1)
+                        if(isHideControls)
                         {
-                            hengPinBigSize = size;
+                            if(hengPinBigSize.width() < 1 && hengPinBigSize.height() < 1)
+                            {
+                                hengPinBigSize = size;
+                            }
+                            size = hengPinBigSize;
                         }
-                        size = hengPinBigSize;
+                        else
+                        {
+                            if(hengPinSize.width() < 1 && hengPinSize.height() < 1)
+                            {
+                                hengPinSize = size;
+                            }
+                            size = hengPinSize;
+                        }
                     }
-                    else
+                    imageCache = imageCache.scaled(size, Qt::KeepAspectRatio);
+                }
+                QPixmap pix = QPixmap::fromImage(imageCache);
+                if(!pix.isNull())
+                {
+                    if(ui->label->isVisible())
                     {
-                        if(hengPinSize.width() < 1 && hengPinSize.height() < 1)
-                        {
-                            hengPinSize = size;
-                        }
-                        size = hengPinSize;
+                        ui->label->setPixmap(pix);
+                        ui->label->update();
                     }
                 }
-                imageCache = imageCache.scaled(size, Qt::KeepAspectRatio);
-            }
-            QPixmap pix = QPixmap::fromImage(imageCache);
-            if(!pix.isNull())
-            {
-                ui->label->setPixmap(pix);
-                ui->label->update();
             }
         }
     }
@@ -395,6 +414,9 @@ void Dialog::setButtonConnectText()
 
 void Dialog::onImageLabelClicked()
 {
+#ifdef Q_OS_ANDROID
+    return;
+#endif
     isHideControls = !isHideControls;
     switchControlVisible();
 }
