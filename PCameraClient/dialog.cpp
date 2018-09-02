@@ -67,6 +67,7 @@ Dialog::Dialog(QWidget *parent) :
     isConnected = false;
     canRequestTcp = false;
     isRequestText = true;
+    isRecording = false;
     tcpArrayCache.clear();
     udpArrayCache.clear();
 }
@@ -108,6 +109,7 @@ void Dialog::resizeEvent(QResizeEvent *)
             hengPinSize = QSize(0, 0);
             hengPinBigSize = QSize(0, 0);
 #ifdef Q_OS_ANDROID
+            this->setStyleSheet("background-color: rgb(0, 0, 0);\ncolor: rgb(255, 255, 255);");
             isHideControls = true;
             ui->widgetCamera->setMaximumSize(size);
             ui->label->setMaximumSize(size);
@@ -119,6 +121,7 @@ void Dialog::resizeEvent(QResizeEvent *)
     {
         isHengPin = false;
 #ifdef Q_OS_ANDROID
+            this->setStyleSheet("");
             isHideControls = false;
             ui->widgetCamera->setMaximumSize(size);
             ui->label->setMaximumSize(size);
@@ -305,6 +308,11 @@ void Dialog::onReadyRead(QByteArray array)
             {
                 text = QString(bytes);
             }
+            if(text.isNull())
+            {
+                return;
+            }
+            isRecording = text.toLower().contains("rec");
             ui->labelMessage->setText(text);
         }
         else if(array.startsWith(imageHeader) && array.endsWith(imageTag))
@@ -319,6 +327,19 @@ void Dialog::onReadyRead(QByteArray array)
                 imageCache = reader.read();
                 if(!imageCache.isNull())
                 {
+                    if(isRecording)
+                    {
+                        if(imageCache.width() > 100 && imageCache.height() > 100)
+                        {
+                            for(int w = 10; w < 25; w++)
+                            {
+                                for(int h = 20; h < 35; h++)
+                                {
+                                    imageCache.setPixelColor(w, h, Qt::red);
+                                }
+                            }
+                        }
+                    }
                     QSize size = QSize(ui->label->width() - 10, ui->label->height() - 10);
                     if(isHengPin)
                     {
@@ -341,13 +362,16 @@ void Dialog::onReadyRead(QByteArray array)
                     }
                     imageCache = imageCache.scaled(size, Qt::KeepAspectRatio);
                 }
-                QPixmap pix = QPixmap::fromImage(imageCache);
-                if(!pix.isNull())
+                if(!imageCache.isNull())
                 {
-                    if(ui->label->isVisible())
+                    QPixmap pix = QPixmap::fromImage(imageCache);
+                    if(!pix.isNull())
                     {
-                        ui->label->setPixmap(pix);
-                        ui->label->update();
+                        if(ui->label->isVisible())
+                        {
+                            ui->label->setPixmap(pix);
+                            ui->label->update();
+                        }
                     }
                 }
             }
@@ -366,10 +390,10 @@ void Dialog::onReadyRead()
         datagram.resize(udpClient->pendingDatagramSize());
         udpClient->readDatagram(datagram.data(), datagram.size());//, &host, &port);
 
-        if(datagram.contains(imageHeader) || datagram.contains(imageTag))
-        {
-            qDebug() << "Image";
-        }
+        //if(datagram.contains(imageHeader) || datagram.contains(imageTag))
+        //{
+        //    qDebug() << "Image";
+        //}
 
         if(datagram.startsWith(textHeader) || datagram.startsWith(imageHeader))
         {

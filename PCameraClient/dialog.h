@@ -68,6 +68,7 @@ private:
     QDateTime lastReceiveUdpData;
     bool canRequestTcp;
     bool isRequestText;
+    bool isRecording;
     QByteArray tcpArrayCache;
     QByteArray udpArrayCache;
 };
