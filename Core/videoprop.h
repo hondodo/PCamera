@@ -31,13 +31,16 @@ public:
     cv::Rect getFaceRect() const;
     void setFaceRect(const cv::Rect &value);
 
+    QString getBaseDir() const;
+    void setBaseDir(const QString &value);
+
 private:
     int width;
     int height;
     int fps;
     QString fileName;
     QString fileNameTag;
-    QString dir;
+    QString baseDir, dir;
     cv::Rect faceRect;
 };
 

@@ -10,6 +10,13 @@ VideoProp::VideoProp()
     faceRect.width = 300;
     faceRect.height = 300;
     setFileNameBuildNew();
+
+#ifdef Q_OS_WIN
+    baseDir = "./REC/";
+#else
+    baseDir = "/media/pi/Potatokid/";
+#endif
+    setDirBuildNew();
 }
 
 int VideoProp::getWidth() const
@@ -62,12 +69,12 @@ void VideoProp::setDirBuildNew()
 {
     QDateTime time = QDateTime::currentDateTime();
 #ifdef Q_OS_WIN
-    dir = "./REC/"
+    dir = baseDir
             + QString("%1%2%3").arg(time.toString("yyyy"),
                                              time.toString("MM"),
                                              time.toString("dd"));
 #else
-    dir = "/media/pi/Potatokid/"       //"./REC/"
+    dir = baseDir
             + QString("%1%2%3").arg(time.toString("yyyy"),
                                              time.toString("MM"),
                                              time.toString("dd"));
@@ -97,4 +104,14 @@ cv::Rect VideoProp::getFaceRect() const
 void VideoProp::setFaceRect(const cv::Rect &value)
 {
     faceRect = value;
+}
+
+QString VideoProp::getBaseDir() const
+{
+    return baseDir;
+}
+
+void VideoProp::setBaseDir(const QString &value)
+{
+    baseDir = value;
 }

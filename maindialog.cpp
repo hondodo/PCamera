@@ -236,10 +236,6 @@ void MainDialog::onReadyRead()
 
 void MainDialog::sendMessage(QByteArray array)
 {
-//    udpServer->writeDatagram(array, QHostAddress("192.168.31.63"), udpPort);
-//    udpServer->writeDatagram(array, QHostAddress("192.168.31.55"), udpPort);
-//    return;
-
     if(isSending)
     {
         return;

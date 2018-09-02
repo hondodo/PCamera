@@ -13,6 +13,7 @@
 #include "Core/facedetecthelper.h"
 #include "Core/videoprop.h"
 #include "Thread/cameracollectorthread.h"
+#include "Core/diskhelper.h"
 
 class CamaraThread : public QThread
 {
@@ -23,9 +24,6 @@ public:
 
     int getCamaraId() const;
     void setCamaraId(int value);
-
-    QString getRecDir() const;
-    void setRecDir(const QString &value);
 
     int getRecMinSecond() const;
     void setRecMinSecond(int value);
@@ -58,10 +56,10 @@ private:
     int recMaxSencond;
     QTime time;
     bool _isConnect;
-    QString recDir;
     FaceDetectHelper faceHelper;
     QSize targetSize;
     void drawTime(cv::InputOutputArray img);
+    DiskHelper diskHelper;
 };
 
 #endif // CAMARATHREAD_H

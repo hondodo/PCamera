@@ -10,7 +10,6 @@ CamaraThread::CamaraThread(QObject *parent) : QThread(parent)
     _isDetectFace = false;
     camaraId = 0;
     time.start();
-    recDir = "REC";
     recMinSecond = 10;
     recMaxSencond = 600;
     targetSize = QSize(400, 300);
@@ -97,6 +96,7 @@ void CamaraThread::run()
     faceRect.width = 300;
     faceRect.height = 300;
     prop.setFaceRect(faceRect);
+    diskHelper.setPath(prop.getBaseDir());
     CameraCollectorThread::Init->addVideoProp(camaraId, prop);
 
     QDateTime needRecLastTime = QDateTime::currentDateTime().addYears(-1);
@@ -117,8 +117,11 @@ void CamaraThread::run()
     int savetime = 0;
     int showtime = 0;
     double framefps = 0;
+    bool isNewMessage = false;
 
     int index = 0;
+    int runIndex = 0;
+    quint64 totalSpace, freeSpace;
 
     Mat cap;
     std::vector<cv::Rect> mogRect;
@@ -143,14 +146,12 @@ void CamaraThread::run()
             drawtimetime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
 
-            //rectangle(cap, prop.getFaceRect(), Scalar(0, 255, 0), 2);
-
             timeOpenCVOP.restart();
             CameraCollectorThread::Init->emitOnImage(camaraId, cap);
             showtime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
 
-            /*
+            /***********FACE*******
             if(index % fps == 0)
             {
                 timeOpenCVOP.restart();
@@ -237,7 +238,8 @@ void CamaraThread::run()
             {
                 framefps = 0.0;
             }
-            message = QString("R:%1M:%2D:%3F:%4S:%5H:%6@%7FPS@%8_%9").arg(
+            isNewMessage = true;
+            message = QString("R:%1M:%2D:%3F:%4S:%5H:%6@%7FPS\n%8:%9").arg(
                         QString::number(readtime, 'f', 0),
                         QString::number(mogtime, 'f', 0),
                         QString::number(drawtimetime, 'f', 0),
@@ -248,7 +250,6 @@ void CamaraThread::run()
                         QString::number(this->camaraId, 'f', 0),
                         isRecording? "Rec" : "Stop"
                         );
-            emit onTip(message);
         }
         else
         {
@@ -257,7 +258,30 @@ void CamaraThread::run()
                 _isConnect = false;
                 emit onConnectChanged(false);
             }
+            isNewMessage = true;
+            message = tr("Capture is empty");
         }
+
+        if(runIndex % 100 == 0)
+        {
+            totalSpace = diskHelper.bytesTotal();
+            freeSpace = diskHelper.bytesAvailable();
+        }
+
+        runIndex++;
+        if(runIndex > 10000)
+        {
+            runIndex = 0;
+        }
+        message += QString("@%1/%2").arg(diskHelper.toSizeInfo(freeSpace),
+                                            diskHelper.toSizeInfo(totalSpace));
+
+        if(isNewMessage)
+        {
+            isNewMessage = false;
+            emit onTip(message);
+        }
+
         int elapsed = time.elapsed();
         if(elapsed < 0)
         {
@@ -338,16 +362,6 @@ int CamaraThread::getRecMinSecond() const
 void CamaraThread::setRecMinSecond(int value)
 {
     recMinSecond = value;
-}
-
-QString CamaraThread::getRecDir() const
-{
-    return recDir;
-}
-
-void CamaraThread::setRecDir(const QString &value)
-{
-    recDir = value;
 }
 
 int CamaraThread::getCamaraId() const

@@ -38,7 +38,8 @@ SOURCES += \
     Thread/ringthread.cpp \
     Thread/oledthread.cpp \
     Core/videoprop.cpp \
-    Core/mogdetectobject.cpp
+    Core/mogdetectobject.cpp \
+    Core/diskhelper.cpp
 
 HEADERS += \
         dialog.h \
@@ -55,7 +56,8 @@ HEADERS += \
     Thread/ringthread.h \
     Thread/oledthread.h \
     Core/videoprop.h \
-    Core/mogdetectobject.h
+    Core/mogdetectobject.h \
+    Core/diskhelper.h
 
 FORMS += \
         dialog.ui \
