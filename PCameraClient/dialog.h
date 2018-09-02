@@ -69,6 +69,7 @@ private:
     bool canRequestTcp;
     bool isRequestText;
     QByteArray tcpArrayCache;
+    QByteArray udpArrayCache;
 };
 
 #endif // DIALOG_H

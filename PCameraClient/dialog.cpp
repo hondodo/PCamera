@@ -68,6 +68,7 @@ Dialog::Dialog(QWidget *parent) :
     canRequestTcp = false;
     isRequestText = true;
     tcpArrayCache.clear();
+    udpArrayCache.clear();
 }
 
 Dialog::~Dialog()
@@ -345,7 +346,21 @@ void Dialog::onReadyRead()
         //quint16 port;
         datagram.resize(udpClient->pendingDatagramSize());
         udpClient->readDatagram(datagram.data(), datagram.size());//, &host, &port);
-        onReadyRead(datagram);
+
+        if(datagram.contains(imageHeader) || datagram.contains(imageTag))
+        {
+            qDebug() << "Image";
+        }
+
+        if(datagram.startsWith(textHeader) || datagram.startsWith(imageHeader))
+        {
+            udpArrayCache.clear();
+        }
+        udpArrayCache.append(datagram);
+        if(udpArrayCache.contains(textTag) || udpArrayCache.contains(imageTag))
+        {
+            onReadyRead(udpArrayCache);
+        }
         //qDebug() << host << port;
         lastReceiveUdpData = QDateTime::currentDateTime();
     }
