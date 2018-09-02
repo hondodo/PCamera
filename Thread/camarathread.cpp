@@ -273,7 +273,7 @@ void CamaraThread::run()
         {
             runIndex = 0;
         }
-        message += QString("@%1/%2").arg(diskHelper.toSizeInfo(freeSpace),
+        message += QString("@Free:%1/%2").arg(diskHelper.toSizeInfo(freeSpace),
                                             diskHelper.toSizeInfo(totalSpace));
 
         if(isNewMessage)
