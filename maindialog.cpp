@@ -19,6 +19,8 @@ MainDialog::MainDialog(QWidget *parent) :
 
     ui->widgetCameraB->setDefaultText();
 
+    ui->widgetBtm->setVisible(false);
+
     connect(ui->widgetCameraA, SIGNAL(onImage(QImage)),
             this, SLOT(onImage(QImage)));
     connect(ui->widgetCameraA, SIGNAL(onTip(QString)),
