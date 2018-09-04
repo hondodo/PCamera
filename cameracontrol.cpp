@@ -76,8 +76,12 @@ void CameraControl::deleteRingThread()
 
 void CameraControl::startNewRingThread()
 {
-    ringThread = new RingThread();
-    ringThread->start();
+    if(QDateTime::currentDateTime().time().hour() > 6 &&
+            QDateTime::currentDateTime().time().hour() < 23)
+    {
+        ringThread = new RingThread();
+        ringThread->start();
+    }
 }
 
 bool CameraControl::getIsRinging() const

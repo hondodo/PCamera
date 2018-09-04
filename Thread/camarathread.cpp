@@ -186,7 +186,7 @@ void CamaraThread::run()
                 {
                     int count = (int)faces.size();
                     emit onFaceDetected(count);
-                    qDebug() << "face found";
+                    //qDebug() << "face found";
                 }
                 facetime = timeOpenCVOP.elapsed();
                 timeOpenCVOP.restart();
@@ -286,6 +286,8 @@ void CamaraThread::run()
             totalSpace = diskHelper.bytesTotal();
             freeSpace = diskHelper.bytesAvailable();
         }
+
+        message += RingThread::_isRunning? "[Ring]" : "";
 
         runIndex++;
         if(runIndex > 10000)

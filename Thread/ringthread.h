@@ -17,13 +17,15 @@ public:
     explicit RingThread(QObject *parent = nullptr);
     ~RingThread();
 
+    static bool _isRunning;
+
     void setStop();
 
 protected:
     void run();
 
 private:
-    bool _isRunning;
+
 #ifdef Q_OS_WIN
     QMediaPlayer *player;
 #endif

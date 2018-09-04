@@ -14,6 +14,7 @@
 #include "Core/videoprop.h"
 #include "Thread/cameracollectorthread.h"
 #include "Core/diskhelper.h"
+#include "Thread/ringthread.h"
 
 class CamaraThread : public QThread
 {
