@@ -196,7 +196,7 @@ void OLedThread::run()
         if(message != nonewritetext)
         {
             writeText(image, message.toStdString());
-            message = nonewritetext;
+            nonewritetext = message;
             QImage showimage = ImageFormat::Mat2QImage(image);
             oled.WriteImage(&showimage);
         }
