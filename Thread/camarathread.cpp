@@ -186,6 +186,7 @@ void CamaraThread::run()
                 {
                     int count = (int)faces.size();
                     emit onFaceDetected(count);
+                    qDebug() << "face found";
                 }
                 facetime = timeOpenCVOP.elapsed();
                 timeOpenCVOP.restart();
