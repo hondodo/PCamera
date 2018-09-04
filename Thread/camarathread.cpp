@@ -161,7 +161,7 @@ void CamaraThread::run()
             timeOpenCVOP.restart();
 
             ///***********FACE*******
-            if(_isDetectFace && index % 3 == 0)
+            if(_isDetectFace && index % 3 == 0 && !RingThread::_isRunning)
             {
                 timeOpenCVOP.restart();
                 /*
@@ -187,6 +187,15 @@ void CamaraThread::run()
                     int count = (int)faces.size();
                     emit onFaceDetected(count);
                     //qDebug() << "face found";
+                    //*************DEBUG*************//
+                    for(int i = 0; i < (int)faces.size(); i++)
+                    {
+                        cv::rectangle(faceCap, faces.at(i), cv::Scalar(0, 0, 255), 2);
+                    }
+                    QString filename = "./REC/Faces/" +
+                            QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".png";
+                    imwrite(filename.toStdString(), faceCap);
+                    //*************DEBUG*************//
                 }
                 facetime = timeOpenCVOP.elapsed();
                 timeOpenCVOP.restart();
