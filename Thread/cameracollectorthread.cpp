@@ -12,9 +12,10 @@ CameraCollectorThread::CameraCollectorThread(QObject *parent) : QObject(parent)
     canDetectFace = faceHelper.init("D:/Potatokid/OpenCV/sources/data/haarcascades/haarcascade_frontalface_alt.xml",
                                     "");
 #else
-    canDetectFace = faceHelper.init("/home/pi/Source/PCamera/Data/haarcascades/haarcascade_frontalcatface.xml",
+    canDetectFace = faceHelper.init("/home/pi/Source/PCamera/Data/haarcascades/haarcascade_frontalface_alt.xml",
                                     "");
 #endif
+    kernel = (cv::Mat_<float>(3, 3) << 0, -1, 0, 0, 5, 0, 0, -1, 0);
 }
 
 CameraCollectorThread::~CameraCollectorThread()
@@ -191,6 +192,21 @@ void CameraCollectorThread::saveRec()
     }
 }
 
+std::vector<cv::Rect_<int> > CameraCollectorThread::findFace(cv::Mat mat)
+{
+    std::vector<cv::Rect_<int> > result;
+    if(mat.empty())
+    {
+        return result;
+    }
+    cv::cvtColor(mat, mat, cv::COLOR_BGR2GRAY);
+    cv::filter2D(mat ,mat, CV_8UC3, kernel);
+    faceHelper.detectFaces(mat, faces);
+    //cv::imwrite("D:/texta.png", mat);
+    result = faces;
+    return result;
+}
+
 std::vector<cv::Rect_<int> > CameraCollectorThread::findFace(int cid)
 {
     std::vector<cv::Rect_<int> > result;
@@ -212,15 +228,13 @@ std::vector<cv::Rect_<int> > CameraCollectorThread::findFace(int cid)
         if(mat.rows >= h && mat.cols >= w)
         {
             cut = mat(rect);
-            cvtColor(cut, cut, cv::COLOR_BGR2GRAY);
         }
-
         faceHelper.detectFaces(cut, faces);
         faceHelper.detectEyes(cut, eyes);
         if(!faces.empty() && (int)faces.size() > 0)
         {
             result = faces;
-            emit onFace(cid, (int)faces.size());
+            //emit onFace(cid, (int)faces.size());
         }
         mat.release();
         camIdFaceCache.remove(cid);

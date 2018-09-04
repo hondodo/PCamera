@@ -32,12 +32,14 @@ public:
 
     std::vector<cv::Rect> findMog(int cid);
     std::vector<cv::Rect> findMog(int cid, cv::Mat mat);
+    std::vector<cv::Rect_<int> > findFace(cv::Mat mat);
     std::vector<cv::Rect_<int> > findFace(int cid);
     void emitOnImage(int cameraId, cv::Mat cap);
     void saveRec(int cid);
     void saveRec(int cid, cv::Mat mat);
     void endRec(int cid);
     bool newRec(int cid);
+
 
 protected:
     void run();
@@ -67,6 +69,7 @@ private:
     bool canDetectFace;
     void findFace();
     void findMog();
+    cv::Mat kernel;
 };
 
 #endif // CAMERACOLLECTORTHREAD_H

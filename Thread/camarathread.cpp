@@ -92,9 +92,18 @@ void CamaraThread::run()
     {
         faceRect.x = width - 300;
     }
+
+#ifdef Q_OS_WIN
     faceRect.y = 0;
     faceRect.width = 300;
     faceRect.height = 300;
+#else
+    faceRect.x = 407;
+    faceRect.y = 197;
+    faceRect.width = 230;
+    faceRect.height = 250;
+#endif
+
     prop.setFaceRect(faceRect);
     diskHelper.setPath(prop.getBaseDir());
     CameraCollectorThread::Init->addVideoProp(camaraId, prop);
@@ -123,7 +132,7 @@ void CamaraThread::run()
     int runIndex = 0;
     quint64 totalSpace, freeSpace;
 
-    Mat cap;
+    Mat cap, faceCap;
     std::vector<cv::Rect> mogRect;
 
     qDebug() << "PROP" << width << height << fps;
@@ -151,10 +160,11 @@ void CamaraThread::run()
             showtime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
 
-            /***********FACE*******
-            if(index % fps == 0)
+            ///***********FACE*******
+            if(_isDetectFace && index % 3 == 0)
             {
                 timeOpenCVOP.restart();
+                /*
                 CameraCollectorThread::Init->addFaceCache(camaraId, cap);
                 std::vector<cv::Rect_<int> > faces =CameraCollectorThread::Init->findFace(camaraId);
                 if(!faces.empty() && faces.size() > 0)
@@ -169,10 +179,18 @@ void CamaraThread::run()
                     }
                     emit onFaceDetected(count);
                 }
+                */
+                faceCap = cap(prop.getFaceRect());
+                std::vector<cv::Rect_<int> > faces = CameraCollectorThread::Init->findFace(faceCap);
+                if(!faces.empty() && (int)faces.size() > 0)
+                {
+                    int count = (int)faces.size();
+                    emit onFaceDetected(count);
+                }
                 facetime = timeOpenCVOP.elapsed();
                 timeOpenCVOP.restart();
             }
-            */
+            //*/
             if(index % 5 == 0)
             {
                 timeOpenCVOP.restart();
