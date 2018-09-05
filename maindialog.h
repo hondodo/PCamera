@@ -8,6 +8,7 @@
 #include <QTextCodec>
 #include <QUdpSocket>
 #include <QNetworkInterface>
+#include <QTimerEvent>
 #include "Thread/oledthread.h"
 #include "Thread/cameracollectorthread.h"
 
@@ -25,6 +26,8 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *);
+    void showEvent(QShowEvent *);
+    void timerEvent(QTimerEvent *event);
 
 private slots:
     void onImage(QImage const &image);
@@ -37,6 +40,10 @@ private slots:
 
 private:
     Ui::MainDialog *ui;
+    bool isFirstShow;
+    bool isTimeTurn;
+    int switchTimeId;
+    int showIndex;
     OLedThread *oledThread;
     QTcpServer *server;
     QList<QTcpSocket *> allClient;

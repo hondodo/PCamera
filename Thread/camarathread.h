@@ -35,6 +35,9 @@ public:
     QSize getTargetSize() const;
     void setTargetSize(const QSize &value);
 
+    bool getIsRecording() const;
+    void setIsRecording(bool value);
+
 protected:
     void run();
 
@@ -52,6 +55,7 @@ public slots:
 private:
     bool _isRunning;
     bool _isDetectFace;
+    bool isRecording;
     int camaraId;
     int recMinSecond;
     int recMaxSencond;

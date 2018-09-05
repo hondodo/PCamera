@@ -6,6 +6,7 @@ MainDialog::MainDialog(QWidget *parent) :
     ui(new Ui::MainDialog)
 {
     ui->setupUi(this);
+    isFirstShow = true;
 
     ui->widgetCameraA->setCameraId(0);
     ui->widgetCameraB->setCameraId(1);
@@ -80,10 +81,18 @@ MainDialog::MainDialog(QWidget *parent) :
     clientBeatTime.clear();
     isTcpTurn.clear();
     isRequestText.clear();
+    showIndex = 0;
+    isTimeTurn = false;
+    ui->widgetTime->setVisible(false);
 }
 
 MainDialog::~MainDialog()
 {
+    if(switchTimeId > 0)
+    {
+        killTimer(switchTimeId);
+        switchTimeId = 0;
+    }
     server->close();
     server->deleteLater();
     if(oledThread != NULL)
@@ -103,6 +112,42 @@ void MainDialog::resizeEvent(QResizeEvent *)
     int bigheight = totalhight / 3 * 2;
     ui->widgetCameraA->setMinimumHeight(bigheight);
     ui->widgetCameraA->setMaximumHeight(bigheight);
+}
+
+void MainDialog::showEvent(QShowEvent *)
+{
+    if(isFirstShow)
+    {
+        isFirstShow = false;
+        ui->widgetTime->start();
+        switchTimeId = startTimer(500);
+    }
+}
+
+void MainDialog::timerEvent(QTimerEvent *event)
+{
+    if(event->timerId() == switchTimeId)
+    {
+        if(ui->widgetCameraA->getIsRecording())
+        {
+            ui->widgetTime->setVisible(false);
+            ui->widgetCameraA->setVisible(true);
+        }
+        else
+        {
+            if(showIndex % 20 == 0)
+            {
+                isTimeTurn = !isTimeTurn;
+            }
+            ui->widgetTime->setVisible(isTimeTurn);
+            ui->widgetCameraA->setVisible(!isTimeTurn);
+            showIndex++;
+            if(showIndex > 100000)
+            {
+                showIndex = 0;
+            }
+        }
+    }
 }
 
 void MainDialog::onImage(const QImage &image)

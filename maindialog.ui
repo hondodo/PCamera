@@ -26,7 +26,7 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="0" column="0">
+   <item row="1" column="0">
     <widget class="QWidget" name="widgetMain" native="true">
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="leftMargin">
@@ -88,6 +88,22 @@
      </layout>
     </widget>
    </item>
+   <item row="0" column="0">
+    <widget class="DateTimeControl" name="widgetTime" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>30</height>
+      </size>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -95,6 +111,12 @@
    <class>CameraControl</class>
    <extends>QWidget</extends>
    <header location="global">cameracontrol.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>DateTimeControl</class>
+   <extends>QWidget</extends>
+   <header location="global">datetimecontrol.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

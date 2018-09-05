@@ -104,6 +104,10 @@ void CameraControl::resizeEvent(QResizeEvent *)
 
 void CameraControl::paintEvent(QPaintEvent *event)
 {
+    if(!this->isVisible())
+    {
+        return;
+    }
     Q_UNUSED(event);
     if(!imageCache.isNull())
     {
@@ -131,6 +135,15 @@ CameraControl::~CameraControl()
     this->timeLabel->deleteLater();
     deleteCameraThread();
     delete ui;
+}
+
+bool CameraControl::getIsRecording()
+{
+    if(camThread != Q_NULLPTR)
+    {
+        return camThread->getIsRecording();
+    }
+    return false;
 }
 
 void CameraControl::setDefaultText()

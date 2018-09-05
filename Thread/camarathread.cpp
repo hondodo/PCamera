@@ -8,6 +8,7 @@ CamaraThread::CamaraThread(QObject *parent) : QThread(parent)
     _isRunning = false;
     _isConnect = false;
     _isDetectFace = false;
+    isRecording = false;
     camaraId = 0;
     time.start();
     recMinSecond = 10;
@@ -111,7 +112,6 @@ void CamaraThread::run()
     QDateTime needRecLastTime = QDateTime::currentDateTime().addYears(-1);
     int maxFrame = fps * recMaxSencond;
     int frameIndex = 0;
-    bool isRecording = false;
 
 
     QTime timerFrame;
@@ -342,6 +342,16 @@ void CamaraThread::onImageShow(int camId, const QImage &image)
     {
         emit onImage(image);
     }
+}
+
+bool CamaraThread::getIsRecording() const
+{
+    return isRecording;
+}
+
+void CamaraThread::setIsRecording(bool value)
+{
+    isRecording = value;
 }
 
 void CamaraThread::drawTime(InputOutputArray img)

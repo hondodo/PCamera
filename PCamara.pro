@@ -39,7 +39,9 @@ SOURCES += \
     Thread/oledthread.cpp \
     Core/videoprop.cpp \
     Core/mogdetectobject.cpp \
-    Core/diskhelper.cpp
+    Core/diskhelper.cpp \
+    datetimecontrol.cpp \
+    3rd/chineseyear.cpp
 
 HEADERS += \
         dialog.h \
@@ -57,12 +59,15 @@ HEADERS += \
     Thread/oledthread.h \
     Core/videoprop.h \
     Core/mogdetectobject.h \
-    Core/diskhelper.h
+    Core/diskhelper.h \
+    datetimecontrol.h \
+    3rd/chineseyear.h
 
 FORMS += \
         dialog.ui \
     cameracontrol.ui \
-    maindialog.ui
+    maindialog.ui \
+    datetimecontrol.ui
 
 
 win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include

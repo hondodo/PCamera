@@ -25,6 +25,8 @@ public:
     static int Width;
     static int Height;
 
+    bool getIsRecording();
+
     int getCameraId() const;
     void setCameraId(int value);
 
