@@ -136,7 +136,7 @@ void MainDialog::timerEvent(QTimerEvent *event)
         }
         else
         {
-            if(showIndex % 20 == 0)
+            if(showIndex % 10 == 0)
             {
                 if(isTimeTurn && isFirstShowTime)
                 {
