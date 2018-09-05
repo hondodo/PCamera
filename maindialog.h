@@ -54,6 +54,7 @@ private:
     QDateTime lastSendImage;
     bool isConverImage;
     bool isSending;
+    bool isFirstShowTime;
     QMap<QTcpSocket *, bool> isTcpTurn, isRequestText;
     QUdpSocket *udpServer;
     quint16 udpPort;

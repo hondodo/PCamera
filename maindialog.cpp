@@ -83,6 +83,7 @@ MainDialog::MainDialog(QWidget *parent) :
     isRequestText.clear();
     showIndex = 0;
     isTimeTurn = false;
+    isFirstShowTime = true;
     ui->widgetTime->setVisible(false);
 }
 
@@ -137,7 +138,18 @@ void MainDialog::timerEvent(QTimerEvent *event)
         {
             if(showIndex % 20 == 0)
             {
-                isTimeTurn = !isTimeTurn;
+                if(isTimeTurn && isFirstShowTime)
+                {
+                    isFirstShowTime = false;
+                }
+                else
+                {
+                    isTimeTurn = !isTimeTurn;
+                    if(isTimeTurn)
+                    {
+                        isFirstShowTime = true;
+                    }
+                }
             }
             ui->widgetTime->setVisible(isTimeTurn);
             ui->widgetCameraA->setVisible(!isTimeTurn);

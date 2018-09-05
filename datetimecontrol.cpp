@@ -1,6 +1,8 @@
 #include "datetimecontrol.h"
 #include "ui_datetimecontrol.h"
 
+const QString XinQi[] = {"日", "一", "二", "三", "四", "五", "六", "日"};
+
 DateTimeControl::DateTimeControl(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::DateTimeControl)
@@ -40,7 +42,7 @@ void DateTimeControl::timerEvent(QTimerEvent *event)
 
         ui->labelData->setText(time.toString("yyyy-MM-dd"));
         ui->labelTime->setText(time.toString("hh:mm:ss"));
-        ui->labelChineseData->setText(lunarstring);
+        ui->labelChineseData->setText(lunarstring + " 星期" + XinQi[time.date().dayOfWeek()]);
         QString shengxiao = ChineseYear::GetShengXiao(lunaryear);
         QString xinzuo = ChineseYear::GetXinZuo(time.date().month(), time.date().day());
         ui->labelShengXiaoXinZuo->setText(shengxiao + " " + xinzuo);
