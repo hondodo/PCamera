@@ -31,6 +31,13 @@ void WeatherReportControl::SetWeather(QString date, int weekIndex, QString dayte
     {
         ui->labelDate->setText(QString("今天"));
     }
+    bool issame = dayweather == nightweather;
+    ui->labelTo->setVisible(!issame);
+    ui->labelReWeaNight->setVisible(!issame);
+    bool issametemp = daytemp == nighttemp;
+    ui->labelToTemp->setVisible(!issametemp);
+    ui->labelReTempDay->setVisible(!issametemp);
+    ui->labelDayDec->setVisible(!issametemp);
 }
 
 QPixmap WeatherReportControl::GetWeatherIcon(QString weather, bool isday, int width, int height)
