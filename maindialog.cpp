@@ -15,7 +15,7 @@ MainDialog::MainDialog(QWidget *parent) :
 
     ui->widgetCameraA->setDefaultText();
     ui->widgetCameraA->startNewCameraThread(0);
-    ui->widgetCameraA->setIsFacing(true);
+    ui->widgetCameraA->setIsFacing(false);
     ui->widgetCameraA->setIsRinging(true);
 
     ui->widgetCameraB->setDefaultText();
