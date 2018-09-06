@@ -21,8 +21,8 @@ public:
 
     void setStop();
 
-    std::string getFileName() const;
-    void setFileName(const std::string &value);
+    QString getFileName() const;
+    void setFileName(const QString &value);
 
 protected:
     void run();
@@ -33,7 +33,7 @@ private:
     QMediaPlayer *player;
 #endif
 
-    std::string fileName;
+    QString fileName;
 
 };
 
