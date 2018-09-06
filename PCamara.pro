@@ -41,7 +41,8 @@ SOURCES += \
     Core/mogdetectobject.cpp \
     Core/diskhelper.cpp \
     datetimecontrol.cpp \
-    3rd/chineseyear.cpp
+    3rd/chineseyear.cpp \
+    weathercontrol.cpp
 
 HEADERS += \
         dialog.h \
@@ -61,13 +62,15 @@ HEADERS += \
     Core/mogdetectobject.h \
     Core/diskhelper.h \
     datetimecontrol.h \
-    3rd/chineseyear.h
+    3rd/chineseyear.h \
+    weathercontrol.h
 
 FORMS += \
         dialog.ui \
     cameracontrol.ui \
     maindialog.ui \
-    datetimecontrol.ui
+    datetimecontrol.ui \
+    weathercontrol.ui
 
 
 win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include

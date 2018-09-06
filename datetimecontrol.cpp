@@ -45,6 +45,7 @@ void DateTimeControl::timerEvent(QTimerEvent *event)
         ui->labelChineseData->setText(lunarstring + " 星期" + XinQi[time.date().dayOfWeek()]);
         QString shengxiao = ChineseYear::GetShengXiao(lunaryear);
         QString xinzuo = ChineseYear::GetXinZuo(time.date().month(), time.date().day());
-        ui->labelShengXiaoXinZuo->setText(shengxiao + " " + xinzuo);
+        QString yearname = ChineseYear::GetYearName(lunaryear);
+        ui->labelShengXiaoXinZuo->setText(yearname + QString("年") + " " + shengxiao + " " + xinzuo);
     }
 }

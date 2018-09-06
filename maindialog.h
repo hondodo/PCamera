@@ -58,6 +58,7 @@ private:
     QMap<QTcpSocket *, bool> isTcpTurn, isRequestText;
     QUdpSocket *udpServer;
     quint16 udpPort;
+    QDateTime nextUpdateWeatherTime;
 };
 
 #endif // MAINDIALOG_H

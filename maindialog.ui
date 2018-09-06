@@ -26,7 +26,7 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QWidget" name="widgetMain" native="true">
      <layout class="QVBoxLayout" name="verticalLayout">
       <property name="leftMargin">
@@ -96,11 +96,15 @@
        <verstretch>0</verstretch>
       </sizepolicy>
      </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>30</height>
-      </size>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="WeatherControl" name="widgetWeather" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
     </widget>
    </item>
@@ -117,6 +121,12 @@
    <class>DateTimeControl</class>
    <extends>QWidget</extends>
    <header location="global">datetimecontrol.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>WeatherControl</class>
+   <extends>QWidget</extends>
+   <header location="global">weathercontrol.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

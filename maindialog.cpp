@@ -85,6 +85,8 @@ MainDialog::MainDialog(QWidget *parent) :
     isTimeTurn = false;
     isFirstShowTime = true;
     ui->widgetTime->setVisible(false);
+    ui->widgetWeather->setVisible(false);
+    nextUpdateWeatherTime = QDateTime::currentDateTime();
 }
 
 MainDialog::~MainDialog()
@@ -121,6 +123,7 @@ void MainDialog::showEvent(QShowEvent *)
     {
         isFirstShow = false;
         ui->widgetTime->start();
+        ui->widgetWeather->startDateTime();
         switchTimeId = startTimer(500);
     }
 }
@@ -129,9 +132,17 @@ void MainDialog::timerEvent(QTimerEvent *event)
 {
     if(event->timerId() == switchTimeId)
     {
+        if((QDateTime::currentDateTime().toMSecsSinceEpoch()
+                - nextUpdateWeatherTime.toMSecsSinceEpoch()) > 0)
+        {
+            QDateTime time = QDateTime::currentDateTime();
+            nextUpdateWeatherTime = time.addMSecs(60 * 30 * 1000);
+            ui->widgetWeather->updateWeather();
+        }
         if(ui->widgetCameraA->getIsRecording())
         {
             ui->widgetTime->setVisible(false);
+            ui->widgetWeather->setVisible(false);
             ui->widgetCameraA->setVisible(true);
         }
         else
@@ -151,7 +162,35 @@ void MainDialog::timerEvent(QTimerEvent *event)
                     }
                 }
             }
-            ui->widgetTime->setVisible(isTimeTurn);
+            if(ui->widgetWeather->getCanShowLive() || ui->widgetWeather->getCanShowReport())
+            {
+                if(isTimeTurn)
+                {
+                    if(isFirstShowTime)
+                    {
+                        ui->widgetWeather->setVisible(false);
+                        ui->widgetTime->setVisible(true);
+                    }
+                    else
+                    {
+                        if(!ui->widgetWeather->isVisible())
+                        {
+                            ui->widgetWeather->switchView();
+                        }
+                        ui->widgetWeather->setVisible(true);
+                        ui->widgetTime->setVisible(false);
+                    }
+                }
+                else
+                {
+                    ui->widgetWeather->setVisible(false);
+                    ui->widgetTime->setVisible(false);
+                }
+            }
+            else
+            {
+                ui->widgetTime->setVisible(isTimeTurn);
+            }
             ui->widgetCameraA->setVisible(!isTimeTurn);
             showIndex++;
             if(showIndex > 100000)
