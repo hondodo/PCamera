@@ -42,7 +42,8 @@ SOURCES += \
     Core/diskhelper.cpp \
     datetimecontrol.cpp \
     3rd/chineseyear.cpp \
-    weathercontrol.cpp
+    weathercontrol.cpp \
+    weatherreportcontrol.cpp
 
 HEADERS += \
         dialog.h \
@@ -63,14 +64,16 @@ HEADERS += \
     Core/diskhelper.h \
     datetimecontrol.h \
     3rd/chineseyear.h \
-    weathercontrol.h
+    weathercontrol.h \
+    weatherreportcontrol.h
 
 FORMS += \
         dialog.ui \
     cameracontrol.ui \
     maindialog.ui \
     datetimecontrol.ui \
-    weathercontrol.ui
+    weathercontrol.ui \
+    weatherreportcontrol.ui
 
 
 win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include

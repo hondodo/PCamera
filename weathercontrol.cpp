@@ -64,7 +64,7 @@ void WeatherControl::finished(QNetworkReply *reply)
     if(reply != Q_NULLPTR)
     {
         QByteArray array = reply->readAll();
-        qDebug() << array;
+        //qDebug() << array;
         reply->deleteLater();
         reply = Q_NULLPTR;
         dealMessage(array);
@@ -73,7 +73,7 @@ void WeatherControl::finished(QNetworkReply *reply)
 
 void WeatherControl::sslErrors(QNetworkReply *reply, const QList<QSslError> &errors)
 {
-    qDebug() << "SSL ERROR";
+    //qDebug() << "SSL ERROR";
     reply->ignoreSslErrors(errors);
 }
 
@@ -122,6 +122,10 @@ void WeatherControl::dealMessage(QByteArray array)
                                 ui->labelCity->setText(city);
                                 ui->labelTempNow->setText(temp);
                                 ui->labelWeaNow->setText(weather);
+                                int hour = QDateTime::currentDateTime().time().hour();
+                                int isday = hour >= 6 && hour < 19;
+                                QPixmap pix = ui->widgetTodayReport->GetWeatherIcon(weather, isday, 150, 150);
+                                ui->labelIcon->setPixmap(pix);
                                 canShowLive = true;
                             }
                         }
@@ -154,50 +158,32 @@ void WeatherControl::dealMessage(QByteArray array)
                                                 {
                                                     index = 0;
                                                 }
-                                                QString week = QString("周") + XinQi[index];
+                                                //QString week = QString("周") + XinQi[index];
                                                 QString daytemp = cast["daytemp"].toString();
                                                 QString dayweather = cast["dayweather"].toString();
                                                 QString nighttemp = cast["nighttemp"].toString();
                                                 QString nightweather = cast["nightweather"].toString();
                                                 if(i == 0)
                                                 {
-                                                    ui->labelDate0->setText(date);
-                                                    ui->labelWeek0->setText(week);
-                                                    ui->labelReTemp0Day->setText(daytemp);
-                                                    ui->labelReWea0Day->setText(dayweather);
-                                                    ui->labelReTemp0Night->setText(nighttemp);
-                                                    ui->labelReWea0Night->setText(nightweather);
-                                                    ui->labelTemp0Day->setText(daytemp);
-                                                    ui->labelWea0Day->setText(dayweather);
-                                                    ui->labelTemp0Night->setText(nighttemp);
-                                                    ui->labelWea0Night->setText(nightweather);
+                                                    ui->widgetTodayReport->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                      nightweather, true);
+                                                    ui->widgetWeatherDay0->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                      nightweather, false);
                                                 }
                                                 else if(i == 1)
                                                 {
-                                                    ui->labelDate1->setText(date);
-                                                    ui->labelWeek1->setText(week);
-                                                    ui->labelReTemp1Day->setText(daytemp);
-                                                    ui->labelReWea1Day->setText(dayweather);
-                                                    ui->labelReTemp1Night->setText(nighttemp);
-                                                    ui->labelReWea1Night->setText(nightweather);
+                                                    ui->widgetWeatherDay1->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                      nightweather, false);
                                                 }
                                                 else if(i == 2)
                                                 {
-                                                    ui->labelDate2->setText(date);
-                                                    ui->labelWeek2->setText(week);
-                                                    ui->labelReTemp2Day->setText(daytemp);
-                                                    ui->labelReWea2Day->setText(dayweather);
-                                                    ui->labelReTemp2Night->setText(nighttemp);
-                                                    ui->labelReWea2Night->setText(nightweather);
+                                                    ui->widgetWeatherDay2->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                      nightweather, false);
                                                 }
                                                 else if(i == 3)
                                                 {
-                                                    ui->labelDate3->setText(date);
-                                                    ui->labelWeek3->setText(week);
-                                                    ui->labelReTemp3Day->setText(daytemp);
-                                                    ui->labelReWea3Day->setText(dayweather);
-                                                    ui->labelReTemp3Night->setText(nighttemp);
-                                                    ui->labelReWea3Night->setText(nightweather);
+                                                    ui->widgetWeatherDay3->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                      nightweather, false);
                                                 }
                                             }
                                         }
