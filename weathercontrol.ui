@@ -40,14 +40,8 @@ color: rgb(255, 255, 255);</string>
      </property>
      <item>
       <widget class="QLabel" name="labelCity">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
        <property name="styleSheet">
-        <string notr="true">font: 36px;</string>
+        <string notr="true">font: 52px;</string>
        </property>
        <property name="text">
         <string>WuChuan</string>
@@ -59,12 +53,6 @@ color: rgb(255, 255, 255);</string>
      </item>
      <item>
       <widget class="QLabel" name="labelTime">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
        <property name="styleSheet">
         <string notr="true">font: 52px;</string>
        </property>
