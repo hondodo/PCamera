@@ -757,25 +757,6 @@ color: rgb(255, 255, 255);</string>
      </property>
     </widget>
    </item>
-   <item>
-    <widget class="QLabel" name="labelReportTime">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font: 16px;</string>
-     </property>
-     <property name="text">
-      <string>@2018-09-06 09:00</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <resources/>
