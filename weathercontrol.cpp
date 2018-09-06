@@ -40,7 +40,6 @@ WeatherControl::~WeatherControl()
 void WeatherControl::switchView()
 {
     isViewLive = !isViewLive;
-    ui->labelReportTime->setVisible(canShowLive);
     if(canShowLive && canShowReport)
     {
         ui->widgetToday->setVisible(isViewLive);
@@ -119,11 +118,10 @@ void WeatherControl::dealMessage(QByteArray array)
                                 QString city = live["city"].toString();
                                 QString temp = live["temperature"].toString();
                                 QString weather = live["weather"].toString();
-                                QString reporttime = live["reporttime"].toString();
+                                //QString reporttime = live["reporttime"].toString();
                                 ui->labelCity->setText(city);
                                 ui->labelTempNow->setText(temp);
                                 ui->labelWeaNow->setText(weather);
-                                ui->labelReportTime->setText(reporttime);
                                 canShowLive = true;
                             }
                         }
