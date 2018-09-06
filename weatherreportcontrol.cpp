@@ -33,7 +33,11 @@ void WeatherReportControl::SetWeather(QString date, int weekIndex, QString dayte
     }
     bool issame = dayweather == nightweather;
     ui->labelTo->setVisible(!issame);
-    ui->labelReWeaNight->setVisible(!issame);
+    //ui->labelReWeaNight->setVisible(!issame);
+    if(issame)
+    {
+        ui->labelReWeaNight->setText("");
+    }
     bool issametemp = daytemp == nighttemp;
     ui->labelToTemp->setVisible(!issametemp);
     ui->labelReTempDay->setVisible(!issametemp);
