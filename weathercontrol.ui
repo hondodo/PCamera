@@ -53,6 +53,25 @@ color: rgb(255, 255, 255);</string>
     </widget>
    </item>
    <item>
+    <widget class="QLabel" name="labelTime">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 52px;</string>
+     </property>
+     <property name="text">
+      <string>14:00:00</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QWidget" name="widgetToday" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
@@ -74,7 +93,7 @@ color: rgb(255, 255, 255);</string>
           <item>
            <widget class="QLabel" name="labelTempNow">
             <property name="styleSheet">
-             <string notr="true">font: 150px;</string>
+             <string notr="true">font: 100px;</string>
             </property>
             <property name="text">
              <string>28</string>
@@ -742,25 +761,6 @@ color: rgb(255, 255, 255);</string>
        </layout>
       </item>
      </layout>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="labelTime">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="styleSheet">
-      <string notr="true">font: 52px;</string>
-     </property>
-     <property name="text">
-      <string>14:00:00</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
     </widget>
    </item>
   </layout>
