@@ -13,6 +13,9 @@
   <property name="windowTitle">
    <string>Dialog</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">background-color: rgb(0, 0, 0);</string>
+  </property>
   <layout class="QGridLayout" name="gridLayout">
    <property name="leftMargin">
     <number>0</number>
@@ -29,9 +32,9 @@
    <property name="spacing">
     <number>0</number>
    </property>
-   <item row="2" column="0">
-    <widget class="QWidget" name="widgetMain" native="true">
-     <layout class="QVBoxLayout" name="verticalLayout">
+   <item row="3" column="0">
+    <widget class="QWidget" name="widgetBtm" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -45,47 +48,29 @@
        <number>0</number>
       </property>
       <item>
-       <widget class="CameraControl" name="widgetCameraA" native="true">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-       </widget>
+       <widget class="CameraControl" name="widgetCameraB" native="true"/>
       </item>
       <item>
-       <widget class="QWidget" name="widgetBtm" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="leftMargin">
-          <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>0</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>0</number>
-         </property>
-         <item>
-          <widget class="CameraControl" name="widgetCameraB" native="true"/>
-         </item>
-         <item>
-          <widget class="CameraControl" name="widgetCameraC" native="true"/>
-         </item>
-         <item>
-          <widget class="CameraControl" name="widgetCameraD" native="true"/>
-         </item>
-        </layout>
-       </widget>
+       <widget class="CameraControl" name="widgetCameraC" native="true"/>
+      </item>
+      <item>
+       <widget class="CameraControl" name="widgetCameraD" native="true"/>
       </item>
      </layout>
     </widget>
    </item>
    <item row="0" column="0">
     <widget class="DateTimeControl" name="widgetTime" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0">
+    <widget class="CameraControl" name="widgetCameraA" native="true">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
        <horstretch>0</horstretch>

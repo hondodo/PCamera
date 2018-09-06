@@ -111,7 +111,7 @@ MainDialog::~MainDialog()
 void MainDialog::resizeEvent(QResizeEvent *)
 {
     return;
-    int totalhight = ui->widgetMain->height();
+    int totalhight = this->height();
     int bigheight = totalhight / 3 * 2;
     ui->widgetCameraA->setMinimumHeight(bigheight);
     ui->widgetCameraA->setMaximumHeight(bigheight);
