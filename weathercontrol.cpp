@@ -51,7 +51,6 @@ void WeatherControl::switchView()
         ui->widgetReport->setVisible(canShowReport);
         ui->widgetToday->setVisible(canShowLive);
     }
-    ui->labelTime->setVisible(ui->widgetToday->isVisible());
 }
 
 void WeatherControl::updateWeather()
