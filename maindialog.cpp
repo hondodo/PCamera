@@ -148,7 +148,7 @@ void MainDialog::startNewRingThread(QString filename)
             QDateTime::currentDateTime().time().hour() < 19)
     {
         ringThread = new RingThread();
-        ringThread->setFileName(filename.toStdString());
+        ringThread->setFileName(filename);
         ringThread->start();
     }
 }

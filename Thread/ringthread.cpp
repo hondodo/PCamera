@@ -36,7 +36,7 @@ void RingThread::run()
     _isRunning = true;
 #ifdef Q_OS_WIN
     player = new QMediaPlayer();
-    player->setMedia(QUrl(QString::fromStdString(fileName)));
+    player->setMedia(QUrl(fileName));
     player->setVolume(80);
     player->play();
 #else
@@ -110,12 +110,12 @@ void RingThread::run()
     _isRunning = false;
 }
 
-std::string RingThread::getFileName() const
+QString RingThread::getFileName() const
 {
     return fileName;
 }
 
-void RingThread::setFileName(const std::string &value)
+void RingThread::setFileName(const QString &value)
 {
     fileName = value;
 }
