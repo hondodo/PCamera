@@ -12,6 +12,7 @@ WeatherControl::WeatherControl(QWidget *parent) :
     canShowLive = false;
     canShowReport = false;
     switchView();
+    this->resize(100, 100);
     utf8Code = QTextCodec::codecForName("UTF-8");
     manager = new QNetworkAccessManager();
     connect(manager, SIGNAL(sslErrors(QNetworkReply*,QList<QSslError>)),
