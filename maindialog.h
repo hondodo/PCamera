@@ -11,6 +11,7 @@
 #include <QTimerEvent>
 #include "Thread/oledthread.h"
 #include "Thread/cameracollectorthread.h"
+#include "Thread/ringthread.h"
 
 namespace Ui {
 class MainDialog;
@@ -59,6 +60,10 @@ private:
     QUdpSocket *udpServer;
     quint16 udpPort;
     QDateTime nextUpdateWeatherTime;
+    int nextTipTime;
+    void deleteRingThread();
+    void startNewRingThread(QString filename);
+    RingThread *ringThread;
 };
 
 #endif // MAINDIALOG_H

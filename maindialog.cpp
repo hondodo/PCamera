@@ -87,10 +87,13 @@ MainDialog::MainDialog(QWidget *parent) :
     ui->widgetTime->setVisible(false);
     ui->widgetWeather->setVisible(false);
     nextUpdateWeatherTime = QDateTime::currentDateTime();
+    nextTipTime = QDateTime::currentDateTime().addMSecs(1000 * 60 * 60).time().hour();
+    ringThread = Q_NULLPTR;
 }
 
 MainDialog::~MainDialog()
 {
+    deleteRingThread();
     if(switchTimeId > 0)
     {
         killTimer(switchTimeId);
@@ -128,8 +131,47 @@ void MainDialog::showEvent(QShowEvent *)
     }
 }
 
+void MainDialog::deleteRingThread()
+{
+    if(ringThread != Q_NULLPTR)
+    {
+        ringThread->setStop();
+        ringThread->wait(1000);
+        ringThread->terminate();
+        ringThread = Q_NULLPTR;
+    }
+}
+
+void MainDialog::startNewRingThread(QString filename)
+{
+    if(QDateTime::currentDateTime().time().hour() > 6 &&
+            QDateTime::currentDateTime().time().hour() < 19)
+    {
+        ringThread = new RingThread();
+        ringThread->setFileName(filename.toStdString());
+        ringThread->start();
+    }
+}
+
 void MainDialog::timerEvent(QTimerEvent *event)
 {
+    //TipTime
+    {
+        if(nextTipTime == QDateTime::currentDateTime().time().hour())
+        {
+            QString filename = QString::number(nextTipTime, 'f', 0) + ".mp3";
+            nextTipTime = QDateTime::currentDateTime().addMSecs(1000 * 60 * 60).time().hour();
+#ifdef Q_OS_WIN
+            filename = "D:/Potatokid/Source/PCamera/TimeMp3/" + filename;
+#else
+            filename = "/home/pi/Music/TimeMp3/" + filename;
+#endif
+            if(nextTipTime >= 6 && nextTipTime <= 21)
+            {
+                startNewRingThread(filename);
+            }
+        }
+    }
     if(event->timerId() == switchTimeId)
     {
         if((QDateTime::currentDateTime().toMSecsSinceEpoch()

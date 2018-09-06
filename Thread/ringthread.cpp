@@ -3,10 +3,14 @@
 bool RingThread::_isRunning = false;
 RingThread::RingThread(QObject *parent) : QThread(parent)
 {
+    fileName = "";
     _isRunning = false;
 #ifdef Q_OS_WIN
     player = Q_NULLPTR;
+#else
+    fileName = "/home/pi/Music/dingdong.mp3";
 #endif
+
 }
 
 RingThread::~RingThread()
@@ -32,11 +36,11 @@ void RingThread::run()
     _isRunning = true;
 #ifdef Q_OS_WIN
     player = new QMediaPlayer();
-    player->setMedia(QUrl("D:/a.mp3"));
+    player->setMedia(QUrl(QString::fromStdString(fileName)));
     player->setVolume(80);
     player->play();
 #else
-    for(int i = 0; i < 2; i++)
+    for(int i = 0; i < 1; i++)
     {
         if(!_isRunning)
         {
@@ -64,7 +68,7 @@ void RingThread::run()
         buffer = (unsigned char*) malloc(buffer_size * sizeof(unsigned char));
 
         /* open the file and get the decoding format */
-        mpg123_open(mh, "/home/pi/Music/dingdong.mp3");
+        mpg123_open(mh, fileName);
         mpg123_getformat(mh, &rate, &channels, &encoding);
 
         /* set the output format and open the output device */
@@ -104,4 +108,14 @@ void RingThread::run()
     }
 #endif
     _isRunning = false;
+}
+
+std::string RingThread::getFileName() const
+{
+    return fileName;
+}
+
+void RingThread::setFileName(const std::string &value)
+{
+    fileName = value;
 }
