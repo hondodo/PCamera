@@ -36,7 +36,7 @@ color: rgb(255, 255, 255);</string>
    <item>
     <widget class="QLabel" name="labelCity">
      <property name="styleSheet">
-      <string notr="true">font: 60px;</string>
+      <string notr="true">font: 36px;</string>
      </property>
      <property name="text">
       <string>WuChuan</string>
@@ -275,7 +275,7 @@ color: rgb(255, 255, 255);</string>
         <item>
          <widget class="QLabel" name="labelDate0">
           <property name="styleSheet">
-           <string notr="true">font: 72px;</string>
+           <string notr="true">font: 52px;</string>
           </property>
           <property name="text">
            <string>09-26</string>
@@ -288,7 +288,7 @@ color: rgb(255, 255, 255);</string>
         <item>
          <widget class="QLabel" name="labelWeek0">
           <property name="styleSheet">
-           <string notr="true">font: 72px;</string>
+           <string notr="true">font: 52px;</string>
           </property>
           <property name="text">
            <string>4</string>
@@ -305,7 +305,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="labelReTemp0Day">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>28</string>
@@ -318,7 +318,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="label_12">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>℃</string>
@@ -330,7 +330,7 @@ color: rgb(255, 255, 255);</string>
           <item>
            <widget class="QLabel" name="labelReWea0Day">
             <property name="styleSheet">
-             <string notr="true">font: 72px;</string>
+             <string notr="true">font: 52px;</string>
             </property>
             <property name="text">
              <string>Cloudy</string>
@@ -349,7 +349,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="labelReTemp0Night">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>28</string>
@@ -362,7 +362,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="label_18">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>℃</string>
@@ -374,7 +374,7 @@ color: rgb(255, 255, 255);</string>
           <item>
            <widget class="QLabel" name="labelReWea0Night">
             <property name="styleSheet">
-             <string notr="true">font: 72px;</string>
+             <string notr="true">font: 52px;</string>
             </property>
             <property name="text">
              <string>Cloudy</string>
@@ -419,7 +419,7 @@ color: rgb(255, 255, 255);</string>
         <item>
          <widget class="QLabel" name="labelDate2">
           <property name="styleSheet">
-           <string notr="true">font: 72px;</string>
+           <string notr="true">font: 52px;</string>
           </property>
           <property name="text">
            <string>09-26</string>
@@ -432,7 +432,7 @@ color: rgb(255, 255, 255);</string>
         <item>
          <widget class="QLabel" name="labelWeek2">
           <property name="styleSheet">
-           <string notr="true">font: 72px;</string>
+           <string notr="true">font: 52px;</string>
           </property>
           <property name="text">
            <string>4</string>
@@ -449,7 +449,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="labelReTemp2Day">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>28</string>
@@ -462,7 +462,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="label_17">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>℃</string>
@@ -474,7 +474,7 @@ color: rgb(255, 255, 255);</string>
           <item>
            <widget class="QLabel" name="labelReWea2Day">
             <property name="styleSheet">
-             <string notr="true">font: 72px;</string>
+             <string notr="true">font: 52px;</string>
             </property>
             <property name="text">
              <string>Cloudy</string>
@@ -493,7 +493,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="labelReTemp2Night">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>28</string>
@@ -506,7 +506,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="label_23">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>℃</string>
@@ -518,7 +518,7 @@ color: rgb(255, 255, 255);</string>
           <item>
            <widget class="QLabel" name="labelReWea2Night">
             <property name="styleSheet">
-             <string notr="true">font: 72px;</string>
+             <string notr="true">font: 52px;</string>
             </property>
             <property name="text">
              <string>Cloudy</string>
@@ -563,7 +563,7 @@ color: rgb(255, 255, 255);</string>
         <item>
          <widget class="QLabel" name="labelDate1">
           <property name="styleSheet">
-           <string notr="true">font: 72px;</string>
+           <string notr="true">font: 52px;</string>
           </property>
           <property name="text">
            <string>09-26</string>
@@ -576,7 +576,7 @@ color: rgb(255, 255, 255);</string>
         <item>
          <widget class="QLabel" name="labelWeek1">
           <property name="styleSheet">
-           <string notr="true">font: 72px;</string>
+           <string notr="true">font: 52px;</string>
           </property>
           <property name="text">
            <string>4</string>
@@ -593,7 +593,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="labelReTemp1Day">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>28</string>
@@ -606,7 +606,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="label_16">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>℃</string>
@@ -618,7 +618,7 @@ color: rgb(255, 255, 255);</string>
           <item>
            <widget class="QLabel" name="labelReWea1Day">
             <property name="styleSheet">
-             <string notr="true">font: 72px;</string>
+             <string notr="true">font: 52px;</string>
             </property>
             <property name="text">
              <string>Cloudy</string>
@@ -637,7 +637,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="labelReTemp1Night">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>28</string>
@@ -650,7 +650,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="label_22">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>℃</string>
@@ -662,7 +662,7 @@ color: rgb(255, 255, 255);</string>
           <item>
            <widget class="QLabel" name="labelReWea1Night">
             <property name="styleSheet">
-             <string notr="true">font: 72px;</string>
+             <string notr="true">font: 52px;</string>
             </property>
             <property name="text">
              <string>Cloudy</string>
@@ -707,7 +707,7 @@ color: rgb(255, 255, 255);</string>
         <item>
          <widget class="QLabel" name="labelDate3">
           <property name="styleSheet">
-           <string notr="true">font: 72px;</string>
+           <string notr="true">font: 52px;</string>
           </property>
           <property name="text">
            <string>09-26</string>
@@ -720,7 +720,7 @@ color: rgb(255, 255, 255);</string>
         <item>
          <widget class="QLabel" name="labelWeek3">
           <property name="styleSheet">
-           <string notr="true">font: 72px;</string>
+           <string notr="true">font: 52px;</string>
           </property>
           <property name="text">
            <string>4</string>
@@ -737,7 +737,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="labelReTemp3Day">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>28</string>
@@ -750,7 +750,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="label_26">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>℃</string>
@@ -762,7 +762,7 @@ color: rgb(255, 255, 255);</string>
           <item>
            <widget class="QLabel" name="labelReWea3Day">
             <property name="styleSheet">
-             <string notr="true">font: 72px;</string>
+             <string notr="true">font: 52px;</string>
             </property>
             <property name="text">
              <string>Cloudy</string>
@@ -781,7 +781,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="labelReTemp3Night">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>28</string>
@@ -794,7 +794,7 @@ color: rgb(255, 255, 255);</string>
             <item>
              <widget class="QLabel" name="label_27">
               <property name="styleSheet">
-               <string notr="true">font: 72px;</string>
+               <string notr="true">font: 52px;</string>
               </property>
               <property name="text">
                <string>℃</string>
@@ -806,7 +806,7 @@ color: rgb(255, 255, 255);</string>
           <item>
            <widget class="QLabel" name="labelReWea3Night">
             <property name="styleSheet">
-             <string notr="true">font: 72px;</string>
+             <string notr="true">font: 52px;</string>
             </property>
             <property name="text">
              <string>Cloudy</string>
@@ -839,7 +839,7 @@ color: rgb(255, 255, 255);</string>
    <item>
     <widget class="QLabel" name="labelTime">
      <property name="styleSheet">
-      <string notr="true">font: 150px;</string>
+      <string notr="true">font: 72px;</string>
      </property>
      <property name="text">
       <string>14:00:00</string>
@@ -852,7 +852,7 @@ color: rgb(255, 255, 255);</string>
    <item>
     <widget class="QLabel" name="labelReportTime">
      <property name="styleSheet">
-      <string notr="true">font: 30px;</string>
+      <string notr="true">font: 16px;</string>
      </property>
      <property name="text">
       <string>@2018-09-06 09:00</string>
