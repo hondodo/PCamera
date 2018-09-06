@@ -45,7 +45,7 @@ color: rgb(255, 255, 255);</string>
          </sizepolicy>
         </property>
         <property name="styleSheet">
-         <string notr="true">font: 72px;</string>
+         <string notr="true">font: 62px;</string>
         </property>
         <property name="text">
          <string>2018-09-15</string>
@@ -70,7 +70,7 @@ color: rgb(255, 255, 255);</string>
          </sizepolicy>
         </property>
         <property name="styleSheet">
-         <string notr="true">font: 72px;</string>
+         <string notr="true">font: 62px;</string>
         </property>
         <property name="text">
          <string>CY-CM-CD</string>
@@ -120,7 +120,7 @@ color: rgb(255, 255, 255);</string>
          </sizepolicy>
         </property>
         <property name="styleSheet">
-         <string notr="true">font: 42px;</string>
+         <string notr="true">font: 32px;</string>
         </property>
         <property name="text">
          <string>XNian-XinZuo</string>
