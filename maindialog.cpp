@@ -127,7 +127,7 @@ void MainDialog::showEvent(QShowEvent *)
         isFirstShow = false;
         ui->widgetTime->start();
         ui->widgetWeather->startDateTime();
-        switchTimeId = startTimer(500);
+        switchTimeId = startTimer(100);
     }
 }
 
@@ -145,7 +145,7 @@ void MainDialog::deleteRingThread()
 void MainDialog::startNewRingThread(QString filename)
 {
     if(QDateTime::currentDateTime().time().hour() > 6 &&
-            QDateTime::currentDateTime().time().hour() < 19)
+            QDateTime::currentDateTime().time().hour() <= 21)
     {
         ringThread = new RingThread();
         ringThread->setFileName(filename);
@@ -189,7 +189,7 @@ void MainDialog::timerEvent(QTimerEvent *event)
         }
         else
         {
-            if(showIndex % 10 == 0)
+            if(showIndex % 50 == 0)
             {
                 if(isTimeTurn && isFirstShowTime)
                 {
