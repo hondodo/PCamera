@@ -19,7 +19,7 @@ public:
     void SetWeather(QString date, int weekIndex, QString daytemp,
                     QString dayweather, QString nighttemp, QString nightweather, bool isShowingToday = false);
 
-    QPixmap GetWeatherIcon(QString weather, bool isday, int width = 52, int height = 52);
+    QPixmap GetWeatherIcon(QString weather, bool isday, int width = 112, int height = 112);
 
 private:
     Ui::WeatherReportControl *ui;

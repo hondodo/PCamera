@@ -6,182 +6,201 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>625</width>
-    <height>137</height>
+    <width>581</width>
+    <height>117</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
    <item row="0" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QVBoxLayout" name="verticalLayout">
      <item>
-      <widget class="QLabel" name="labelDate">
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>09-26</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout">
+       <item>
+        <widget class="QLabel" name="labelDate">
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>09-26</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelWeek">
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>4</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelReTempNight">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>28</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_12">
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>℃</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelToTemp">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>～</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelReTempDay">
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>28</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelDayDec">
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>℃</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
      <item>
-      <widget class="QLabel" name="labelWeek">
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>4</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelReTempNight">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>28</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="label_12">
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>℃</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelToTemp">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>～</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelReTempDay">
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>28</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelDayDec">
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>℃</string>
-       </property>
-      </widget>
+      <layout class="QHBoxLayout" name="horizontalLayout_2">
+       <item>
+        <widget class="QLabel" name="labelReWeaDay">
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>Cloudy</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelTo">
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>转</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="labelReWeaNight">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font: 52px;</string>
+         </property>
+         <property name="text">
+          <string>Cloudy</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
      </item>
     </layout>
    </item>
-   <item row="1" column="0">
-    <layout class="QHBoxLayout" name="horizontalLayout_2">
-     <item>
-      <widget class="QLabel" name="labelReWeaDay">
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>Cloudy</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelTo">
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>转</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelReWeaNight">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>Cloudy</string>
-       </property>
-       <property name="alignment">
-        <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignVCenter</set>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="labelIcon">
-       <property name="minimumSize">
-        <size>
-         <width>52</width>
-         <height>52</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>52</width>
-         <height>52</height>
-        </size>
-       </property>
-       <property name="styleSheet">
-        <string notr="true">font: 52px;</string>
-       </property>
-       <property name="text">
-        <string>ICON</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+   <item row="0" column="1">
+    <widget class="QLabel" name="labelIcon">
+     <property name="minimumSize">
+      <size>
+       <width>112</width>
+       <height>112</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>112</width>
+       <height>112</height>
+      </size>
+     </property>
+     <property name="styleSheet">
+      <string notr="true">font: 52px;</string>
+     </property>
+     <property name="text">
+      <string>ICON</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
