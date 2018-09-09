@@ -8,13 +8,13 @@ MainDialog::MainDialog(QWidget *parent) :
     ui->setupUi(this);
     isFirstShow = true;
 
-    ui->widgetCameraA->setCameraId(2);
+    ui->widgetCameraA->setCameraId(0);
     ui->widgetCameraB->setCameraId(1);
     ui->widgetCameraC->setCameraId(2);
     ui->widgetCameraD->setCameraId(3);
 
     ui->widgetCameraA->setDefaultText();
-    ui->widgetCameraA->startNewCameraThread(2);
+    ui->widgetCameraA->startNewCameraThread(0);
     ui->widgetCameraA->setIsFacing(false);
     ui->widgetCameraA->setIsRinging(true);
 
