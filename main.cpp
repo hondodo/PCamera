@@ -18,6 +18,7 @@ int main(int, char**)
         return 1;
     }
 
+    capture.set(CAP_PROP_AUTO_EXPOSURE, 0);
     capture.set(CAP_PROP_FRAME_WIDTH, 1280);
     capture.set(CAP_PROP_FRAME_HEIGHT, 720);
     capture.set(CAP_PROP_EXPOSURE, -8);
