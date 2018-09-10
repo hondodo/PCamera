@@ -20,7 +20,7 @@ int main(int, char**)
 
     capture.set(CAP_PROP_FRAME_WIDTH, 1280);
     capture.set(CAP_PROP_FRAME_HEIGHT, 720);
-    capture.set(CAP_PROP_EXPOSURE, -5);
+    capture.set(CAP_PROP_EXPOSURE, -8);
 
     cout << "Frame width: " << capture.get(CAP_PROP_FRAME_WIDTH) << endl;
     cout << "     height: " << capture.get(CAP_PROP_FRAME_HEIGHT) << endl;
