@@ -21,6 +21,8 @@ WeatherControl::WeatherControl(QWidget *parent) :
             this, SLOT(finished(QNetworkReply*)));
     liveUrl = QString("https://restapi.amap.com/v3/weather/weatherInfo?key=90ff0faabf905ddd468a2dfe596e7b87&city=440883&extensions=base&output=json");
     reportUrl = QString("https://restapi.amap.com/v3/weather/weatherInfo?key=90ff0faabf905ddd468a2dfe596e7b87&city=440883&extensions=all&output=json");
+
+    ui->widgetWeatherDay3->setVisible(false);
 }
 
 WeatherControl::~WeatherControl()
