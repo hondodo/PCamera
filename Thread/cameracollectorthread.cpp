@@ -320,10 +320,10 @@ std::vector<Rect> CameraCollectorThread::findMog(int cid, Mat mat)
     MogDetectObject *mogobj = (&camIdMogObj[cid]);
     resize(mat, mogobj->smallMat, Size(200, 150), 0, 0);
     mogobj->mog->apply(mogobj->smallMat, mogobj->lastMat);
-    cv::threshold(mogobj->lastMat, mogobj->lastMat, 130, 255, cv::THRESH_BINARY);
-    cv::medianBlur(mogobj->lastMat, mogobj->lastMat, 3);
-    cv::erode(mogobj->lastMat, mogobj->lastMat, cv::Mat());
-    cv::dilate(mogobj->lastMat, mogobj->lastMat, cv::Mat());
+//    cv::threshold(mogobj->lastMat, mogobj->lastMat, 130, 255, cv::THRESH_BINARY);
+//    cv::medianBlur(mogobj->lastMat, mogobj->lastMat, 3);
+//    cv::erode(mogobj->lastMat, mogobj->lastMat, cv::Mat());
+//    cv::dilate(mogobj->lastMat, mogobj->lastMat, cv::Mat());
     findContours(mogobj->lastMat, mogobj->cnts, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
     float area;
     Rect rect;
