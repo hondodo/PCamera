@@ -120,6 +120,8 @@ void VideoPlayer::run()
     char option_value2[]="100";
     av_dict_set(&avdic,option_key2,option_value2,0);
 
+    av_dict_set(&avdic, "framerate", "30", 0);
+
 #ifdef Q_OS_WIN
     char url[]="video=World Facing Right";
     //"http://admin:12345@192.168.31.55:8081";//"rtsp://admin:admin@192.168.1.18:554/h264/ch1/main/av_stream";
