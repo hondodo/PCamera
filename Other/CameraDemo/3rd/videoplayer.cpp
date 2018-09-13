@@ -218,11 +218,15 @@ void VideoPlayer::run()
 
     while (1)
     {
+        frameTimer.restart();
+        otherTimer.restart();
+
         if (av_read_frame(pFormatCtx, packet) < 0)
         {
             break; //这里认为视频读取完了
         }
-        frameTimer.restart();
+
+        readtime = otherTimer.elapsed();
         otherTimer.restart();
 
         if (packet->stream_index == videoStream) {
@@ -238,14 +242,13 @@ void VideoPlayer::run()
                         (uint8_t const * const *) pFrame->data,
                         pFrame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
                         pFrameRGB->linesize);
-                readtime = otherTimer.elapsed();
-                otherTimer.restart();
+
                 //把这个RGB数据 用QImage加载
                 QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
                 QImage image = tmpImg.copy(); //把图像复制一份 传递给界面显示
                 width =image.width();
                 height = image.height();
-                image = image.scaled(640, 480);
+                image = image.scaled(640, 480, Qt::KeepAspectRatio);
                 emit sig_GetOneFrame(image);  //发送信号
                 showtime = otherTimer.elapsed();
                 double frame = 1000.0 / frameTimer.elapsed();
