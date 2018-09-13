@@ -38,26 +38,18 @@ FORMS += \
         mainwindow.ui
 
 
-win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice
+win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include \
+             D:\Potatokid\OpenCV\build\include\opencv \
+             D:\Potatokid\OpenCV\build\include\opencv2 \
+             D:\ffmpeg\dev\include
 
-INCLUDEPATH += D:/ffmpeg/dev/include
+else:unix: INCLUDEPATH += /usr/include/opencv\
+               /usr/include/opencv2\
+               /usr/local/include\
 
-win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include
-             D:\Potatokid\OpenCV\build\include\opencv
-             D:\Potatokid\OpenCV\build\include\opencv2
-win32: LIBS += D:\Potatokid\OpenCV\buildOpenCV\lib\libopencv_*.a
-
-win32: LIBS += -L$$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/lib/ -lSDL2
-
-INCLUDEPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-DEPENDPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-
-win32: LIBS += -L$$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/lib/ -lSDL2main
-
-INCLUDEPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-DEPENDPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-
-win32: LIBS += -L$$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/lib/ -lSDL2test
-
-INCLUDEPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-DEPENDPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
+win32: LIBS += D:\Potatokid\OpenCV\buildOpenCV\lib\libopencv_*.a\
+               -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice
+else:unix: LIBS += /usr/local/lib/libopencv_*.so\
+                   -lmpg123\
+                   -lao\
+                   -lwiringPi
