@@ -120,8 +120,8 @@ void VideoPlayer::run()
     char option_value2[]="100";
     av_dict_set(&avdic,option_key2,option_value2,0);
 
-    av_dict_set(&avdic, "framerate", "30", 0);
-    av_dict_set(&avdic, "video_size", "640x480", 0);
+    //av_dict_set(&avdic, "framerate", "30", 0);
+    //av_dict_set(&avdic, "video_size", "640x480", 0);
 
 #ifdef Q_OS_WIN
     char url[]="video=World Facing Right";
@@ -241,7 +241,7 @@ void VideoPlayer::run()
                 //把这个RGB数据 用QImage加载
                 QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
                 QImage image = tmpImg.copy(); //把图像复制一份 传递给界面显示
-                //image = image.scaled(1024, 720);
+                image = image.scaled(1024, 720);
                 emit sig_GetOneFrame(image);  //发送信号
                 showtime = otherTimer.elapsed();
                 double frame = 1000.0 / frameTimer.elapsed();
