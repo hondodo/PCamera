@@ -122,6 +122,7 @@ void VideoPlayer::run()
 
     //av_dict_set(&avdic, "framerate", "30", 0);
     //av_dict_set(&avdic, "video_size", "640x480", 0);
+    av_dict_set(&avdic, "video_size", "1024x720", 0);
 
 #ifdef Q_OS_WIN
     char url[]="video=World Facing Right";
