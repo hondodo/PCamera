@@ -38,10 +38,9 @@ FORMS += \
         mainwindow.ui
 
 
-LIBS += -lavcodec -lavformat -lswscale -lavutil -lavdevice
-
 win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice
-win32:INCLUDEPATH += D:/ffmpeg/dev/include
+
+INCLUDEPATH += D:/ffmpeg/dev/include
 
 win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include
              D:\Potatokid\OpenCV\build\include\opencv

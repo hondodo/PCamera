@@ -99,10 +99,17 @@ void VideoPlayer::run()
 
     avformat_network_init();   //初始化FFmpeg网络模块，2017.8.5---lizhen
     av_register_all();         //初始化FFMPEG  调用了这个才能正常适用编码器和解码器
-
+    avdevice_register_all();
 
     //Allocate an AVFormatContext.
     pFormatCtx = avformat_alloc_context();
+
+    AVInputFormat *inputFmt = NULL;
+#ifdef Q_OS_WIN
+    inputFmt = av_find_input_format("dshow");
+#else
+    inputFmt = av_find_input_format("video4linux2");
+#endif
 
     //2017.8.5---lizhen
     AVDictionary *avdic=NULL;
@@ -112,12 +119,25 @@ void VideoPlayer::run()
     char option_key2[]="max_delay";
     char option_value2[]="100";
     av_dict_set(&avdic,option_key2,option_value2,0);
-    char url[]="/dev/video0";//"rtsp://admin:admin@192.168.1.18:554/h264/ch1/main/av_stream";
 
-    if (avformat_open_input(&pFormatCtx, url, NULL, &avdic) != 0) {
+#ifdef Q_OS_WIN
+    char url[]="video=World Facing Right";
+    //"http://admin:12345@192.168.31.55:8081";//"rtsp://admin:admin@192.168.1.18:554/h264/ch1/main/av_stream";
+    //ret = avformat_open_input(&pFormatCtx, url, NULL, &avdic);
+    ret = avformat_open_input(&pFormatCtx, url, inputFmt, &avdic);
+    if (ret != 0)
+    {
         printf("can't open the file. \n");
         return;
     }
+#else
+    ret = avformat_open_input(&pFormatCtx, "/dev/video0", inputFmt, &avdic);
+    if (ret != 0)
+    {
+        printf("can't open the file. \n");
+        return;
+    }
+#endif
 
     if (avformat_find_stream_info(pFormatCtx, NULL) < 0) {
         printf("Could't find stream infomation.\n");
@@ -184,7 +204,7 @@ void VideoPlayer::run()
     av_new_packet(packet, y_size); //分配packet的数据
 
     //2017.8.1---lizhen
-    av_dump_format(pFormatCtx, 0, url, 0); //输出视频信息
+    //av_dump_format(pFormatCtx, 0, url, 0); //输出视频信息
 
     while (1)
     {
