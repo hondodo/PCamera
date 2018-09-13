@@ -213,6 +213,7 @@ void VideoPlayer::run()
     frameTimer.start();
     otherTimer.start();
     int readtime = 0, showtime = 0;
+    int width = 0, height = 0;
 
     while (1)
     {
@@ -241,14 +242,18 @@ void VideoPlayer::run()
                 //把这个RGB数据 用QImage加载
                 QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
                 QImage image = tmpImg.copy(); //把图像复制一份 传递给界面显示
-                image = image.scaled(1024, 720);
+                width =image.width();
+                height = image.height();
+                image = image.scaled(640, 480);
                 emit sig_GetOneFrame(image);  //发送信号
                 showtime = otherTimer.elapsed();
                 double frame = 1000.0 / frameTimer.elapsed();
-                QString text = QString("%1FPS, R:%2, S:%3").arg(
+                QString text = QString("%1FPS, R:%2, S:%3 @ %4x%5").arg(
                             QString::number(frame, 'f', 2),
                             QString::number(readtime, 'f', 0),
-                            QString::number(showtime, 'f', 0)
+                            QString::number(showtime, 'f', 0),
+                            QString::number(width, 'f', 0),
+                            QString::number(height, 'f', 0)
                             );
                 emit onMessage(text);
             }
