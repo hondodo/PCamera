@@ -7,6 +7,7 @@
 #include <QCamera>
 #include <QCameraInfo>
 #include <QApplication>
+#include <QTime>
 
 extern "C"
 {
@@ -26,6 +27,7 @@ public:
     void run();
 signals:
     void sig_GetOneFrame(QImage);
+    void onMessage(QString text);
 protected slots:
 private:
     void show_vfw_device();

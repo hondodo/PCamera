@@ -20,6 +20,8 @@ public:
 
 public slots:
     void slot_GetOneFrame(QImage img);
+    void onMessage(QString text);
+
 private slots:
     void on_pushButton_clicked();
 

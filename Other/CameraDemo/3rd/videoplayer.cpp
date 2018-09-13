@@ -206,12 +206,19 @@ void VideoPlayer::run()
     //2017.8.1---lizhen
     //av_dump_format(pFormatCtx, 0, url, 0); //输出视频信息
 
+    QTime frameTimer, otherTimer;
+    frameTimer.start();
+    otherTimer.start();
+    int readtime = 0, showtime = 0;
+
     while (1)
     {
         if (av_read_frame(pFormatCtx, packet) < 0)
         {
             break; //这里认为视频读取完了
         }
+        frameTimer.restart();
+        otherTimer.restart();
 
         if (packet->stream_index == videoStream) {
             ret = avcodec_decode_video2(pCodecCtx, pFrame, &got_picture,packet);
@@ -226,11 +233,21 @@ void VideoPlayer::run()
                         (uint8_t const * const *) pFrame->data,
                         pFrame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
                         pFrameRGB->linesize);
-
+                readtime = otherTimer.elapsed();
+                otherTimer.restart();
                 //把这个RGB数据 用QImage加载
                 QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
                 QImage image = tmpImg.copy(); //把图像复制一份 传递给界面显示
+                image = image.scaled(1024, 720);
                 emit sig_GetOneFrame(image);  //发送信号
+                showtime = otherTimer.elapsed();
+                double frame = 1000.0 / frameTimer.elapsed();
+                QString text = QString("%1FPS, R:%2, S:%3").arg(
+                            QString::number(frame, 'f', 2),
+                            QString::number(readtime, 'f', 0),
+                            QString::number(showtime, 'f', 0)
+                            );
+                emit onMessage(text);
             }
         }
         av_free_packet(packet); //释放资源,否则内存会一直上升
