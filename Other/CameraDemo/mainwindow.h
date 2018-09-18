@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QTimer>
 #include "3rd/videoplayer.h"
+#include "cameracontrol.h"
 
 namespace Ui {
 class MainWindow;
@@ -20,8 +21,6 @@ public:
 
 public slots:
     void slot_GetOneFrame(QImage img);
-    void onMessage(QString text);
-
 private slots:
     void on_pushButton_clicked();
 

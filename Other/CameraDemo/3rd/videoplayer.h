@@ -7,7 +7,7 @@
 #include <QCamera>
 #include <QCameraInfo>
 #include <QApplication>
-#include <QTime>
+#include "cameratype.h"
 
 extern "C"
 {
@@ -25,15 +25,28 @@ public:
     ~VideoPlayer();
     void startPlay();
     void run();
+
+    QString getCameraUrl() const;
+    void setCameraUrl(const QString &value);
+
+    CAMERATYPE getCameraType() const;
+    void setCameraType(const CAMERATYPE &value);
+
+    static init();
+
 signals:
     void sig_GetOneFrame(QImage);
-    void onMessage(QString text);
+
 protected slots:
+
 private:
     void show_vfw_device();
     void show_dshow_device();
     void show_dshow_device_option();
     void show_avfoundation_device();
+
+    QString cameraUrl;
+    CAMERATYPE cameraType;//0-local 1-web
 };
 
 #endif // WORKER_H

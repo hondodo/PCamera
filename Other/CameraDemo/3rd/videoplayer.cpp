@@ -23,7 +23,8 @@ extern "C"
 using namespace std;
 VideoPlayer::VideoPlayer()
 {
-
+    cameraType = CAMERATYPE_LOCAL;
+    cameraUrl = "video=";
 }
 
 VideoPlayer::~VideoPlayer()
@@ -44,7 +45,7 @@ void VideoPlayer::show_dshow_device(){
     av_dict_set(&options,"list_devices","true",0);
     AVInputFormat *iformat = av_find_input_format("dshow");
     printf("========Device Info=============\n");
-    avformat_open_input(&pFormatCtx,"video=dummy",iformat,&options);
+    avformat_open_input(&pFormatCtx,"video=video=World Facing Right",iformat,&options);
     printf("================================\n");
 }
 
@@ -79,7 +80,30 @@ void VideoPlayer::show_avfoundation_device(){
     printf("=============================\n");
 }
 
+CAMERATYPE VideoPlayer::getCameraType() const
+{
+    return cameraType;
+}
 
+void VideoPlayer::setCameraType(const CAMERATYPE &value)
+{
+    cameraType = value;
+}
+
+VideoPlayer::init()
+{
+
+}
+
+QString VideoPlayer::getCameraUrl() const
+{
+    return cameraUrl;
+}
+
+void VideoPlayer::setCameraUrl(const QString &value)
+{
+    cameraUrl = value;
+}
 
 void VideoPlayer::run()
 {
@@ -92,10 +116,10 @@ void VideoPlayer::run()
     AVPacket *packet;
     uint8_t *out_buffer;
 
-    static struct SwsContext *img_convert_ctx;
+    struct SwsContext *img_convert_ctx;
 
     int videoStream, i, numBytes;
-    int ret, got_picture;
+    int ret = -1, got_picture;
 
     avformat_network_init();   //初始化FFmpeg网络模块，2017.8.5---lizhen
     av_register_all();         //初始化FFMPEG  调用了这个才能正常适用编码器和解码器
@@ -120,15 +144,22 @@ void VideoPlayer::run()
     char option_value2[]="100";
     av_dict_set(&avdic,option_key2,option_value2,0);
 
-    //av_dict_set(&avdic, "framerate", "30", 0);
-    //av_dict_set(&avdic, "video_size", "640x480", 0);
-    av_dict_set(&avdic, "video_size", "1024x720", 0);
-
 #ifdef Q_OS_WIN
-    char url[]="video=World Facing Right";
-    //"http://admin:12345@192.168.31.55:8081";//"rtsp://admin:admin@192.168.1.18:554/h264/ch1/main/av_stream";
+//    QList<QByteArray> all = QCamera::availableDevices();
+//    QString desc = QCamera::deviceDescription(all.at(0));
+//    desc = "video=" + desc;
+    //char url[]="video=World Facing Right";
+    //"http://admin:12345@192.168.31.87:8081";//"rtsp://admin:admin@192.168.1.18:554/h264/ch1/main/av_stream";
     //ret = avformat_open_input(&pFormatCtx, url, NULL, &avdic);
-    ret = avformat_open_input(&pFormatCtx, url, inputFmt, &avdic);
+    if(cameraType == CAMERATYPE_LOCAL)
+    {
+        ret = avformat_open_input(&pFormatCtx, cameraUrl.toLocal8Bit().data(), inputFmt, &avdic);
+    }
+    else if(cameraType == CAMERATYPE_WEB)
+    {
+        ret = avformat_open_input(&pFormatCtx, cameraUrl.toLocal8Bit().data(), NULL, &avdic);
+    }
+
     if (ret != 0)
     {
         printf("can't open the file. \n");
@@ -210,24 +241,12 @@ void VideoPlayer::run()
     //2017.8.1---lizhen
     //av_dump_format(pFormatCtx, 0, url, 0); //输出视频信息
 
-    QTime frameTimer, otherTimer;
-    frameTimer.start();
-    otherTimer.start();
-    int readtime = 0, showtime = 0;
-    int width = 0, height = 0;
-
     while (1)
     {
-        frameTimer.restart();
-        otherTimer.restart();
-
         if (av_read_frame(pFormatCtx, packet) < 0)
         {
             break; //这里认为视频读取完了
         }
-
-        readtime = otherTimer.elapsed();
-        otherTimer.restart();
 
         if (packet->stream_index == videoStream) {
             ret = avcodec_decode_video2(pCodecCtx, pFrame, &got_picture,packet);
@@ -246,20 +265,8 @@ void VideoPlayer::run()
                 //把这个RGB数据 用QImage加载
                 QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
                 QImage image = tmpImg.copy(); //把图像复制一份 传递给界面显示
-                width =image.width();
-                height = image.height();
-                image = image.scaled(640, 480, Qt::KeepAspectRatio);
+                image = image.scaled(400, 300, Qt::KeepAspectRatio);
                 emit sig_GetOneFrame(image);  //发送信号
-                showtime = otherTimer.elapsed();
-                double frame = 1000.0 / frameTimer.elapsed();
-                QString text = QString("%1FPS, R:%2, S:%3 @ %4x%5").arg(
-                            QString::number(frame, 'f', 2),
-                            QString::number(readtime, 'f', 0),
-                            QString::number(showtime, 'f', 0),
-                            QString::number(width, 'f', 0),
-                            QString::number(height, 'f', 0)
-                            );
-                emit onMessage(text);
             }
         }
         av_free_packet(packet); //释放资源,否则内存会一直上升
