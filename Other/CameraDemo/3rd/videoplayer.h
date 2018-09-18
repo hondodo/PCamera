@@ -32,7 +32,7 @@ public:
     CAMERATYPE getCameraType() const;
     void setCameraType(const CAMERATYPE &value);
 
-    static init();
+    static void init();
 
 signals:
     void sig_GetOneFrame(QImage);

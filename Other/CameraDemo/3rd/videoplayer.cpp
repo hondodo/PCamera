@@ -90,7 +90,7 @@ void VideoPlayer::setCameraType(const CAMERATYPE &value)
     cameraType = value;
 }
 
-VideoPlayer::init()
+void VideoPlayer::init()
 {
 
 }
