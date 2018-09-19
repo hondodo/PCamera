@@ -27,13 +27,15 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     3rd/videoplayer.cpp \
-    cameracontrol.cpp
+    cameracontrol.cpp \
+    rendercontrol.cpp
 
 HEADERS += \
         mainwindow.h \
     3rd/videoplayer.h \
     cameracontrol.h \
-    cameratype.h
+    cameratype.h \
+    rendercontrol.h
 
 FORMS += \
         mainwindow.ui \
@@ -49,17 +51,3 @@ win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include
              D:\Potatokid\OpenCV\build\include\opencv2
 win32: LIBS += D:\Potatokid\OpenCV\buildOpenCV\lib\libopencv_*.a
 
-win32: LIBS += -L$$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/lib/ -lSDL2
-
-INCLUDEPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-DEPENDPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-
-win32: LIBS += -L$$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/lib/ -lSDL2main
-
-INCLUDEPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-DEPENDPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-
-win32: LIBS += -L$$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/lib/ -lSDL2test
-
-INCLUDEPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include
-DEPENDPATH += $$PWD/../../SDL2-devel-2.0.8-VC/SDL2-2.0.8/include

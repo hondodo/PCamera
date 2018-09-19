@@ -23,8 +23,7 @@ class VideoPlayer:public QThread
 public:
     VideoPlayer();
     ~VideoPlayer();
-    void startPlay();
-    void run();
+    void setStop();
 
     QString getCameraUrl() const;
     void setCameraUrl(const QString &value);
@@ -32,21 +31,21 @@ public:
     CAMERATYPE getCameraType() const;
     void setCameraType(const CAMERATYPE &value);
 
-    static void init();
+protected:
+    void run() override;
 
 signals:
-    void sig_GetOneFrame(QImage);
+    void onFrame(QImage);
 
 protected slots:
 
 private:
-    void show_vfw_device();
-    void show_dshow_device();
-    void show_dshow_device_option();
-    void show_avfoundation_device();
+    bool _isRunning;
 
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
+
+
 };
 
 #endif // WORKER_H

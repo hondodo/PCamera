@@ -6,6 +6,7 @@
 #include <QTimer>
 #include "3rd/videoplayer.h"
 #include "cameracontrol.h"
+#include "rendercontrol.h"
 
 namespace Ui {
 class MainWindow;

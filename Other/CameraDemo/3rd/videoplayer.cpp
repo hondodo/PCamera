@@ -13,7 +13,6 @@ extern "C"
     #include "libavformat/avformat.h"
     #include "libavutil/pixfmt.h"
     #include "libswscale/swscale.h"
-    //2017.8.9---lizhen
     #include "libavutil/time.h"
     #include "libavutil/mathematics.h"
 }
@@ -25,59 +24,17 @@ VideoPlayer::VideoPlayer()
 {
     cameraType = CAMERATYPE_LOCAL;
     cameraUrl = "video=";
+    _isRunning = false;
 }
 
 VideoPlayer::~VideoPlayer()
 {
-
+    setStop();
 }
 
-void VideoPlayer::startPlay()
+void VideoPlayer::setStop()
 {
-    ///调用 QThread 的start函数 将会自动执行下面的run函数 run函数是一个新的线程
-    this->start();
-}
-
-//Show Dshow Device
-void VideoPlayer::show_dshow_device(){
-    AVFormatContext *pFormatCtx = avformat_alloc_context();
-    AVDictionary* options = NULL;
-    av_dict_set(&options,"list_devices","true",0);
-    AVInputFormat *iformat = av_find_input_format("dshow");
-    printf("========Device Info=============\n");
-    avformat_open_input(&pFormatCtx,"video=video=World Facing Right",iformat,&options);
-    printf("================================\n");
-}
-
-//Show Dshow Device Option
-void VideoPlayer::show_dshow_device_option(){
-    AVFormatContext *pFormatCtx = avformat_alloc_context();
-    AVDictionary* options = NULL;
-    av_dict_set(&options,"list_options","true",0);
-    AVInputFormat *iformat = av_find_input_format("dshow");
-    printf("========Device Option Info======\n");
-    avformat_open_input(&pFormatCtx,"video=Integrated Camera",iformat,&options);
-    printf("================================\n");
-}
-
-//Show VFW Device
-void VideoPlayer::show_vfw_device(){
-    AVFormatContext *pFormatCtx = avformat_alloc_context();
-    AVInputFormat *iformat = av_find_input_format("vfwcap");
-    printf("========VFW Device Info======\n");
-    avformat_open_input(&pFormatCtx,"list",iformat,NULL);
-    printf("=============================\n");
-}
-
-//Show AVFoundation Device
-void VideoPlayer::show_avfoundation_device(){
-    AVFormatContext *pFormatCtx = avformat_alloc_context();
-    AVDictionary* options = NULL;
-    av_dict_set(&options,"list_devices","true",0);
-    AVInputFormat *iformat = av_find_input_format("avfoundation");
-    printf("==AVFoundation Device Info===\n");
-    avformat_open_input(&pFormatCtx,"",iformat,&options);
-    printf("=============================\n");
+    _isRunning = false;
 }
 
 CAMERATYPE VideoPlayer::getCameraType() const
@@ -88,11 +45,6 @@ CAMERATYPE VideoPlayer::getCameraType() const
 void VideoPlayer::setCameraType(const CAMERATYPE &value)
 {
     cameraType = value;
-}
-
-void VideoPlayer::init()
-{
-
 }
 
 QString VideoPlayer::getCameraUrl() const
@@ -219,9 +171,6 @@ void VideoPlayer::run()
     pFrame = av_frame_alloc();
     pFrameRGB = av_frame_alloc();
 
-    //2017.8.7---lizhen
-    //cout<<pCodecCtx->width<<endl;
-
     ///这里我们改成了 将解码后的YUV数据转换成RGB32
     img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
             pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
@@ -238,10 +187,8 @@ void VideoPlayer::run()
     packet = (AVPacket *) malloc(sizeof(AVPacket)); //分配一个packet
     av_new_packet(packet, y_size); //分配packet的数据
 
-    //2017.8.1---lizhen
-    //av_dump_format(pFormatCtx, 0, url, 0); //输出视频信息
-
-    while (1)
+    _isRunning = true;
+    while (_isRunning)
     {
         if (av_read_frame(pFormatCtx, packet) < 0)
         {
@@ -264,24 +211,12 @@ void VideoPlayer::run()
 
                 //把这个RGB数据 用QImage加载
                 QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
-                QImage image = tmpImg.copy(); //把图像复制一份 传递给界面显示
-                image = image.scaled(400, 300, Qt::KeepAspectRatio);
-                emit sig_GetOneFrame(image);  //发送信号
+                QImage image = tmpImg.copy();
+                emit onFrame(image);  //发送信号
             }
         }
-        av_free_packet(packet); //释放资源,否则内存会一直上升
-
-        //2017.8.7---lizhen
-        msleep(5); //停一停  不然放的太快了
-
-        //2017.8.9---lizhen
-        /*int64_t start_time=av_gettime();
-        AVRational time_base=pFormatCtx->streams[videoStream]->time_base;
-        AVRational time_base_q={1,AV_TIME_BASE};
-        int64_t pts_time = av_rescale_q(packet->dts, time_base, time_base_q);
-        int64_t now_time = av_gettime() - start_time;
-        if (pts_time > now_time)
-             av_usleep(pts_time - now_time);*/
+        av_free_packet(packet);
+        msleep(5);
     }
     av_free(out_buffer);
     av_free(pFrameRGB);

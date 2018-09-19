@@ -40,7 +40,7 @@ void CameraControl::start()
     VideoPlayer *player = new VideoPlayer();
     player->setCameraType(cameraType);
     player->setCameraUrl(cameraUrl);
-    connect(player, SIGNAL(sig_GetOneFrame(QImage)), this, SLOT(onImage(QImage)));
+    connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)));
     player->start();
 }
 
