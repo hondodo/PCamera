@@ -61,12 +61,11 @@ void MainWindow::on_pushButton_clicked()
         control->start();
     }
 #else
-    /*
-    RenderControl *controllocal = new RenderControl();
+    CameraControl *controllocal = new CameraControl();
     controllocal->setCameraType(CAMERATYPE_LOCAL);
     ui->verticalLayout->addWidget(controllocal);
     controllocal->setCameraUrl("/dev/video0");
-    controllocal->start();*/
+    controllocal->start();
 #endif
     CameraControl *control = new CameraControl();
     ui->verticalLayout->addWidget(control);
