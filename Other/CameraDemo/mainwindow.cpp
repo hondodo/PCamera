@@ -68,7 +68,7 @@ void MainWindow::on_pushButton_clicked()
     controllocal->setCameraUrl("/dev/video0");
     controllocal->start();*/
 #endif
-    RenderControl *control = new RenderControl();
+    CameraControl *control = new CameraControl();
     ui->verticalLayout->addWidget(control);
     control->setCameraUrl("http://admin:12345@192.168.31.87:8081");
     control->setCameraType(CAMERATYPE_WEB);
