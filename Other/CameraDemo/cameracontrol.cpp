@@ -51,5 +51,5 @@ void CameraControl::stop()
 
 void CameraControl::onImage(QImage image)
 {
-    ui->label->setPixmap(QPixmap::fromImage(image));
+    ui->label->setPixmap(QPixmap::fromImage(image.scaled(400, 300, Qt::KeepAspectRatio)));
 }
