@@ -48,6 +48,7 @@ void MainWindow::on_pushButton_clicked()
     control->setCameraType(CAMERATYPE_WEB);
     control->start();
     */
+#ifdef Q_OS_WIN
     QList<QByteArray> all = QCamera::availableDevices();
     for(int i = 0; i < all.count(); i++)
     {
@@ -59,6 +60,8 @@ void MainWindow::on_pushButton_clicked()
         control->setCameraUrl(desc);
         control->start();
     }
+#else
+#endif
     RenderControl *control = new RenderControl();
     ui->verticalLayout->addWidget(control);
     control->setCameraUrl("http://admin:12345@192.168.31.87:8081");
