@@ -64,8 +64,8 @@ void MainWindow::on_pushButton_clicked()
     RenderControl *controllocal = new RenderControl();
     controllocal->setCameraType(CAMERATYPE_LOCAL);
     ui->verticalLayout->addWidget(controllocal);
-    control->setCameraUrl("/dev/video0");
-    control->start();
+    controllocal->setCameraUrl("/dev/video0");
+    controllocal->start();
 #endif
     RenderControl *control = new RenderControl();
     ui->verticalLayout->addWidget(control);
