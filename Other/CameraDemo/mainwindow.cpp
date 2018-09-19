@@ -30,7 +30,7 @@ void MainWindow::on_pushButton_clicked()
 //    //t->start();
 //    worker->start();
 
-
+    /*
     QList<QByteArray> all = QCamera::availableDevices();
     for(int i = 0; i < all.count(); i++)
     {
@@ -47,21 +47,21 @@ void MainWindow::on_pushButton_clicked()
     control->setCameraUrl("http://admin:12345@192.168.31.87:8081");
     control->setCameraType(CAMERATYPE_WEB);
     control->start();
-
-//    QList<QByteArray> all = QCamera::availableDevices();
-//    for(int i = 0; i < all.count(); i++)
-//    {
-//        QString desc = QCamera::deviceDescription(all.at(i));
-//        desc = "video=" + desc;
-//        RenderControl *control = new RenderControl();
-//        control->setCameraType(CAMERATYPE_LOCAL);
-//        ui->verticalLayout->addWidget(control);
-//        control->setCameraUrl(desc);
-//        control->start();
-//    }
-//    RenderControl *control = new RenderControl();
-//    ui->verticalLayout->addWidget(control);
-//    control->setCameraUrl("http://admin:12345@192.168.31.87:8081");
-//    control->setCameraType(CAMERATYPE_WEB);
-//    control->start();
+    */
+    QList<QByteArray> all = QCamera::availableDevices();
+    for(int i = 0; i < all.count(); i++)
+    {
+        QString desc = QCamera::deviceDescription(all.at(i));
+        desc = "video=" + desc;
+        RenderControl *control = new RenderControl();
+        control->setCameraType(CAMERATYPE_LOCAL);
+        ui->verticalLayout->addWidget(control);
+        control->setCameraUrl(desc);
+        control->start();
+    }
+    RenderControl *control = new RenderControl();
+    ui->verticalLayout->addWidget(control);
+    control->setCameraUrl("http://admin:12345@192.168.31.87:8081");
+    control->setCameraType(CAMERATYPE_WEB);
+    control->start();
 }
