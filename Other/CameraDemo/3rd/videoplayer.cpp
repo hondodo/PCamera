@@ -96,7 +96,7 @@ void VideoPlayer::run()
     char option_value2[]="100";
     av_dict_set(&avdic,option_key2,option_value2,0);
 
-#ifdef Q_OS_WIN
+//#ifdef Q_OS_WIN
 //    QList<QByteArray> all = QCamera::availableDevices();
 //    QString desc = QCamera::deviceDescription(all.at(0));
 //    desc = "video=" + desc;
@@ -117,14 +117,14 @@ void VideoPlayer::run()
         printf("can't open the file. \n");
         return;
     }
-#else
-    ret = avformat_open_input(&pFormatCtx, "/dev/video0", inputFmt, &avdic);
-    if (ret != 0)
-    {
-        printf("can't open the file. \n");
-        return;
-    }
-#endif
+//#else
+//    ret = avformat_open_input(&pFormatCtx, "/dev/video0", inputFmt, &avdic);
+//    if (ret != 0)
+//    {
+//        printf("can't open the file. \n");
+//        return;
+//    }
+//#endif
 
     if (avformat_find_stream_info(pFormatCtx, NULL) < 0) {
         printf("Could't find stream infomation.\n");

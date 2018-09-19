@@ -6,7 +6,7 @@ RenderControl::RenderControl(QWidget *parent) : QOpenGLWidget(parent)
 #ifdef Q_OS_WIN
     cameraUrl = "video=";
 #else
-    cameraUrl = "";
+    cameraUrl = "/dev/video0";
 #endif
     cameraType = CAMERATYPE_LOCAL;
     player = Q_NULLPTR;
@@ -56,7 +56,7 @@ void RenderControl::onImage(QImage image)
 {
     if(canUpdateImage)
     {
-        imageCache = image.copy();
+        imageCache = image.scaled(400, 300, Qt::KeepAspectRatio);//image.copy();
     }
     update();
 }
