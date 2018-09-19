@@ -216,7 +216,7 @@ void VideoPlayer::run()
             }
         }
         av_free_packet(packet);
-        msleep(5);
+        msleep(30);
     }
     av_free(out_buffer);
     av_free(pFrameRGB);
