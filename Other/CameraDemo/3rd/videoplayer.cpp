@@ -23,7 +23,11 @@ using namespace std;
 VideoPlayer::VideoPlayer()
 {
     cameraType = CAMERATYPE_LOCAL;
+#ifdef Q_OS_WIN
     cameraUrl = "video=";
+#else
+    cameraUrl = "/dev/video0";
+#endif
     _isRunning = false;
 }
 
@@ -216,7 +220,7 @@ void VideoPlayer::run()
             }
         }
         av_free_packet(packet);
-        msleep(30);
+        msleep(5);
     }
     av_free(out_buffer);
     av_free(pFrameRGB);
