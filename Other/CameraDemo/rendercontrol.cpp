@@ -56,7 +56,7 @@ void RenderControl::onImage(QImage image)
 {
     if(canUpdateImage)
     {
-        imageCache = image.scaled(400, 300, Qt::KeepAspectRatio);//image.copy();
+        imageCache = image.copy(0, 0, 400, 300);
     }
     update();
 }
