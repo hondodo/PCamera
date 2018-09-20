@@ -8,6 +8,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     worker = Q_NULLPTR;
     t = Q_NULLPTR;
+    existsCameraUrls.clear();
 }
 
 MainWindow::~MainWindow()
@@ -49,27 +50,58 @@ void MainWindow::on_pushButton_clicked()
     control->start();
     */
 #ifdef Q_OS_WIN
-    QList<QByteArray> all = QCamera::availableDevices();
-    for(int i = 0; i < all.count(); i++)
-    {
-        QString desc = QCamera::deviceDescription(all.at(i));
-        desc = "video=" + desc;
-        RenderControl *control = new RenderControl();
-        control->setCameraType(CAMERATYPE_LOCAL);
-        ui->verticalLayout->addWidget(control);
-        control->setCameraUrl(desc);
-        control->start();
-    }
+//    QList<QByteArray> all = QCamera::availableDevices();
+//    for(int i = 0; i < all.count(); i++)
+//    {
+//        QString desc = QCamera::deviceDescription(all.at(i));
+//        desc = "video=" + desc;
+//        RenderControl *control = new RenderControl();
+//        control->setCameraType(CAMERATYPE_LOCAL);
+//        ui->verticalLayout->addWidget(control);
+//        control->setCameraUrl(desc);
+//        control->start();
+//    }
 #else
-    CameraControl *controllocal = new CameraControl();
-    controllocal->setCameraType(CAMERATYPE_LOCAL);
-    ui->verticalLayout->addWidget(controllocal);
-    controllocal->setCameraUrl("/dev/video0");
-    controllocal->start();
+//    CameraControl *controllocal = new CameraControl();
+//    controllocal->setCameraType(CAMERATYPE_LOCAL);
+//    ui->verticalLayout->addWidget(controllocal);
+//    controllocal->setCameraUrl("/dev/video0");
+//    controllocal->start();
 #endif
-    CameraControl *control = new CameraControl();
-    ui->verticalLayout->addWidget(control);
-    control->setCameraUrl("http://admin:12345@192.168.31.87:8081");
-    control->setCameraType(CAMERATYPE_WEB);
-    control->start();
+//    CameraControl *control = new CameraControl();
+//    ui->verticalLayout->addWidget(control);
+//    control->setCameraUrl("http://admin:12345@192.168.31.87:8081");
+//    control->setCameraType(CAMERATYPE_WEB);
+//    control->start();
+}
+
+void MainWindow::on_pushButtonAddCamera_clicked()
+{
+    AddCameraForm *form = new AddCameraForm();
+    form->setExistsCameraUrls(existsCameraUrls);
+    connect(form, SIGNAL(onClose(int)), this, SLOT(onAddCameraFormClose(int)));
+    form->show();
+}
+
+void MainWindow::onAddCameraFormClose(int code)
+{
+    AddCameraForm *form = qobject_cast<AddCameraForm *>(QObject::sender());
+    if(form != Q_NULLPTR)
+    {
+        if(code == 0)
+        {
+            QString url = form->getCameraUrl();
+            if(!existsCameraUrls.contains(url.toLower()))
+            {
+                existsCameraUrls.append(url.toLower());
+                CameraControl *control = new CameraControl();
+                ui->gridLayoutCameras->addWidget(control);
+                control->setCameraUrl(url);
+                control->setCameraType(form->getCameraType());
+                control->start();
+            }
+        }
+        form->deleteLater();
+        form = Q_NULLPTR;
+    }
 }

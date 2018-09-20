@@ -28,18 +28,21 @@ SOURCES += \
         mainwindow.cpp \
     3rd/videoplayer.cpp \
     cameracontrol.cpp \
-    rendercontrol.cpp
+    rendercontrol.cpp \
+    addcameraform.cpp
 
 HEADERS += \
         mainwindow.h \
     3rd/videoplayer.h \
     cameracontrol.h \
     cameratype.h \
-    rendercontrol.h
+    rendercontrol.h \
+    addcameraform.h
 
 FORMS += \
         mainwindow.ui \
-    cameracontrol.ui
+    cameracontrol.ui \
+    addcameraform.ui
 
 win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice
 unix:LIBS += -lavcodec -lavformat -lswscale -lavutil -lavdevice
