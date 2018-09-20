@@ -148,6 +148,13 @@ void CamaraThread::run()
                 _isConnect = true;
                 emit onConnectChanged(true);
             }
+
+            if(isNewMessage)
+            {
+                isNewMessage = false;
+                emit onTip(message);
+            }
+
             readtime = timeOpenCVOP.elapsed();
             timeOpenCVOP.restart();
 
@@ -306,11 +313,11 @@ void CamaraThread::run()
         message += QString("@Free:%1/%2").arg(diskHelper.toSizeInfo(freeSpace),
                                             diskHelper.toSizeInfo(totalSpace));
 
-        if(isNewMessage)
-        {
-            isNewMessage = false;
-            emit onTip(message);
-        }
+//        if(isNewMessage)
+//        {
+//            isNewMessage = false;
+//            emit onTip(message);
+//        }
 
         int elapsed = time.elapsed();
         if(elapsed < 0)

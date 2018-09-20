@@ -255,10 +255,10 @@ void MainDialog::onImage(const QImage &image)
     {
         QBuffer buffer;
         buffer.open(QIODevice::ReadWrite);
-        int quality = 60;
-        if(image.width() > 640 || image.height() > 480)
+        int quality = 80;
+        if(image.width() > 960 || image.height() > 540)
         {
-            QImage tmpimg = image.scaled(640, 480, Qt::KeepAspectRatio);
+            QImage tmpimg = image.scaled(960, 540, Qt::KeepAspectRatio);
             tmpimg.save(&buffer, "jpg", quality);
         }
         else
