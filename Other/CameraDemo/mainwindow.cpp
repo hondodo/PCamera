@@ -90,14 +90,16 @@ void MainWindow::resizeCameraControl()
 {
     if(ui->tabWidget->currentWidget() == ui->tabCamBig)
     {
-        int tabcamwidth = ui->tabCamBig->width();
-        int tabcamheight = ui->tabCamBig->height();
-        if(tabcamwidth > maxwidth || tabcamheight > maxheight)
+        int tabcamwidth = ui->widgetCamBig->width() - 25;
+        int tabcamheight = ui->widgetCamBig->height() - 10;
+        int mw = maxwidth - 25;
+        int mh = maxheight - 10;
+        if(tabcamwidth > mw || tabcamheight > mh)
         {
-            ui->tabCam4->setMaximumSize(maxwidth, maxheight);
-            ui->tabCam4->resize(maxwidth, maxheight);
-            tabcamwidth = maxwidth;
-            tabcamheight = maxheight;
+            ui->tabCam4->setMaximumSize(mw, mh);
+            ui->tabCam4->resize(mw, mh);
+            tabcamwidth = mw;
+            tabcamheight = mw;
         }
         int showindex = 0;
         if(allCameraControls.count() > showindex)
@@ -108,14 +110,16 @@ void MainWindow::resizeCameraControl()
     }
     else if(ui->tabWidget->currentWidget() == ui->tabCam4)
     {
-        int tabcamwidth = ui->tabCam4->width();
-        int tabcamheight = ui->tabCam4->height();
-        if(tabcamwidth > maxwidth || tabcamheight > maxheight)
+        int tabcamwidth = ui->tabCam4->width() - 25;
+        int tabcamheight = ui->tabCam4->height() - 25;
+        int mw = maxwidth - 25;
+        int mh = maxheight - 25;
+        if(tabcamwidth > mw || tabcamheight > mh)
         {
-            ui->tabCam4->setMaximumSize(maxwidth, maxheight);
-            ui->tabCam4->resize(maxwidth, maxheight);
-            tabcamwidth = maxwidth;
-            tabcamheight = maxheight;
+            ui->tabCam4->setMaximumSize(mw, mh);
+            ui->tabCam4->resize(mw, mh);
+            tabcamwidth = mw;
+            tabcamheight = mh;
         }
         int eachwidth = tabcamwidth / 2;
         int eachheight = tabcamheight / 2;
