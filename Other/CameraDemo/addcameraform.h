@@ -23,6 +23,8 @@ public:
     int getState() const;
     void setExistsCameraUrls(const QList<QString> &value);
 
+    QString getCameraName() const;
+
 protected:
     void showEvent(QShowEvent *event);
 
@@ -32,19 +34,19 @@ signals:
 private slots:
     void on_comboBoxType_currentIndexChanged(int index);
     void on_pushButtonOK_clicked();
-
     void on_lineEditUrl_textChanged(const QString &arg1);
-
     void on_comboBoxUrl_currentIndexChanged(int index);
 
 private:
     Ui::AddCameraForm *ui;
     bool isFirstShow;
     void initCameraComboBox();
+    void initCameraName();
     QString cameraUrl;
     CAMERATYPE cameraType;
     int state;
     QList<QString> existsCameraUrls;
+    QString cameraName;
 };
 
 #endif // ADDCAMERAFORM_H

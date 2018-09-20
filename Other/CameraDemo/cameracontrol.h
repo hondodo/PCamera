@@ -25,6 +25,15 @@ public:
     void start();
     void stop();
 
+    QString getCameraName() const;
+    void setCameraName(const QString &value);
+
+    int getImageWidth() const;
+    void setImageWidth(int value);
+
+    int getImageHeight() const;
+    void setImageHeight(int value);
+
 private slots:
     void onImage(QImage image);
 
@@ -32,6 +41,8 @@ private:
     Ui::CameraControl *ui;
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
+    QString cameraName;
+    int imageWidth, imageHeight;
 };
 
 #endif // CAMERACONTROL_H

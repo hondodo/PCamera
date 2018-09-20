@@ -8,6 +8,8 @@ CameraControl::CameraControl(QWidget *parent) :
     ui->setupUi(this);
     cameraType = CAMERATYPE_LOCAL;
     cameraUrl = "video=";
+    imageWidth = 640;
+    imageHeight = 480;
 }
 
 CameraControl::~CameraControl()
@@ -51,5 +53,51 @@ void CameraControl::stop()
 
 void CameraControl::onImage(QImage image)
 {
-    ui->label->setPixmap(QPixmap::fromImage(image.scaled(400, 300, Qt::KeepAspectRatio)));
+    if(image.isNull())
+    {
+        return;
+    }
+//    if(this->maximumHeight() > this->height() || this->maximumWidth() > this->width())
+//    {
+        ui->label->setPixmap(QPixmap::fromImage(image.scaled(imageWidth, imageHeight, Qt::KeepAspectRatio)));
+//    }
+//    if(image.height() > this->height() || image.width() > this->width())
+//    {
+//        ui->label->setPixmap(QPixmap::fromImage(image.scaled(this->size(), Qt::KeepAspectRatio)));
+//    }
+//    else
+//    {
+//        ui->label->setPixmap(QPixmap::fromImage(image));
+//    }
+}
+
+int CameraControl::getImageHeight() const
+{
+    return imageHeight;
+}
+
+void CameraControl::setImageHeight(int value)
+{
+    imageHeight = value;
+}
+
+int CameraControl::getImageWidth() const
+{
+    return imageWidth;
+}
+
+void CameraControl::setImageWidth(int value)
+{
+    imageWidth = value;
+}
+
+QString CameraControl::getCameraName() const
+{
+    return cameraName;
+}
+
+void CameraControl::setCameraName(const QString &value)
+{
+    cameraName = value;
+    ui->label->setText("Camera:" + cameraName);
 }

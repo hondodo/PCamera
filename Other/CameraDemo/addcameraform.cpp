@@ -23,6 +23,7 @@ void AddCameraForm::showEvent(QShowEvent *event)
         on_comboBoxType_currentIndexChanged(ui->comboBoxType->currentIndex());
         state = -1;
         cameraUrl = "";
+        cameraName = "";
         cameraType = CAMERATYPE_LOCAL;
         existsCameraUrls.clear();
         ui->labelError->setText("");
@@ -45,6 +46,7 @@ void AddCameraForm::on_comboBoxType_currentIndexChanged(int index)
         ui->comboBoxUrl->setVisible(false);
         ui->lineEditUrl->setVisible(true);
     }
+    initCameraName();
 }
 
 void AddCameraForm::initCameraComboBox()
@@ -78,6 +80,23 @@ void AddCameraForm::initCameraComboBox()
 #endif
 }
 
+void AddCameraForm::initCameraName()
+{
+    if(ui->comboBoxType->currentIndex() == 0)
+    {
+        ui->lineEditName->setText(ui->comboBoxUrl->currentText());
+    }
+    else
+    {
+        ui->lineEditName->setText(ui->lineEditUrl->text().trimmed());
+    }
+}
+
+QString AddCameraForm::getCameraName() const
+{
+    return cameraName;
+}
+
 void AddCameraForm::setExistsCameraUrls(const QList<QString> &value)
 {
     existsCameraUrls = value;
@@ -101,6 +120,7 @@ QString AddCameraForm::getCameraUrl() const
 void AddCameraForm::on_pushButtonOK_clicked()
 {
     state = 0;
+    cameraName = ui->lineEditName->text().trimmed();
     if(ui->comboBoxType->currentIndex() == 0)
     {
         cameraType = CAMERATYPE_LOCAL;
@@ -133,10 +153,12 @@ void AddCameraForm::on_lineEditUrl_textChanged(const QString &arg1)
 {
     Q_UNUSED(arg1);
     ui->labelError->setVisible(false);
+    initCameraName();
 }
 
 void AddCameraForm::on_comboBoxUrl_currentIndexChanged(int index)
 {
     Q_UNUSED(index);
     ui->labelError->setVisible(false);
+    initCameraName();
 }

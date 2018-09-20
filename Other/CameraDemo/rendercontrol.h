@@ -22,6 +22,9 @@ public:
     void stop();
     void start();
 
+    QString getCameraName() const;
+    void setCameraName(const QString &value);
+
 protected:
     void initializeGL() override;
     void paintGL() override;
@@ -39,6 +42,7 @@ private:
     VideoPlayer *player;
     QImage imageCache;
     bool canUpdateImage;
+    QString cameraName;
 };
 
 #endif // RENDERCONTROL_H

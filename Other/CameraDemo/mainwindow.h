@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include <QThread>
 #include <QTimer>
+#include <QApplication>
+#include <QDesktopWidget>
 #include "3rd/videoplayer.h"
 #include "cameracontrol.h"
 #include "rendercontrol.h"
@@ -21,19 +23,24 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+protected:
+    void resizeEvent(QResizeEvent *event);
+
 public slots:
-    void slot_GetOneFrame(QImage img);
 
 private slots:
-    void on_pushButton_clicked();
     void on_pushButtonAddCamera_clicked();
     void onAddCameraFormClose(int code);
+    void on_tabWidget_currentChanged(int index);
 
 private:
     Ui::MainWindow *ui;
-    VideoPlayer *worker;
-    QThread *t;
     QList<QString> existsCameraUrls;
+    QList<CameraControl *> allCameraControls;
+    void showCamera();
+    void resizeCameraControl();
+    int maxwidth;
+    int maxheight;
 };
 
 #endif // MAINWINDOW_H

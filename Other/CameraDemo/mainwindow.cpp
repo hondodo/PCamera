@@ -6,9 +6,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    worker = Q_NULLPTR;
-    t = Q_NULLPTR;
     existsCameraUrls.clear();
+    allCameraControls.clear();
+    QRect rect = QApplication::desktop()->availableGeometry();
+    maxwidth = rect.width();
+    maxheight = rect.height();
 }
 
 MainWindow::~MainWindow()
@@ -16,63 +18,10 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::slot_GetOneFrame(QImage img)
+void MainWindow::resizeEvent(QResizeEvent *event)
 {
-    //ui->label->setPixmap(QPixmap::fromImage(img));
-}
-
-void MainWindow::on_pushButton_clicked()
-{
-//    //t = new QThread;
-//    worker = new VideoPlayer;
-//    //connect(t, &QThread::finished, worker, &QObject::deleteLater);//防止内存泄漏
-//    connect(worker, SIGNAL(sig_GetOneFrame(QImage)), this, SLOT(slot_GetOneFrame(QImage)));
-//    //worker->moveToThread(t);
-//    //t->start();
-//    worker->start();
-
-    /*
-    QList<QByteArray> all = QCamera::availableDevices();
-    for(int i = 0; i < all.count(); i++)
-    {
-        QString desc = QCamera::deviceDescription(all.at(i));
-        desc = "video=" + desc;
-        CameraControl *control = new CameraControl();
-        control->setCameraType(CAMERATYPE_LOCAL);
-        ui->verticalLayout->addWidget(control);
-        control->setCameraUrl(desc);
-        control->start();
-    }
-    CameraControl *control = new CameraControl();
-    ui->verticalLayout->addWidget(control);
-    control->setCameraUrl("http://admin:12345@192.168.31.87:8081");
-    control->setCameraType(CAMERATYPE_WEB);
-    control->start();
-    */
-#ifdef Q_OS_WIN
-//    QList<QByteArray> all = QCamera::availableDevices();
-//    for(int i = 0; i < all.count(); i++)
-//    {
-//        QString desc = QCamera::deviceDescription(all.at(i));
-//        desc = "video=" + desc;
-//        RenderControl *control = new RenderControl();
-//        control->setCameraType(CAMERATYPE_LOCAL);
-//        ui->verticalLayout->addWidget(control);
-//        control->setCameraUrl(desc);
-//        control->start();
-//    }
-#else
-//    CameraControl *controllocal = new CameraControl();
-//    controllocal->setCameraType(CAMERATYPE_LOCAL);
-//    ui->verticalLayout->addWidget(controllocal);
-//    controllocal->setCameraUrl("/dev/video0");
-//    controllocal->start();
-#endif
-//    CameraControl *control = new CameraControl();
-//    ui->verticalLayout->addWidget(control);
-//    control->setCameraUrl("http://admin:12345@192.168.31.87:8081");
-//    control->setCameraType(CAMERATYPE_WEB);
-//    control->start();
+    Q_UNUSED(event);
+    resizeCameraControl();
 }
 
 void MainWindow::on_pushButtonAddCamera_clicked()
@@ -95,13 +44,98 @@ void MainWindow::onAddCameraFormClose(int code)
             {
                 existsCameraUrls.append(url.toLower());
                 CameraControl *control = new CameraControl();
-                ui->gridLayoutCameras->addWidget(control);
+                allCameraControls.append(control);
                 control->setCameraUrl(url);
                 control->setCameraType(form->getCameraType());
+                control->setCameraName(form->getCameraName());
                 control->start();
+                showCamera();
             }
         }
         form->deleteLater();
         form = Q_NULLPTR;
     }
+}
+
+void MainWindow::showCamera()
+{
+    if(ui->tabWidget->currentWidget() == ui->tabCamBig)
+    {
+        if(allCameraControls.count() > 0)
+        {
+            ui->verticalLayoutCamBig->addWidget(allCameraControls.at(0));
+        }
+    }
+    else if(ui->tabWidget->currentWidget() == ui->tabCam4)
+    {
+        for(int i = 0; i < 4; i++)
+        {
+            if(allCameraControls.count() > i)
+            {
+                if(i == 0) ui->verticalLayoutCams1->addWidget(allCameraControls.at(i));
+                if(i == 1) ui->verticalLayoutCams2->addWidget(allCameraControls.at(i));
+                if(i == 2) ui->verticalLayoutCams3->addWidget(allCameraControls.at(i));
+                if(i == 3) ui->verticalLayoutCams4->addWidget(allCameraControls.at(i));
+            }
+        }
+    }
+    else if(ui->tabWidget->currentWidget() == ui->tabCamBigAndSmall)
+    {
+
+    }
+    resizeCameraControl();
+}
+
+void MainWindow::resizeCameraControl()
+{
+    if(ui->tabWidget->currentWidget() == ui->tabCamBig)
+    {
+        int tabcamwidth = ui->tabCamBig->width();
+        int tabcamheight = ui->tabCamBig->height();
+        if(tabcamwidth > maxwidth || tabcamheight > maxheight)
+        {
+            ui->tabCam4->setMaximumSize(maxwidth, maxheight);
+            ui->tabCam4->resize(maxwidth, maxheight);
+            tabcamwidth = maxwidth;
+            tabcamheight = maxheight;
+        }
+        int showindex = 0;
+        if(allCameraControls.count() > showindex)
+        {
+            allCameraControls.at(showindex)->setImageWidth(tabcamwidth);
+            allCameraControls.at(showindex)->setImageHeight(tabcamheight);
+        }
+    }
+    else if(ui->tabWidget->currentWidget() == ui->tabCam4)
+    {
+        int tabcamwidth = ui->tabCam4->width();
+        int tabcamheight = ui->tabCam4->height();
+        if(tabcamwidth > maxwidth || tabcamheight > maxheight)
+        {
+            ui->tabCam4->setMaximumSize(maxwidth, maxheight);
+            ui->tabCam4->resize(maxwidth, maxheight);
+            tabcamwidth = maxwidth;
+            tabcamheight = maxheight;
+        }
+        int eachwidth = tabcamwidth / 2;
+        int eachheight = tabcamheight / 2;
+        for(int i = 0; i < 4; i++)
+        {
+            if(allCameraControls.count() > i)
+            {
+                allCameraControls.at(i)->setImageWidth(eachwidth);
+                allCameraControls.at(i)->setImageHeight(eachheight);
+            }
+        }
+    }
+    else if(ui->tabWidget->currentWidget() == ui->tabCamBigAndSmall)
+    {
+
+    }
+}
+
+void MainWindow::on_tabWidget_currentChanged(int index)
+{
+    Q_UNUSED(index);
+    showCamera();
 }

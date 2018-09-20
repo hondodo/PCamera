@@ -61,6 +61,16 @@ void RenderControl::onImage(QImage image)
     update();
 }
 
+QString RenderControl::getCameraName() const
+{
+    return cameraName;
+}
+
+void RenderControl::setCameraName(const QString &value)
+{
+    cameraName = value;
+}
+
 CAMERATYPE RenderControl::getCameraType() const
 {
     return cameraType;
