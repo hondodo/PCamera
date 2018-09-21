@@ -54,3 +54,15 @@ win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include
              D:\Potatokid\OpenCV\build\include\opencv2
 win32: LIBS += D:\Potatokid\OpenCV\buildOpenCV\lib\libopencv_*.a
 
+win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include
+             D:\Potatokid\OpenCV\build\include\opencv
+             D:\Potatokid\OpenCV\build\include\opencv2
+else:unix: INCLUDEPATH += /usr/include/opencv\
+               /usr/include/opencv2\
+               /usr/local/include\
+
+win32: LIBS += D:\Potatokid\OpenCV\buildOpenCV\lib\libopencv_*.a
+else:unix: LIBS += /usr/local/lib/libopencv_*.so\
+                   -lmpg123\
+                   -lao\
+                   -lwiringPi

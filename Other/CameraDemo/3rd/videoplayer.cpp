@@ -100,18 +100,11 @@ void VideoPlayer::run()
     //    char option_value2[]="100";
     //    av_dict_set(&avdic,option_key2,option_value2,0);
     av_dict_set(&avdic, "fflags", "nobuffer", 0);
-    av_dict_set(&avdic, "max_delay", "100000", 0);
+    av_dict_set(&avdic, "max_delay", "100", 0);
     av_dict_set(&avdic, "framerate", "30", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
     av_dict_set(&avdic, "video_size", "1280x720", 0);
 
-    //#ifdef Q_OS_WIN
-    //    QList<QByteArray> all = QCamera::availableDevices();
-    //    QString desc = QCamera::deviceDescription(all.at(0));
-    //    desc = "video=" + desc;
-    //char url[]="video=World Facing Right";
-    //"http://admin:12345@192.168.31.87:8081";//"rtsp://admin:admin@192.168.1.18:554/h264/ch1/main/av_stream";
-    //ret = avformat_open_input(&pFormatCtx, url, NULL, &avdic);
     if(cameraType == CAMERATYPE_LOCAL)
     {
         ret = avformat_open_input(&pFormatCtx, cameraUrl.toLocal8Bit().data(), inputFmt, &avdic);
@@ -126,14 +119,6 @@ void VideoPlayer::run()
         printf("can't open the file. \n");
         return;
     }
-    //#else
-    //    ret = avformat_open_input(&pFormatCtx, "/dev/video0", inputFmt, &avdic);
-    //    if (ret != 0)
-    //    {
-    //        printf("can't open the file. \n");
-    //        return;
-    //    }
-    //#endif
 
     if (avformat_find_stream_info(pFormatCtx, NULL) < 0) {
         printf("Could't find stream infomation.\n");
@@ -183,12 +168,12 @@ void VideoPlayer::run()
     ///这里我们改成了 将解码后的YUV数据转换成RGB32
     img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
                                      pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
-                                     AV_PIX_FMT_RGB32, SWS_BICUBIC, NULL, NULL, NULL);
+                                     AV_PIX_FMT_BGR24, SWS_BICUBIC, NULL, NULL, NULL);
 
-    numBytes = avpicture_get_size(AV_PIX_FMT_RGB32, pCodecCtx->width,pCodecCtx->height);
+    numBytes = avpicture_get_size(AV_PIX_FMT_BGR24, pCodecCtx->width,pCodecCtx->height);
 
     out_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
-    avpicture_fill((AVPicture *) pFrameRGB, out_buffer, AV_PIX_FMT_RGB32,
+    avpicture_fill((AVPicture *) pFrameRGB, out_buffer, AV_PIX_FMT_BGR24,
                    pCodecCtx->width, pCodecCtx->height);
 
     int y_size = pCodecCtx->width * pCodecCtx->height;
@@ -202,6 +187,18 @@ void VideoPlayer::run()
     int readtime = 0, dealtime = 0, showtime = 0;
     frametime.start();
     othertime.start();
+
+    cv::VideoWriter writer;
+    QString filename = "";
+#ifdef Q_OS_WIN
+    filename = "D:/test.avi";
+#else
+    filename = "/media/pi/Potatokid/test.avi";
+#endif
+    writer.open(filename.toLocal8Bit().data(), CV_FOURCC('D', 'I', 'V', 'X'), 30, cv::Size(1280, 720));
+
+    cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
+    cv::Mat temp;
     while (_isRunning)
     {
         if (av_read_frame(pFormatCtx, packet) < 0)
@@ -212,7 +209,7 @@ void VideoPlayer::run()
         if (packet->stream_index == videoStream)
         {
             othertime.restart();
-            ret = avcodec_decode_video2(pCodecCtx, pFrame, &got_picture,packet);
+            ret = avcodec_decode_video2(pCodecCtx, pFrame, &got_picture, packet);
 
             if (ret < 0)
             {
@@ -230,8 +227,24 @@ void VideoPlayer::run()
                           pFrameRGB->linesize);
 
                 //把这个RGB数据 用QImage加载
-                QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
-                QImage image = tmpImg.copy();
+                //QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
+                //QImage image = tmpImg.copy();
+
+                //cv::Mat tmp(image.height(),image.width(),CV_8UC3,(uchar*)image.bits(), image.bytesPerLine());
+                //cv::cvtColor(tmp, tmp,CV_BGR2RGB);
+
+                //cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
+                mRGB.data =(uchar*)pFrameRGB->data[0];
+                if(writer.isOpened())
+                {
+                    writer.write(mRGB);
+                }
+
+                cv::cvtColor(mRGB, temp,CV_BGR2RGB);
+                QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+                QImage image(dest);
+                image.detach();
+
                 dealtime = othertime.elapsed();
                 othertime.restart();
                 emit onFrame(image);
@@ -248,6 +261,8 @@ void VideoPlayer::run()
         frame = 1000.0 / frametime.elapsed();
         qDebug() << "FPS:" << frame << "Read:" << readtime << "Deal:" << dealtime << "Show:" << showtime;
     }
+    mRGB.release();
+    temp.release();
     av_free(out_buffer);
     av_free(pFrameRGB);
     avcodec_close(pCodecCtx);
