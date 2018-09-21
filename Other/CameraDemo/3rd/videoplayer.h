@@ -7,6 +7,7 @@
 #include <QCamera>
 #include <QCameraInfo>
 #include <QApplication>
+#include <QTime>
 #include "cameratype.h"
 
 extern "C"
