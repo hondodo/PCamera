@@ -99,11 +99,11 @@ void VideoPlayer::run()
     //    char option_key2[]="max_delay";
     //    char option_value2[]="100";
     //    av_dict_set(&avdic,option_key2,option_value2,0);
-    av_dict_set(&avdic, "fflags", "nobuffer", 0);
+    //av_dict_set(&avdic, "fflags", "nobuffer", 0);
     av_dict_set(&avdic, "max_delay", "100", 0);
-    av_dict_set(&avdic, "framerate", "30", 0);
-    av_dict_set(&avdic, "input_format", "mjpeg", 0);
-    av_dict_set(&avdic, "video_size", "1280x720", 0);
+    //av_dict_set(&avdic, "framerate", "30", 0);
+    //av_dict_set(&avdic, "input_format", "mjpeg", 0);
+    //av_dict_set(&avdic, "video_size", "1280x720", 0);
 
     if(cameraType == CAMERATYPE_LOCAL)
     {
@@ -117,6 +117,7 @@ void VideoPlayer::run()
     if (ret != 0)
     {
         printf("can't open the file. \n");
+        qDebug() << "can't open the file. " << ret;
         return;
     }
 
@@ -199,6 +200,7 @@ void VideoPlayer::run()
 
     cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
     cv::Mat temp;
+
     while (_isRunning)
     {
         if (av_read_frame(pFormatCtx, packet) < 0)
@@ -253,7 +255,7 @@ void VideoPlayer::run()
         }
         av_free_packet(packet);
         int els = frametime.elapsed();
-        int sleep = 1000.0 / 15 - els;
+        int sleep = 1000.0 / 10 - els;
         if(sleep > 0)
         {
             msleep(sleep);

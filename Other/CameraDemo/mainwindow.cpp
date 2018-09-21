@@ -21,6 +21,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    for(int i = 0; i < allCameraControls.count(); i++)
+    {
+        allCameraControls.at(i)->stop();
+    }
     delete ui;
 }
 
