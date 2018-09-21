@@ -255,7 +255,7 @@ void VideoPlayer::run()
         }
         av_free_packet(packet);
         int els = frametime.elapsed();
-        int sleep = 1000.0 / 10 - els;
+        int sleep = 1000.0 / 15 - els;
         if(sleep > 0)
         {
             msleep(sleep);
