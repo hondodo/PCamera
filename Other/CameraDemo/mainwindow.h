@@ -36,7 +36,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QList<QString> existsCameraUrls;
-    QList<CameraControl *> allCameraControls;
+    QList<RenderControl *> allCameraControls;
     void showCamera();
     void resizeCameraControl();
     int maxwidth;

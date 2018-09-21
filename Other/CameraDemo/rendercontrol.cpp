@@ -56,9 +56,29 @@ void RenderControl::onImage(QImage image)
 {
     if(canUpdateImage)
     {
-        imageCache = image.copy(0, 0, 400, 300);
+        imageCache = image.copy();
     }
     update();
+}
+
+int RenderControl::getImageHeight() const
+{
+    return imageHeight;
+}
+
+void RenderControl::setImageHeight(int value)
+{
+    imageHeight = value;
+}
+
+int RenderControl::getImageWidth() const
+{
+    return imageWidth;
+}
+
+void RenderControl::setImageWidth(int value)
+{
+    imageWidth = value;
 }
 
 QString RenderControl::getCameraName() const

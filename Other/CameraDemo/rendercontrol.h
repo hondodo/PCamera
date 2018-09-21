@@ -25,6 +25,12 @@ public:
     QString getCameraName() const;
     void setCameraName(const QString &value);
 
+    int getImageWidth() const;
+    void setImageWidth(int value);
+
+    int getImageHeight() const;
+    void setImageHeight(int value);
+
 protected:
     void initializeGL() override;
     void paintGL() override;
@@ -43,6 +49,7 @@ private:
     QImage imageCache;
     bool canUpdateImage;
     QString cameraName;
+    int imageWidth, imageHeight;
 };
 
 #endif // RENDERCONTROL_H

@@ -161,10 +161,10 @@ void VideoPlayer::run()
     pCodecCtx = pFormatCtx->streams[videoStream]->codec;
     pCodec = avcodec_find_decoder(pCodecCtx->codec_id);
     //2017.8.9---lizhen
-    pCodecCtx->bit_rate =0;   //初始化为0
-    pCodecCtx->time_base.num=1;  //下面两行：一秒钟25帧
-    pCodecCtx->time_base.den=10;
-    pCodecCtx->frame_number=1;  //每包一个视频帧
+    pCodecCtx->bit_rate = 0;   //初始化为0
+    pCodecCtx->time_base.num = 1;  //下面两行：一秒钟25帧
+    pCodecCtx->time_base.den = 30;
+    pCodecCtx->frame_number = 1;  //每包一个视频帧
 
     if (pCodec == NULL) {
         printf("Codec not found.\n");
@@ -211,7 +211,6 @@ void VideoPlayer::run()
         frametime.restart();
         if (packet->stream_index == videoStream)
         {
-
             othertime.restart();
             ret = avcodec_decode_video2(pCodecCtx, pFrame, &got_picture,packet);
 

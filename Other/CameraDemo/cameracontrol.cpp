@@ -57,18 +57,14 @@ void CameraControl::onImage(QImage image)
     {
         return;
     }
-//    if(this->maximumHeight() > this->height() || this->maximumWidth() > this->width())
-//    {
+    if(image.width() > imageWidth || image.height() > imageHeight)
+    {
         ui->label->setPixmap(QPixmap::fromImage(image.scaled(imageWidth, imageHeight, Qt::KeepAspectRatio)));
-//    }
-//    if(image.height() > this->height() || image.width() > this->width())
-//    {
-//        ui->label->setPixmap(QPixmap::fromImage(image.scaled(this->size(), Qt::KeepAspectRatio)));
-//    }
-//    else
-//    {
-//        ui->label->setPixmap(QPixmap::fromImage(image));
-//    }
+    }
+    else
+    {
+        ui->label->setPixmap(QPixmap::fromImage(image));
+    }
 }
 
 int CameraControl::getImageHeight() const
@@ -78,7 +74,7 @@ int CameraControl::getImageHeight() const
 
 void CameraControl::setImageHeight(int value)
 {
-    imageHeight = value;
+    imageHeight = value > 720? 720 : value;
 }
 
 int CameraControl::getImageWidth() const
@@ -88,7 +84,7 @@ int CameraControl::getImageWidth() const
 
 void CameraControl::setImageWidth(int value)
 {
-    imageWidth = value;
+    imageWidth = value > 1280? 1280 : value;
 }
 
 QString CameraControl::getCameraName() const
