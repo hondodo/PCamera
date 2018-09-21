@@ -239,7 +239,7 @@ void VideoPlayer::run()
                 mRGB.data =(uchar*)pFrameRGB->data[0];
                 if(writer.isOpened())
                 {
-                    writer.write(mRGB);
+                   // writer.write(mRGB);
                 }
 
                 cv::cvtColor(mRGB, temp,CV_BGR2RGB);
