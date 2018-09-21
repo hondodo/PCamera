@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QApplication>
 #include <QDesktopWidget>
+#include <QTimerEvent>
 #include "3rd/videoplayer.h"
 #include "cameracontrol.h"
 #include "rendercontrol.h"
@@ -25,6 +26,7 @@ public:
 
 protected:
     void resizeEvent(QResizeEvent *event);
+    void timerEvent(QTimerEvent *event);
 
 public slots:
 
@@ -42,6 +44,11 @@ private:
     void resizeCameraControl();
     int maxwidth;
     int maxheight;
+
+    int timerId;
+    int timerFrames;
+    int camBigIndex;
+    CameraControl *camBigShowingWidget;
 };
 
 #endif // MAINWINDOW_H

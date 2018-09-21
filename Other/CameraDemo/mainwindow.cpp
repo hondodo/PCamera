@@ -11,6 +11,12 @@ MainWindow::MainWindow(QWidget *parent) :
     QRect rect = QApplication::desktop()->availableGeometry();
     maxwidth = rect.width();
     maxheight = rect.height();
+    camBigIndex = -1;
+    timerId = 0;
+    timerFrames = 0;
+    timerId = startTimer(100);
+    camBigShowingWidget = Q_NULLPTR;
+    ui->widgetHide->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -22,6 +28,48 @@ void MainWindow::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
     resizeCameraControl();
+}
+
+void MainWindow::timerEvent(QTimerEvent *event)
+{
+    Q_UNUSED(event);
+    if(event->timerId() == timerId)
+    {
+        if(timerFrames % 100 == 0)
+        {
+            if(ui->tabWidget->currentWidget() == ui->tabCamBig)
+            {
+                if(camBigShowingWidget != Q_NULLPTR && allCameraControls.count() > 1)
+                {
+                    ui->verticalLayoutHide->addWidget(camBigShowingWidget);
+                }
+                if(!allCameraControls.isEmpty() && allCameraControls.count() > 0)
+                {
+                    if(camBigIndex < 0 || camBigIndex > (allCameraControls.count() - 1))
+                    {
+                        camBigIndex = 0;
+                    }
+                    if(camBigShowingWidget != allCameraControls.at(camBigIndex))
+                    {
+                        camBigShowingWidget = allCameraControls.at(camBigIndex);
+                        ui->verticalLayoutCamBig->addWidget(camBigShowingWidget);
+                        resizeCameraControl();
+                    }
+                }
+                else
+                {
+                    camBigShowingWidget = Q_NULLPTR;
+                }
+            }
+            camBigIndex++;
+        }
+
+        timerFrames++;
+        if(timerFrames > 10000)
+        {
+            timerFrames = 0;
+        }
+    }
 }
 
 void MainWindow::on_pushButtonAddCamera_clicked()
@@ -49,6 +97,9 @@ void MainWindow::onAddCameraFormClose(int code)
                 control->setCameraType(form->getCameraType());
                 control->setCameraName(form->getCameraName());
                 control->start();
+                ui->verticalLayoutHide->removeWidget(camBigShowingWidget);
+                camBigShowingWidget = control;
+                ui->verticalLayoutCamBig->addWidget(camBigShowingWidget);
                 showCamera();
             }
         }
@@ -61,10 +112,7 @@ void MainWindow::showCamera()
 {
     if(ui->tabWidget->currentWidget() == ui->tabCamBig)
     {
-        if(allCameraControls.count() > 0)
-        {
-            ui->verticalLayoutCamBig->addWidget(allCameraControls.at(0));
-        }
+        ui->verticalLayoutCamBig->addWidget(camBigShowingWidget);
     }
     else if(ui->tabWidget->currentWidget() == ui->tabCam4)
     {
@@ -90,23 +138,28 @@ void MainWindow::resizeCameraControl()
 {
     if(ui->tabWidget->currentWidget() == ui->tabCamBig)
     {
-        int tabcamwidth = ui->widgetCamBig->width() - 25;
-        int tabcamheight = ui->widgetCamBig->height() - 10;
-        int mw = maxwidth - 25;
-        int mh = maxheight - 10;
-        if(tabcamwidth > mw || tabcamheight > mh)
+        if(camBigShowingWidget != Q_NULLPTR)
         {
-            ui->tabCam4->setMaximumSize(mw, mh);
-            ui->tabCam4->resize(mw, mh);
-            tabcamwidth = mw;
-            tabcamheight = mw;
+            int tabcamwidth = ui->widgetCamBig->width() - 25;
+            int tabcamheight = ui->widgetCamBig->height() - 10;
+            int mw = maxwidth - 25;
+            int mh = maxheight - 10;
+            if(tabcamwidth > mw || tabcamheight > mh)
+            {
+                ui->tabCam4->setMaximumSize(mw, mh);
+                ui->tabCam4->resize(mw, mh);
+                tabcamwidth = mw;
+                tabcamheight = mw;
+            }
+            camBigShowingWidget->setImageWidth(tabcamwidth);
+            camBigShowingWidget->setImageHeight(tabcamheight);
         }
-        int showindex = 0;
-        if(allCameraControls.count() > showindex)
-        {
-            allCameraControls.at(showindex)->setImageWidth(tabcamwidth);
-            allCameraControls.at(showindex)->setImageHeight(tabcamheight);
-        }
+        //int showindex = 0;
+        //if(allCameraControls.count() > showindex)
+        //{
+        //    allCameraControls.at(showindex)->setImageWidth(tabcamwidth);
+        //    allCameraControls.at(showindex)->setImageHeight(tabcamheight);
+        //}
     }
     else if(ui->tabWidget->currentWidget() == ui->tabCam4)
     {
