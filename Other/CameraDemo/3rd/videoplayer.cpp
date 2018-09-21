@@ -101,9 +101,9 @@ void VideoPlayer::run()
     //    av_dict_set(&avdic,option_key2,option_value2,0);
     //av_dict_set(&avdic, "fflags", "nobuffer", 0);
     av_dict_set(&avdic, "max_delay", "100", 0);
-    //av_dict_set(&avdic, "framerate", "30", 0);
-    //av_dict_set(&avdic, "input_format", "mjpeg", 0);
-    //av_dict_set(&avdic, "video_size", "1280x720", 0);
+    av_dict_set(&avdic, "framerate", "30", 0);
+    av_dict_set(&avdic, "input_format", "mjpeg", 0);
+    av_dict_set(&avdic, "video_size", "1280x720", 0);
 
     if(cameraType == CAMERATYPE_LOCAL)
     {
@@ -242,6 +242,7 @@ void VideoPlayer::run()
                    // writer.write(mRGB);
                 }
 
+                mRGB.convertTo(mRGB, -1, 2.2, 50);
                 cv::cvtColor(mRGB, temp,CV_BGR2RGB);
                 QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
                 QImage image(dest);
