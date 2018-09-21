@@ -43,7 +43,7 @@ void MainWindow::onAddCameraFormClose(int code)
             if(!existsCameraUrls.contains(url.toLower()))
             {
                 existsCameraUrls.append(url.toLower());
-                RenderControl *control = new RenderControl();
+                CameraControl *control = new CameraControl();
                 allCameraControls.append(control);
                 control->setCameraUrl(url);
                 control->setCameraType(form->getCameraType());
