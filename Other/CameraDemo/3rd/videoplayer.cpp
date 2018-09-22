@@ -201,6 +201,11 @@ void VideoPlayer::run()
     cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
     cv::Mat temp;
 
+    //计算出的偏差值，小于1表示比较正常，大于1表示存在亮度异常；
+    //当cast异常时，da大于0表示过亮，da小于0表示过暗
+    float brightnessCast = 0, brightnessDA = 0;
+    cv::Rect brightnessRect;
+
     while (_isRunning)
     {
         if (av_read_frame(pFormatCtx, packet) < 0)
@@ -237,12 +242,35 @@ void VideoPlayer::run()
 
                 //cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
                 mRGB.data =(uchar*)pFrameRGB->data[0];
+
                 if(writer.isOpened())
                 {
                    // writer.write(mRGB);
                 }
 
-                mRGB.convertTo(mRGB, -1, 2.2, 50);
+                brightnessRect.x = 0;
+                brightnessRect.y = 0;
+                brightnessRect.width = mRGB.cols;
+                brightnessRect.height = mRGB.cols;
+                if(mRGB.rows > 400)
+                {
+                    brightnessRect.y = (mRGB.rows - 400) / 2;
+                    brightnessRect.height = 400;
+                }
+                if(mRGB.cols > 400)
+                {
+                    brightnessRect.x = (mRGB.cols - 400) / 2;
+                    brightnessRect.width = 400;
+                }
+
+                MatHelper::Init->brightnessException(mRGB, brightnessCast, brightnessDA, brightnessRect);
+                if(brightnessCast > 1.0)
+                {
+                    if(brightnessDA < 0)
+                    {
+                        mRGB.convertTo(mRGB, -1, 2.2, 50);
+                    }
+                }
                 cv::cvtColor(mRGB, temp,CV_BGR2RGB);
                 QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
                 QImage image(dest);

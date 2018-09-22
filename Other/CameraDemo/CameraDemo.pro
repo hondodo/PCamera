@@ -29,7 +29,8 @@ SOURCES += \
     3rd/videoplayer.cpp \
     cameracontrol.cpp \
     rendercontrol.cpp \
-    addcameraform.cpp
+    addcameraform.cpp \
+    mathelper.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -37,7 +38,8 @@ HEADERS += \
     cameracontrol.h \
     cameratype.h \
     rendercontrol.h \
-    addcameraform.h
+    addcameraform.h \
+    mathelper.h
 
 FORMS += \
         mainwindow.ui \
