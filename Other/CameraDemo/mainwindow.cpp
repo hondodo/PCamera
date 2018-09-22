@@ -104,7 +104,7 @@ void MainWindow::onAddCameraFormClose(int code)
 #ifdef Q_OS_WIN
                     control->setCheckBrighness(true);
                     control->setFixBrighnessByTime(false);
-#elif
+#else
                     control->setCheckBrighness(false);
                     control->setFixBrighnessByTime(true);
 #endif
