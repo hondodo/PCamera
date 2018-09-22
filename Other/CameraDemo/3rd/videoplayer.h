@@ -8,8 +8,11 @@
 #include <QCameraInfo>
 #include <QApplication>
 #include <QTime>
+#include <QDateTime>
 #include "cameratype.h"
 #include "mathelper.h"
+#include "ffmpeghelper.h"
+#include "videofilehelper.h"
 
 extern "C"
 {
@@ -33,6 +36,15 @@ public:
     CAMERATYPE getCameraType() const;
     void setCameraType(const CAMERATYPE &value);
 
+    bool getCheckBrighness() const;
+    void setCheckBrighness(bool value);
+
+    bool getFixBrighnessByTime() const;
+    void setFixBrighnessByTime(bool value);
+
+    QString getCameraName() const;
+    void setCameraName(const QString &value);
+
 protected:
     void run() override;
 
@@ -46,8 +58,9 @@ private:
 
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
-
-
+    QString cameraName;
+    bool checkBrighness;
+    bool fixBrighnessByTime;
 };
 
 #endif // WORKER_H

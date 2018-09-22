@@ -29,6 +29,9 @@ VideoPlayer::VideoPlayer()
     cameraUrl = "/dev/video0";
 #endif
     _isRunning = false;
+    checkBrighness = false;
+    fixBrighnessByTime = false;
+    cameraName = "";
 }
 
 VideoPlayer::~VideoPlayer()
@@ -189,15 +192,12 @@ void VideoPlayer::run()
     frametime.start();
     othertime.start();
 
-    cv::VideoWriter writer;
     QString filename = "";
 #ifdef Q_OS_WIN
     filename = "D:/test.avi";
 #else
     filename = "/media/pi/Potatokid/test.avi";
 #endif
-    writer.open(filename.toLocal8Bit().data(), CV_FOURCC('D', 'I', 'V', 'X'), 30, cv::Size(1280, 720));
-
     cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
     cv::Mat temp;
 
@@ -243,34 +243,48 @@ void VideoPlayer::run()
                 //cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
                 mRGB.data =(uchar*)pFrameRGB->data[0];
 
-                if(writer.isOpened())
-                {
-                   // writer.write(mRGB);
-                }
+                VideoFileThread::Init->append(filename, mRGB);
 
-                brightnessRect.x = 0;
-                brightnessRect.y = 0;
-                brightnessRect.width = mRGB.cols;
-                brightnessRect.height = mRGB.cols;
-                if(mRGB.rows > 400)
+                if(checkBrighness)
                 {
-                    brightnessRect.y = (mRGB.rows - 400) / 2;
-                    brightnessRect.height = 400;
-                }
-                if(mRGB.cols > 400)
-                {
-                    brightnessRect.x = (mRGB.cols - 400) / 2;
-                    brightnessRect.width = 400;
-                }
-
-                MatHelper::Init->brightnessException(mRGB, brightnessCast, brightnessDA, brightnessRect);
-                if(brightnessCast > 1.0)
-                {
-                    if(brightnessDA < 0)
+                    brightnessRect.x = 0;
+                    brightnessRect.y = 0;
+                    brightnessRect.width = mRGB.cols;
+                    brightnessRect.height = mRGB.cols;
+                    if(mRGB.rows > 400)
                     {
-                        mRGB.convertTo(mRGB, -1, 2.2, 50);
+                        brightnessRect.y = (mRGB.rows - 400) / 2;
+                        brightnessRect.height = 400;
+                    }
+                    if(mRGB.cols > 400)
+                    {
+                        brightnessRect.x = (mRGB.cols - 400) / 2;
+                        brightnessRect.width = 400;
+                    }
+
+                    MatHelper::Init->brightnessException(mRGB, brightnessCast, brightnessDA, brightnessRect);
+                    if(brightnessCast > 1.0)
+                    {
+                        if(brightnessDA < 0)
+                        {
+                            mRGB.convertTo(mRGB, -1, 2.2, 50);
+                        }
                     }
                 }
+                else
+                {
+                    if(fixBrighnessByTime)
+                    {
+                        QDateTime now = QDateTime::currentDateTime();
+                        if(now.time().hour() > 6 && now.time().hour() < 18)
+                        {}
+                        else
+                        {
+                            mRGB.convertTo(mRGB, -1, 2.2, 50);
+                        }
+                    }
+                }
+
                 cv::cvtColor(mRGB, temp,CV_BGR2RGB);
                 QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
                 QImage image(dest);
@@ -298,4 +312,34 @@ void VideoPlayer::run()
     av_free(pFrameRGB);
     avcodec_close(pCodecCtx);
     avformat_close_input(&pFormatCtx);
+}
+
+QString VideoPlayer::getCameraName() const
+{
+    return cameraName;
+}
+
+void VideoPlayer::setCameraName(const QString &value)
+{
+    cameraName = value;
+}
+
+bool VideoPlayer::getFixBrighnessByTime() const
+{
+    return fixBrighnessByTime;
+}
+
+void VideoPlayer::setFixBrighnessByTime(bool value)
+{
+    fixBrighnessByTime = value;
+}
+
+bool VideoPlayer::getCheckBrighness() const
+{
+    return checkBrighness;
+}
+
+void VideoPlayer::setCheckBrighness(bool value)
+{
+    checkBrighness = value;
 }

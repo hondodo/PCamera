@@ -30,7 +30,9 @@ SOURCES += \
     cameracontrol.cpp \
     rendercontrol.cpp \
     addcameraform.cpp \
-    mathelper.cpp
+    mathelper.cpp \
+    3rd/ffmpeghelper.cpp \
+    videofilehelper.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -39,15 +41,17 @@ HEADERS += \
     cameratype.h \
     rendercontrol.h \
     addcameraform.h \
-    mathelper.h
+    mathelper.h \
+    3rd/ffmpeghelper.h \
+    videofilehelper.h
 
 FORMS += \
         mainwindow.ui \
     cameracontrol.ui \
     addcameraform.ui
 
-win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice
-unix:LIBS += -lavcodec -lavformat -lswscale -lavutil -lavdevice
+win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
+unix:LIBS += -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
 
 INCLUDEPATH += D:/ffmpeg/dev/include
 

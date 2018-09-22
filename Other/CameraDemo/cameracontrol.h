@@ -34,6 +34,12 @@ public:
     int getImageHeight() const;
     void setImageHeight(int value);
 
+    bool getCheckBrighness() const;
+    void setCheckBrighness(bool value);
+
+    bool getFixBrighnessByTime() const;
+    void setFixBrighnessByTime(bool value);
+
 private slots:
     void onImage(QImage image);
 
@@ -42,7 +48,10 @@ private:
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
     QString cameraName;
+    VideoPlayer *player;
     int imageWidth, imageHeight;
+    bool checkBrighness;
+    bool fixBrighnessByTime;
 };
 
 #endif // CAMERACONTROL_H

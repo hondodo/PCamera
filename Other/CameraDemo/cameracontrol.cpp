@@ -10,10 +10,15 @@ CameraControl::CameraControl(QWidget *parent) :
     cameraUrl = "video=";
     imageWidth = 640;
     imageHeight = 480;
+    cameraName = "";
+    checkBrighness = false;
+    fixBrighnessByTime = false;
+    player = Q_NULLPTR;
 }
 
 CameraControl::~CameraControl()
 {
+    stop();
     delete ui;
 }
 
@@ -39,16 +44,27 @@ void CameraControl::setCameraType(const CAMERATYPE &value)
 
 void CameraControl::start()
 {
-    VideoPlayer *player = new VideoPlayer();
+    stop();
+    player = new VideoPlayer();
     player->setCameraType(cameraType);
     player->setCameraUrl(cameraUrl);
+    player->setCameraName(cameraName);
+    player->setCheckBrighness(checkBrighness);
+    player->setFixBrighnessByTime(fixBrighnessByTime);
     connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)));
     player->start();
 }
 
 void CameraControl::stop()
 {
-
+    if(player != Q_NULLPTR)
+    {
+        player->setStop();
+        player->wait(3000);
+        player->terminate();
+        player->deleteLater();
+        player = Q_NULLPTR;
+    }
 }
 
 void CameraControl::onImage(QImage image)
@@ -65,6 +81,26 @@ void CameraControl::onImage(QImage image)
     {
         ui->label->setPixmap(QPixmap::fromImage(image));
     }
+}
+
+bool CameraControl::getFixBrighnessByTime() const
+{
+    return fixBrighnessByTime;
+}
+
+void CameraControl::setFixBrighnessByTime(bool value)
+{
+    fixBrighnessByTime = value;
+}
+
+bool CameraControl::getCheckBrighness() const
+{
+    return checkBrighness;
+}
+
+void CameraControl::setCheckBrighness(bool value)
+{
+    checkBrighness = value;
 }
 
 int CameraControl::getImageHeight() const

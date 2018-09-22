@@ -17,10 +17,12 @@ MainWindow::MainWindow(QWidget *parent) :
     timerId = startTimer(100);
     camBigShowingWidget = Q_NULLPTR;
     ui->widgetHide->setVisible(false);
+    VideoFileThread::Init->start();
 }
 
 MainWindow::~MainWindow()
 {
+    VideoFileThread::Init->setStop();
     for(int i = 0; i < allCameraControls.count(); i++)
     {
         allCameraControls.at(i)->stop();
@@ -97,6 +99,16 @@ void MainWindow::onAddCameraFormClose(int code)
                 existsCameraUrls.append(url.toLower());
                 CameraControl *control = new CameraControl();
                 allCameraControls.append(control);
+                if(form->getCameraType() == CAMERATYPE_LOCAL)
+                {
+#ifdef Q_OS_WIN
+                    control->setCheckBrighness(true);
+                    control->setFixBrighnessByTime(false);
+#elif
+                    control->setCheckBrighness(false);
+                    control->setFixBrighnessByTime(true);
+#endif
+                }
                 control->setCameraUrl(url);
                 control->setCameraType(form->getCameraType());
                 control->setCameraName(form->getCameraName());
