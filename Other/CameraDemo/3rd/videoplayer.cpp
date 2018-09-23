@@ -199,12 +199,12 @@ void VideoPlayer::run()
     filename = "/media/pi/Potatokid/test.avi";
 #endif
     cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
-    cv::Mat temp;
+    cv::Mat temp, small;
 
     //计算出的偏差值，小于1表示比较正常，大于1表示存在亮度异常；
     //当cast异常时，da大于0表示过亮，da小于0表示过暗
     float brightnessCast = 0, brightnessDA = 0;
-    cv::Rect brightnessRect;
+    double brightnessA = 2.2, brightnessB = 50;//a 1.0-3.0 b 0-100
 
     while (_isRunning)
     {
@@ -243,31 +243,39 @@ void VideoPlayer::run()
                 //cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
                 mRGB.data =(uchar*)pFrameRGB->data[0];
 
-                VideoFileThread::Init->append(filename, mRGB);
+                //VideoFileThread::Init->append(filename, mRGB);
 
                 if(checkBrighness)
                 {
-                    brightnessRect.x = 0;
-                    brightnessRect.y = 0;
-                    brightnessRect.width = mRGB.cols;
-                    brightnessRect.height = mRGB.cols;
-                    if(mRGB.rows > 400)
-                    {
-                        brightnessRect.y = (mRGB.rows - 400) / 2;
-                        brightnessRect.height = 400;
-                    }
-                    if(mRGB.cols > 400)
-                    {
-                        brightnessRect.x = (mRGB.cols - 400) / 2;
-                        brightnessRect.width = 400;
-                    }
-
-                    MatHelper::Init->brightnessException(mRGB, brightnessCast, brightnessDA, brightnessRect);
+                    cv::resize(mRGB, small, cv::Size(100, 50));
+                    MatHelper::Init->brightnessException(small, brightnessCast, brightnessDA);
                     if(brightnessCast > 1.0)
                     {
                         if(brightnessDA < 0)
                         {
-                            mRGB.convertTo(mRGB, -1, 2.2, 50);
+                            mRGB.convertTo(mRGB, -1, brightnessA, brightnessB);
+                            cv::resize(mRGB, small, cv::Size(150, 100));
+                            MatHelper::Init->brightnessException(small, brightnessCast, brightnessDA);
+                            if(brightnessCast > 1.0)
+                            {
+                                if(brightnessDA < -10)
+                                {
+                                    brightnessB += 1;
+                                }
+                                else if(brightnessDA > 10)
+                                {
+                                    brightnessB -= 1;
+                                }
+                                if(brightnessB > 100)
+                                {
+                                    brightnessB = 100;
+                                }
+                                if(brightnessB < 0)
+                                {
+                                    brightnessB = 0;
+                                }
+                                qDebug() << "BRIGHTNESS:" << brightnessB;
+                            }
                         }
                     }
                 }
