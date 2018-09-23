@@ -302,7 +302,7 @@ void VideoPlayer::run()
                 othertime.restart();
                 if(writer.isOpened())
                 {
-                    //writer.write(mRGB);
+                    writer.write(mRGB);
                 }
                 savetime = othertime.elapsed();
                 othertime.restart();
