@@ -14,7 +14,7 @@ VideoProp::VideoProp()
 #ifdef Q_OS_WIN
     baseDir = "./REC/";
 #else
-    baseDir = "/media/pi/Potatokid/";
+    baseDir = "/media/pi/Disk0/";
 #endif
     setDirBuildNew();
 }
