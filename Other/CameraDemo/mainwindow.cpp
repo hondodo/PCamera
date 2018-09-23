@@ -105,8 +105,8 @@ void MainWindow::onAddCameraFormClose(int code)
                     control->setCheckBrighness(true);
                     control->setFixBrighnessByTime(false);
 #else
-                    control->setCheckBrighness(false);
-                    control->setFixBrighnessByTime(false);
+                    control->setCheckBrighness(true);
+                    control->setFixBrighnessByTime(true);
 #endif
                 }
                 control->setCameraUrl(url);
