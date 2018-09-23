@@ -105,7 +105,7 @@ void MainWindow::onAddCameraFormClose(int code)
                     control->setCheckBrighness(true);
                     control->setFixBrighnessByTime(false);
 #else
-                    control->setCheckBrighness(false);
+                    control->setCheckBrighness(true);
                     control->setFixBrighnessByTime(true);
 #endif
                 }
