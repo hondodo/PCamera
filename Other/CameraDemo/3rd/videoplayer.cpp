@@ -99,9 +99,6 @@ void VideoPlayer::run()
     char option_key[]="rtsp_transport";
     char option_value[]="tcp";
     av_dict_set(&avdic,option_key,option_value,0);
-    //    char option_key2[]="max_delay";
-    //    char option_value2[]="100";
-    //    av_dict_set(&avdic,option_key2,option_value2,0);
     //av_dict_set(&avdic, "fflags", "nobuffer", 0);
     av_dict_set(&avdic, "max_delay", "100", 0);
     av_dict_set(&avdic, "framerate", "30", 0);
@@ -188,7 +185,7 @@ void VideoPlayer::run()
     _isRunning = true;
     QTime frametime, othertime;
     double  frame = 0.0;
-    int readtime = 0, dealtime = 0, showtime = 0;
+    int readtime = 0, dealtime = 0, showtime = 0, savetime = 0;
     frametime.start();
     othertime.start();
 
@@ -196,7 +193,7 @@ void VideoPlayer::run()
 #ifdef Q_OS_WIN
     filename = "D:/test.avi";
 #else
-    filename = "/media/pi/Potatokid/test.avi";
+    filename = "/media/pi/Disk0/test.avi";
 #endif
     cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
     cv::Mat temp, small;
@@ -205,6 +202,9 @@ void VideoPlayer::run()
     //当cast异常时，da大于0表示过亮，da小于0表示过暗
     float brightnessCast = 0, brightnessDA = 0;
     double brightnessA = 2.2, brightnessB = 50;//a 1.0-3.0 b 0-100
+
+    cv::VideoWriter writer;
+    writer.open(filename.toLocal8Bit().data(), CV_FOURCC('D', 'I', 'V', 'X'), 15, cv::Size(1280, 720));
 
     while (_isRunning)
     {
@@ -300,6 +300,12 @@ void VideoPlayer::run()
 
                 dealtime = othertime.elapsed();
                 othertime.restart();
+                if(writer.isOpened())
+                {
+                    writer.write(mRGB);
+                }
+                savetime = othertime.elapsed();
+                othertime.restart();
                 emit onFrame(image);
                 showtime = othertime.elapsed();
             }
@@ -312,7 +318,11 @@ void VideoPlayer::run()
             msleep(sleep);
         }
         frame = 1000.0 / frametime.elapsed();
-        qDebug() << "FPS:" << frame << "Read:" << readtime << "Deal:" << dealtime << "Show:" << showtime;
+        qDebug() << "FPS:" << frame << "Read:" << readtime << "Deal:" << dealtime << "Show:" << showtime << "Save:" << savetime;
+    }
+    if(writer.isOpened())
+    {
+        writer.release();
     }
     mRGB.release();
     temp.release();
