@@ -250,7 +250,7 @@ void VideoPlayer::run()
 
                 if(checkBrighness)
                 {
-                    cv::resize(mRGB, small, cv::Size(100, 50));
+                    cv::resize(mRGB, small, cv::Size(50, 50));
                     MatHelper::Init->brightnessException(small, brightnessCast, brightnessDA);
                     if(brightnessCast > 1.0)
                     {
