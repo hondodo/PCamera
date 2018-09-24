@@ -209,6 +209,10 @@ void VideoPlayer::run()
     cv::VideoWriter writer;
     writer.open(filename.toLocal8Bit().data(), CV_FOURCC('D', 'I', 'V', 'X'), 15, cv::Size(1280, 720));
 
+    unsigned char *y_data = new unsigned char[(pCodecCtx->width*pCodecCtx->height*3)>>1];
+    unsigned char *u_data = y_data+(pCodecCtx->width*pCodecCtx->height);
+    unsigned char *v_data = u_data+((pCodecCtx->width*pCodecCtx->height)>>2);
+
     while (_isRunning)
     {
         if (av_read_frame(pFormatCtx, packet) < 0)
@@ -235,7 +239,14 @@ void VideoPlayer::run()
                           (uint8_t const * const *) pFrame->data,
                           pFrame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
                           pFrameRGB->linesize);
-                emit onFrame((unsigned char*)pFrameRGB->data[0]);
+                y_size = pCodecCtx->width*pCodecCtx->height;
+
+                memcpy(y_data, pFrameRGB->data[0], y_size);
+                //memcpy(u_data, pFrameRGB->data[1], y_size / 4);
+                //memcpy(v_data, pFrameRGB->data[2], y_size / 4);
+
+
+                emit onFrame(y_data);
 
                 /*
                 //把这个RGB数据 用QImage加载

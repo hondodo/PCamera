@@ -35,7 +35,8 @@ SOURCES += \
     videofilehelper.cpp \
     3rd/gl_widget.cpp \
     cameracontrolgl.cpp \
-    cameracontrolopengl.cpp
+    cameracontrolopengl.cpp \
+    3rd/glplayer.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -49,7 +50,8 @@ HEADERS += \
     videofilehelper.h \
     3rd/gl_widget.h \
     cameracontrolgl.h \
-    cameracontrolopengl.h
+    cameracontrolopengl.h \
+    3rd/glplayer.h
 
 FORMS += \
         mainwindow.ui \
@@ -83,3 +85,4 @@ else:unix: LIBS += /usr/local/lib/libopencv_*.so\
 win32:LIBS += -lOpengl32 \
                 -lglu32 \
                 -lglut
+unix: LIBS += -lGL -lGLU -lglut

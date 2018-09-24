@@ -67,21 +67,30 @@ void Gl_widget::initializeGL()
     glBindTexture(GL_TEXTURE_2D, y_texture);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef Q_OS_WIN
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_DECAL);
+#else
+#endif
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, video_width, video_height, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, y_data);
 
     f->glActiveTexture(GL_TEXTURE1);
     glBindTexture(GL_TEXTURE_2D, u_texture);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef Q_OS_WIN
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_DECAL);
+#else
+#endif
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, video_width>>1, video_height>>1, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, u_data);
 
     f->glActiveTexture(GL_TEXTURE2);
     glBindTexture(GL_TEXTURE_2D, v_texture);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+#ifdef Q_OS_WIN
     glTexEnvf(GL_TEXTURE_ENV,GL_TEXTURE_ENV_MODE,GL_DECAL);
+#else
+#endif
     glTexImage2D(GL_TEXTURE_2D, 0, GL_LUMINANCE, video_width>>1, video_height>>1, 0, GL_LUMINANCE, GL_UNSIGNED_BYTE, v_data);
 
     program.setUniformValue("y_texture", 0);
@@ -103,11 +112,15 @@ void Gl_widget::paintGL()
     glClear(GL_COLOR_BUFFER_BIT);
 
     glEnable(GL_TEXTURE_2D);
+#ifdef Q_OS_WIN
     glBegin(GL_QUADS);
         glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, 1.0f, 0.0f);              // Top Left
         glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, 1.0f, 0.0f);              // Top Right
         glTexCoord2f(1.0f,1.0f); glVertex3f( 1.0f,-1.0f, 0.0f);              // Bottom Right
+        glTexCoord2f(0.0f,1.0f); glVertex3f(-1.0f,-1.0f, 0.0f);              // Bottom Left
     glEnd();
+#else
+#endif
     glFlush();
     glDisable(GL_TEXTURE_2D);
 }
