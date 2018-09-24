@@ -23,7 +23,6 @@ public slots:
     void onFrame(unsigned char *yuvData);
 
 private:
-    Ui::CameraControlGL *ui;
     Gl_widget glWidget;
 };
 

@@ -107,7 +107,6 @@ void Gl_widget::paintGL()
         glTexCoord2f(0.0f, 0.0f); glVertex3f(-1.0f, 1.0f, 0.0f);              // Top Left
         glTexCoord2f(1.0f, 0.0f); glVertex3f( 1.0f, 1.0f, 0.0f);              // Top Right
         glTexCoord2f(1.0f,1.0f); glVertex3f( 1.0f,-1.0f, 0.0f);              // Bottom Right
-        glTexCoord2f(0.0f,1.0f); glVertex3f(-1.0f,-1.0f, 0.0f);              // Bottom Left
     glEnd();
     glFlush();
     glDisable(GL_TEXTURE_2D);

@@ -1,17 +1,14 @@
 #include "cameracontrolgl.h"
-#include "ui_cameracontrolgl.h"
 
 CameraControlGL::CameraControlGL(int width, int height, QWidget *parent) :
     QWidget(parent),
-    glWidget(width, height, this),
-    ui(new Ui::CameraControlGL)
+    glWidget(width, height, this)
 {
-    ui->setupUi(this);
+
 }
 
 CameraControlGL::~CameraControlGL()
 {
-    delete ui;
 }
 
 void CameraControlGL::resizeEvent(QResizeEvent *event)
