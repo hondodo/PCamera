@@ -3,7 +3,6 @@
 
 #include <QWidget>
 #include "3rd/videoplayer.h"
-#include "cameracontrolgl.h"
 
 namespace Ui {
 class CameraControl;
@@ -43,8 +42,6 @@ public:
 
 private slots:
     void onImage(QImage image);
-    void onFreamSize(int width, int height);
-    void onFream(unsigned char *yuvData);
 
 private:
     Ui::CameraControl *ui;
@@ -55,7 +52,6 @@ private:
     int imageWidth, imageHeight;
     bool checkBrighness;
     bool fixBrighnessByTime;
-    CameraControlGL *glcontrol;
 };
 
 #endif // CAMERACONTROL_H

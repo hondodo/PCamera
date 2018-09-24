@@ -169,12 +169,12 @@ void VideoPlayer::run()
     ///这里我们改成了 将解码后的YUV数据转换成RGB32
     img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
                                      pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
-                                     AV_PIX_FMT_YUV420P, SWS_BICUBIC, NULL, NULL, NULL);//AV_PIX_FMT_BGR24
+                                     AV_PIX_FMT_BGR24, SWS_BICUBIC, NULL, NULL, NULL);//AV_PIX_FMT_BGR24
 
-    numBytes = avpicture_get_size(AV_PIX_FMT_YUV420P, pCodecCtx->width,pCodecCtx->height);
+    numBytes = avpicture_get_size(AV_PIX_FMT_BGR24, pCodecCtx->width,pCodecCtx->height);
 
     out_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
-    avpicture_fill((AVPicture *) pFrameRGB, out_buffer, AV_PIX_FMT_YUV420P,
+    avpicture_fill((AVPicture *) pFrameRGB, out_buffer, AV_PIX_FMT_BGR24,
                    pCodecCtx->width, pCodecCtx->height);
 
     int y_size = pCodecCtx->width * pCodecCtx->height;
@@ -209,10 +209,6 @@ void VideoPlayer::run()
     cv::VideoWriter writer;
     writer.open(filename.toLocal8Bit().data(), CV_FOURCC('D', 'I', 'V', 'X'), 15, cv::Size(1280, 720));
 
-    unsigned char *y_data = new unsigned char[(pCodecCtx->width*pCodecCtx->height*3)>>1];
-    unsigned char *u_data = y_data+(pCodecCtx->width*pCodecCtx->height);
-    unsigned char *v_data = u_data+((pCodecCtx->width*pCodecCtx->height)>>2);
-
     while (_isRunning)
     {
         if (av_read_frame(pFormatCtx, packet) < 0)
@@ -239,16 +235,7 @@ void VideoPlayer::run()
                           (uint8_t const * const *) pFrame->data,
                           pFrame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
                           pFrameRGB->linesize);
-                y_size = pCodecCtx->width*pCodecCtx->height;
 
-                memcpy(y_data, pFrameRGB->data[0], y_size);
-                //memcpy(u_data, pFrameRGB->data[1], y_size / 4);
-                //memcpy(v_data, pFrameRGB->data[2], y_size / 4);
-
-
-                emit onFrame(y_data);
-
-                /*
                 //把这个RGB数据 用QImage加载
                 //QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
                 //QImage image = tmpImg.copy();
@@ -324,7 +311,6 @@ void VideoPlayer::run()
                 othertime.restart();
                 emit onFrame(image);
                 showtime = othertime.elapsed();
-                */
             }
         }
         av_free_packet(packet);

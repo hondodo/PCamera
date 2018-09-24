@@ -14,7 +14,6 @@ CameraControl::CameraControl(QWidget *parent) :
     checkBrighness = false;
     fixBrighnessByTime = false;
     player = Q_NULLPTR;
-    glcontrol = Q_NULLPTR;
 }
 
 CameraControl::~CameraControl()
@@ -53,8 +52,6 @@ void CameraControl::start()
     player->setCheckBrighness(checkBrighness);
     player->setFixBrighnessByTime(fixBrighnessByTime);
     connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)));
-    connect(player, SIGNAL(onFrameSize(int,int)), this, SLOT(onFreamSize(int,int)));
-    connect(player, SIGNAL(onFrame(unsigned char*)), this, SLOT(onFream(unsigned char*)));
     player->start();
 }
 
@@ -83,20 +80,6 @@ void CameraControl::onImage(QImage image)
     else
     {
         ui->label->setPixmap(QPixmap::fromImage(image));
-    }
-}
-
-void CameraControl::onFreamSize(int width, int height)
-{
-    glcontrol = new CameraControlGL(width, height);
-    glcontrol->show();
-}
-
-void CameraControl::onFream(unsigned char *yuvData)
-{
-    if(glcontrol != Q_NULLPTR)
-    {
-        glcontrol->onFrame(yuvData);
     }
 }
 
