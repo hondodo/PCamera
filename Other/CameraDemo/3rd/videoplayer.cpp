@@ -169,12 +169,12 @@ void VideoPlayer::run()
     ///这里我们改成了 将解码后的YUV数据转换成RGB32
     img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
                                      pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
-                                     AV_PIX_FMT_BGR24, SWS_BICUBIC, NULL, NULL, NULL);
+                                     AV_PIX_FMT_YUV420P, SWS_BICUBIC, NULL, NULL, NULL);//AV_PIX_FMT_BGR24
 
-    numBytes = avpicture_get_size(AV_PIX_FMT_BGR24, pCodecCtx->width,pCodecCtx->height);
+    numBytes = avpicture_get_size(AV_PIX_FMT_YUV420P, pCodecCtx->width,pCodecCtx->height);
 
     out_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
-    avpicture_fill((AVPicture *) pFrameRGB, out_buffer, AV_PIX_FMT_BGR24,
+    avpicture_fill((AVPicture *) pFrameRGB, out_buffer, AV_PIX_FMT_YUV420P,
                    pCodecCtx->width, pCodecCtx->height);
 
     int y_size = pCodecCtx->width * pCodecCtx->height;
@@ -195,6 +195,9 @@ void VideoPlayer::run()
 #else
     filename = "/media/pi/Disk0/test.avi";
 #endif
+
+    emit onFrameSize(pCodecCtx->width, pCodecCtx->height);
+
     cv::Mat mRGB(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
     cv::Mat temp, small;
 
@@ -232,7 +235,9 @@ void VideoPlayer::run()
                           (uint8_t const * const *) pFrame->data,
                           pFrame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
                           pFrameRGB->linesize);
+                emit onFrame((unsigned char*)pFrameRGB->data[0]);
 
+                /*
                 //把这个RGB数据 用QImage加载
                 //QImage tmpImg((uchar *)out_buffer,pCodecCtx->width,pCodecCtx->height,QImage::Format_RGB32);
                 //QImage image = tmpImg.copy();
@@ -308,6 +313,7 @@ void VideoPlayer::run()
                 othertime.restart();
                 emit onFrame(image);
                 showtime = othertime.elapsed();
+                */
             }
         }
         av_free_packet(packet);

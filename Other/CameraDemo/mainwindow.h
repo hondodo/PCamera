@@ -11,6 +11,7 @@
 #include "cameracontrol.h"
 #include "rendercontrol.h"
 #include "addcameraform.h"
+#include "cameracontrolgl.h"
 
 namespace Ui {
 class MainWindow;

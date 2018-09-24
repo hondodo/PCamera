@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia
+QT       += core gui multimedia opengl
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -32,7 +32,10 @@ SOURCES += \
     addcameraform.cpp \
     mathelper.cpp \
     3rd/ffmpeghelper.cpp \
-    videofilehelper.cpp
+    videofilehelper.cpp \
+    3rd/gl_widget.cpp \
+    cameracontrolgl.cpp \
+    cameracontrolopengl.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -43,12 +46,16 @@ HEADERS += \
     addcameraform.h \
     mathelper.h \
     3rd/ffmpeghelper.h \
-    videofilehelper.h
+    videofilehelper.h \
+    3rd/gl_widget.h \
+    cameracontrolgl.h \
+    cameracontrolopengl.h
 
 FORMS += \
         mainwindow.ui \
     cameracontrol.ui \
-    addcameraform.ui
+    addcameraform.ui \
+    cameracontrolopengl.ui
 
 win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
 unix:LIBS += -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
@@ -72,3 +79,7 @@ else:unix: LIBS += /usr/local/lib/libopencv_*.so\
                    -lmpg123\
                    -lao\
                    -lwiringPi
+
+win32:LIBS += -lOpengl32 \
+                -lglu32 \
+                -lglut

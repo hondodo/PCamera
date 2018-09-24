@@ -50,6 +50,8 @@ protected:
 
 signals:
     void onFrame(QImage);
+    void onFrameSize(int width, int height);
+    void onFrame(unsigned char *yuvData);
 
 protected slots:
 
