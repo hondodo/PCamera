@@ -192,7 +192,7 @@ static int init_filter(FilteringContext* fctx, AVCodecContext *dec_ctx,
             ret = AVERROR_UNKNOWN;
             goto end;
         }
-       _snprintf(args, sizeof(args),
+       printf(args, sizeof(args),
                 "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
                dec_ctx->width, dec_ctx->height, dec_ctx->pix_fmt,
                 dec_ctx->time_base.num,dec_ctx->time_base.den,
@@ -228,7 +228,7 @@ static int init_filter(FilteringContext* fctx, AVCodecContext *dec_ctx,
         if (!dec_ctx->channel_layout)
            dec_ctx->channel_layout =
                av_get_default_channel_layout(dec_ctx->channels);
-       _snprintf(args, sizeof(args),
+       printf(args, sizeof(args),
                 "time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%I64x",
                dec_ctx->time_base.num, dec_ctx->time_base.den,dec_ctx->sample_rate,
                av_get_sample_fmt_name(dec_ctx->sample_fmt),
