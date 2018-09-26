@@ -12,13 +12,14 @@
  *
  */
 
+#include <stdio.h>
+#include <string.h>
+
 //extern "C"
 //{
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libavfilter/avfilter.h"
-//#include "libavfilter/avfiltergraph.h"
-//#include "libavfilter/avcodec.h"
 #include "libavfilter/buffersink.h"
 #include "libavfilter/buffersrc.h"
 #include "libavutil/avutil.h"
@@ -46,7 +47,7 @@ static int open_input_file(const char *filename)
     ifmt_ctx =NULL;
     avdevice_register_all();
     AVInputFormat *inputFmt = NULL;
-    inputFmt = av_find_input_format("video4linux2");//av_find_input_format("dshow");
+    inputFmt = av_find_input_format("video4linux2");//av_find_input_format("video4linux2");//av_find_input_format("dshow");
     AVDictionary *avdic=NULL;
     char option_key[]="rtsp_transport";
     char option_value[]="tcp";
@@ -101,7 +102,7 @@ static int open_output_file(const char *filename)
     for (i = 0; i < ifmt_ctx->nb_streams; i++) {
         out_stream= avformat_new_stream(ofmt_ctx, NULL);
         if (!out_stream) {
-           av_log(NULL, AV_LOG_ERROR, "Failedallocating output stream\n");
+           av_log(NULL, AV_LOG_ERROR, "Failed allocating output stream\n");
             return AVERROR_UNKNOWN;
         }
         in_stream =ifmt_ctx->streams[i];
@@ -110,7 +111,7 @@ static int open_output_file(const char *filename)
         if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO
                 ||dec_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
             /* in this example, we choose transcoding to same codec */
-            encoder= avcodec_find_encoder(dec_ctx->codec_id);
+            encoder= avcodec_find_encoder(dec_ctx->codec_id);//AV_CODEC_ID_MJPEG
             /* In this example, we transcode to same properties(picture size,
             * sample rate etc.). These properties can be changed for output
             * streams easily using filters */
@@ -119,7 +120,7 @@ static int open_output_file(const char *filename)
                enc_ctx->width = dec_ctx->width;
                enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
                 /* take first format from list of supported formats */
-               enc_ctx->pix_fmt = encoder->pix_fmts[0];
+               enc_ctx->pix_fmt = encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                enc_ctx->time_base = dec_ctx->time_base;
             } else {
@@ -171,6 +172,7 @@ static int open_output_file(const char *filename)
 static int init_filter(FilteringContext* fctx, AVCodecContext *dec_ctx,
        AVCodecContext *enc_ctx, const char *filter_spec)
 {
+    char buf[] = "";
     char args[512];
     int ret = 0;
     AVFilter*buffersrc = NULL;
@@ -192,7 +194,7 @@ static int init_filter(FilteringContext* fctx, AVCodecContext *dec_ctx,
             ret = AVERROR_UNKNOWN;
             goto end;
         }
-       printf(args, sizeof(args),
+       snprintf(args, sizeof(args),
                 "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=%d/%d",
                dec_ctx->width, dec_ctx->height, dec_ctx->pix_fmt,
                 dec_ctx->time_base.num,dec_ctx->time_base.den,
@@ -201,6 +203,7 @@ static int init_filter(FilteringContext* fctx, AVCodecContext *dec_ctx,
         ret =avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
                args, NULL, filter_graph);
         if (ret < 0) {
+            av_strerror(ret, buf, 1024);
            av_log(NULL, AV_LOG_ERROR, "Cannotcreate buffer source\n");
             goto end;
         }
@@ -228,7 +231,7 @@ static int init_filter(FilteringContext* fctx, AVCodecContext *dec_ctx,
         if (!dec_ctx->channel_layout)
            dec_ctx->channel_layout =
                av_get_default_channel_layout(dec_ctx->channels);
-       printf(args, sizeof(args),
+       snprintf(args, sizeof(args),
                 "time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%I64x",
                dec_ctx->time_base.num, dec_ctx->time_base.den,dec_ctx->sample_rate,
                av_get_sample_fmt_name(dec_ctx->sample_fmt),
@@ -521,8 +524,10 @@ int main(int argc, char **argv)
     }
    av_write_trailer(ofmt_ctx);
 end:
-   av_free_packet(&packet);
-   av_frame_free(&frame);
+   //av_free_packet(&packet);
+   //av_frame_free(&frame);
+   av_free(&packet);
+   av_free(&frame);
     for (i = 0; i < ifmt_ctx->nb_streams; i++) {
        avcodec_close(ifmt_ctx->streams[i]->codec);
         if (ofmt_ctx && ofmt_ctx->nb_streams >i && ofmt_ctx->streams[i] &&ofmt_ctx->streams[i]->codec)
