@@ -17,6 +17,7 @@
 #include <string.h>
 #include <QThread>
 #include <QDebug>
+#include <QTime>
 
 extern "C"
 {
@@ -127,7 +128,7 @@ static int open_output_file(const char *filename)
         if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO
                 ||dec_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
             /* in this example, we choose transcoding to same codec */
-            encoder= avcodec_find_encoder(AV_CODEC_ID_H264);//dec_ctx->codec_id);//AV_CODEC_ID_MJPEG
+            encoder= avcodec_find_encoder(dec_ctx->codec_id);//dec_ctx->codec_id);//AV_CODEC_ID_H264//AV_CODEC_ID_MJPEG
             /* In this example, we transcode to same properties(picture size,
             * sample rate etc.). These properties can be changed for output
             * streams easily using filters */
@@ -146,11 +147,11 @@ static int open_output_file(const char *filename)
                 enc_ctx->width = dec_ctx->width;
                 enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
                 /* take first format from list of supported formats */
-                enc_ctx->pix_fmt = AV_PIX_FMT_YUV422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
+                enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;//AV_PIX_FMT_YUV422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                 enc_ctx->time_base = dec_ctx->time_base;
 
-                enc_ctx->bit_rate = 20000000;
+                enc_ctx->bit_rate = 25000000;
                 //enc_ctx->width = 640;
                 //enc_ctx->height = 480;
                 //enc_ctx->time_base.num = 1;
