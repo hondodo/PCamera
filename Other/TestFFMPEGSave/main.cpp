@@ -528,7 +528,7 @@ int main(int argc, char **argv)
                 goto end;
         }
         av_free_packet(&packet);
-        QThread::msleep(30);
+        //QThread::msleep(30);
     }
     /* flush filters and encoders */
     for (i = 0; i < ifmt_ctx->nb_streams; i++)
