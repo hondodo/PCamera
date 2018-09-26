@@ -12,11 +12,14 @@
  *
  */
 
+#include <QSysInfo>
 #include <stdio.h>
 #include <string.h>
+#include <QThread>
+#include <QDebug>
 
-//extern "C"
-//{
+extern "C"
+{
 #include "libavcodec/avcodec.h"
 #include "libavformat/avformat.h"
 #include "libavfilter/avfilter.h"
@@ -26,7 +29,7 @@
 #include "libavutil/opt.h"
 #include "libavutil/pixdesc.h"
 #include "libavdevice/avdevice.h"
-//};
+};
 
 #define AV_CODEC_FLAG_GLOBAL_HEADER (1 << 22)
 #define CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
@@ -40,6 +43,14 @@ typedef struct FilteringContext{
     AVFilterGraph*filter_graph;
 } FilteringContext;
 static FilteringContext *filter_ctx;
+
+static void printError(int ret)
+{
+    char buf[] = "";
+    av_strerror(ret, buf, 1024);
+    return;
+}
+
 static int open_input_file(const char *filename)
 {
     int ret;
@@ -47,7 +58,11 @@ static int open_input_file(const char *filename)
     ifmt_ctx =NULL;
     avdevice_register_all();
     AVInputFormat *inputFmt = NULL;
-    inputFmt = av_find_input_format("video4linux2");//av_find_input_format("video4linux2");//av_find_input_format("dshow");
+#ifdef Q_OS_WIN
+    inputFmt = av_find_input_format("dshow");
+#else
+    inputFmt = av_find_input_format("video4linux2");
+#endif
     AVDictionary *avdic=NULL;
     char option_key[]="rtsp_transport";
     char option_value[]="tcp";
@@ -59,6 +74,7 @@ static int open_input_file(const char *filename)
 
     if ((ret = avformat_open_input(&ifmt_ctx,filename, inputFmt, &avdic)) < 0) {
        av_log(NULL, AV_LOG_ERROR, "Cannot openinput file\n");
+       printError(ret);
         return ret;
     }
     if ((ret = avformat_find_stream_info(ifmt_ctx, NULL))< 0) {
@@ -116,13 +132,17 @@ static int open_output_file(const char *filename)
             * sample rate etc.). These properties can be changed for output
             * streams easily using filters */
             if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
+                AVRational ar;
+                ar.num = 1;
+                ar.den = 30;
+                dec_ctx->sample_aspect_ratio = dec_ctx->time_base = ar;
                enc_ctx->height = dec_ctx->height;
                enc_ctx->width = dec_ctx->width;
-               enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
+               enc_ctx->sample_aspect_ratio =ar;// dec_ctx->sample_aspect_ratio;
                 /* take first format from list of supported formats */
-               enc_ctx->pix_fmt = encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
+               enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ420P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
                 /* video time_base can be set to whatever is handy andsupported by encoder */
-               enc_ctx->time_base = dec_ctx->time_base;
+               enc_ctx->time_base = ar;//dec_ctx->time_base;
             } else {
                enc_ctx->sample_rate = dec_ctx->sample_rate;
                enc_ctx->channel_layout = dec_ctx->channel_layout;
@@ -175,8 +195,8 @@ static int init_filter(FilteringContext* fctx, AVCodecContext *dec_ctx,
     char buf[] = "";
     char args[512];
     int ret = 0;
-    AVFilter*buffersrc = NULL;
-    AVFilter*buffersink = NULL;
+    const AVFilter*buffersrc = NULL;
+    const AVFilter*buffersink = NULL;
     AVFilterContext*buffersrc_ctx = NULL;
     AVFilterContext*buffersink_ctx = NULL;
     AVFilterInOut*outputs = avfilter_inout_alloc();
@@ -352,14 +372,15 @@ static int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
     enc_pkt.dts =av_rescale_q_rnd(enc_pkt.dts,
            ofmt_ctx->streams[stream_index]->codec->time_base,
            ofmt_ctx->streams[stream_index]->time_base,
-           (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+           (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
     enc_pkt.pts =av_rescale_q_rnd(enc_pkt.pts,
            ofmt_ctx->streams[stream_index]->codec->time_base,
            ofmt_ctx->streams[stream_index]->time_base,
-           (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+           (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
    enc_pkt.duration = av_rescale_q(enc_pkt.duration,
            ofmt_ctx->streams[stream_index]->codec->time_base,
            ofmt_ctx->streams[stream_index]->time_base);
+   qDebug() << enc_pkt.dts << enc_pkt.pts << enc_pkt.duration;
     av_log(NULL,AV_LOG_DEBUG, "Muxing frame\n");
     /* mux encoded frame */
     ret =av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
@@ -440,11 +461,11 @@ int main(int argc, char **argv)
    av_register_all();
    avfilter_register_all();
     if ((ret = open_input_file(argv[1])) < 0)
-        goto end;
+        return 1;
     if ((ret = open_output_file(argv[2])) < 0)
-        goto end;
+        return 1;
     if ((ret = init_filters()) < 0)
-        goto end;
+        return 1;
     /* read all packets */
     while (1) {
         if ((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
@@ -494,19 +515,21 @@ int main(int argc, char **argv)
            packet.dts = av_rescale_q_rnd(packet.dts,
                    ifmt_ctx->streams[stream_index]->time_base,
                    ofmt_ctx->streams[stream_index]->time_base,
-                    (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+                    (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
            packet.pts = av_rescale_q_rnd(packet.pts,
                    ifmt_ctx->streams[stream_index]->time_base,
                    ofmt_ctx->streams[stream_index]->time_base,
-                    (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+                    (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
             ret =av_interleaved_write_frame(ofmt_ctx, &packet);
             if (ret < 0)
                 goto end;
         }
        av_free_packet(&packet);
+       QThread::msleep(30);
     }
     /* flush filters and encoders */
-    for (i = 0; i < ifmt_ctx->nb_streams; i++) {
+    for (i = 0; i < ifmt_ctx->nb_streams; i++)
+    {
         /* flush filter */
         if (!filter_ctx[i].filter_graph)
             continue;
@@ -524,10 +547,8 @@ int main(int argc, char **argv)
     }
    av_write_trailer(ofmt_ctx);
 end:
-   //av_free_packet(&packet);
-   //av_frame_free(&frame);
-   av_free(&packet);
-   av_free(&frame);
+   av_free_packet(&packet);
+   av_frame_free(&frame);
     for (i = 0; i < ifmt_ctx->nb_streams; i++) {
        avcodec_close(ifmt_ctx->streams[i]->codec);
         if (ofmt_ctx && ofmt_ctx->nb_streams >i && ofmt_ctx->streams[i] &&ofmt_ctx->streams[i]->codec)
