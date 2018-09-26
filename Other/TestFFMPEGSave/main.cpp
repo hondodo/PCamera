@@ -68,9 +68,9 @@ static int open_input_file(const char *filename)
     char option_value[]="tcp";
     av_dict_set(&avdic,option_key,option_value,0);
     av_dict_set(&avdic, "max_delay", "100", 0);
-    //av_dict_set(&avdic, "framerate", "30", 0);
-    //av_dict_set(&avdic, "input_format", "mjpeg", 0);
-    //av_dict_set(&avdic, "video_size", "1280x720", 0);
+    av_dict_set(&avdic, "framerate", "30", 0);
+    av_dict_set(&avdic, "input_format", "mjpeg", 0);
+    av_dict_set(&avdic, "video_size", "1280x720", 0);
 
     if ((ret = avformat_open_input(&ifmt_ctx,filename, inputFmt, &avdic)) < 0) {
         av_log(NULL, AV_LOG_ERROR, "Cannot openinput file\n");
