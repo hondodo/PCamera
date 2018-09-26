@@ -135,7 +135,6 @@ static int open_output_file(const char *filename)
                 AVRational ar;
                 ar.num = 1;
                 ar.den = 30;
-                dec_ctx->sample_aspect_ratio = dec_ctx->time_base = ar;
                enc_ctx->height = dec_ctx->height;
                enc_ctx->width = dec_ctx->width;
                enc_ctx->sample_aspect_ratio =ar;// dec_ctx->sample_aspect_ratio;
