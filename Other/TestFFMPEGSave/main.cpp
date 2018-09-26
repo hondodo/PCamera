@@ -127,10 +127,17 @@ static int open_output_file(const char *filename)
         if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO
                 ||dec_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
             /* in this example, we choose transcoding to same codec */
-            encoder= avcodec_find_encoder(dec_ctx->codec_id);//AV_CODEC_ID_MJPEG
+            encoder= avcodec_find_encoder(AV_CODEC_ID_H264);//dec_ctx->codec_id);//AV_CODEC_ID_MJPEG
             /* In this example, we transcode to same properties(picture size,
             * sample rate etc.). These properties can be changed for output
             * streams easily using filters */
+
+            enc_ctx->me_range = 16;
+            enc_ctx->max_qdiff = 4;
+            enc_ctx->qmin = 10;
+            enc_ctx->qmax = 51;
+            enc_ctx->qcompress = 0.6;
+
             if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
                 AVRational ar;
                 ar.num = 1;
@@ -139,9 +146,19 @@ static int open_output_file(const char *filename)
                 enc_ctx->width = dec_ctx->width;
                 enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
                 /* take first format from list of supported formats */
-                enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
+                enc_ctx->pix_fmt = AV_PIX_FMT_YUV422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                 enc_ctx->time_base = dec_ctx->time_base;
+
+                enc_ctx->bit_rate = 20000000;
+                //enc_ctx->width = 640;
+                //enc_ctx->height = 480;
+                //enc_ctx->time_base.num = 1;
+                //enc_ctx->time_base.den = 30;
+
+                /* print output stream information*/
+                av_dump_format(ofmt_ctx, 0, filename, 1);
+
                 //enc_ctx->bit_rate = 2 * 1024 * 1024;
             } else {
                 enc_ctx->sample_rate = dec_ctx->sample_rate;
@@ -486,14 +503,20 @@ int main(int argc, char **argv)
                 ret = AVERROR(ENOMEM);
                 break;
             }
-            //           packet.dts = av_rescale_q_rnd(packet.dts,
-            //                   ifmt_ctx->streams[stream_index]->time_base,
-            //                   ifmt_ctx->streams[stream_index]->codec->time_base,
-            //                    (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-            //           packet.pts = av_rescale_q_rnd(packet.pts,
-            //                   ifmt_ctx->streams[stream_index]->time_base,
-            //                   ifmt_ctx->streams[stream_index]->codec->time_base,
-            //                   (AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+
+            //qDebug() << packet.dts << packet.pts;
+            //qDebug() << ifmt_ctx->streams[stream_index]->time_base.num << ifmt_ctx->streams[stream_index]->time_base.den;
+            //qDebug() << ofmt_ctx->streams[stream_index]->time_base.num << ofmt_ctx->streams[stream_index]->time_base.den;
+            //packet.dts = av_rescale_q_rnd(packet.dts,
+            //                              ifmt_ctx->streams[stream_index]->time_base,
+            //                              ifmt_ctx->streams[stream_index]->codec->time_base,
+            //                              (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            //packet.pts = av_rescale_q_rnd(packet.pts,
+            //                              ifmt_ctx->streams[stream_index]->time_base,
+            //                              ifmt_ctx->streams[stream_index]->codec->time_base,
+            //                              (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            //qDebug() << packet.dts << packet.pts;
+            //qDebug() << "----- -----";
             packet.dts = packet.pts = frameindex;
             frameindex++;
             dec_func = (type == AVMEDIA_TYPE_VIDEO) ? avcodec_decode_video2 :
@@ -516,6 +539,7 @@ int main(int argc, char **argv)
             }
         } else {
             /* remux this frame without reencoding */
+
             packet.dts = av_rescale_q_rnd(packet.dts,
                                           ifmt_ctx->streams[stream_index]->time_base,
                                           ofmt_ctx->streams[stream_index]->time_base,
