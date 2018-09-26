@@ -139,9 +139,10 @@ static int open_output_file(const char *filename)
                 enc_ctx->width = dec_ctx->width;
                 enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
                 /* take first format from list of supported formats */
-                enc_ctx->pix_fmt = encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
+                enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                 enc_ctx->time_base = dec_ctx->time_base;
+                enc_ctx->bit_rate = 1024 * 1024;
             } else {
                 enc_ctx->sample_rate = dec_ctx->sample_rate;
                 enc_ctx->channel_layout = dec_ctx->channel_layout;
