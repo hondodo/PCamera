@@ -68,9 +68,9 @@ static int open_input_file(const char *filename)
     char option_value[]="tcp";
     av_dict_set(&avdic,option_key,option_value,0);
     av_dict_set(&avdic, "max_delay", "100", 0);
-    av_dict_set(&avdic, "framerate", "30", 0);
-    av_dict_set(&avdic, "input_format", "mjpeg", 0);
-    av_dict_set(&avdic, "video_size", "1280x720", 0);
+    //av_dict_set(&avdic, "framerate", "30", 0);
+    //av_dict_set(&avdic, "input_format", "mjpeg", 0);
+    //av_dict_set(&avdic, "video_size", "1280x720", 0);
 
     if ((ret = avformat_open_input(&ifmt_ctx,filename, inputFmt, &avdic)) < 0) {
         av_log(NULL, AV_LOG_ERROR, "Cannot openinput file\n");
@@ -142,7 +142,7 @@ static int open_output_file(const char *filename)
                 enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                 enc_ctx->time_base = dec_ctx->time_base;
-                enc_ctx->bit_rate = 2 * 1024 * 1024;
+                //enc_ctx->bit_rate = 2 * 1024 * 1024;
             } else {
                 enc_ctx->sample_rate = dec_ctx->sample_rate;
                 enc_ctx->channel_layout = dec_ctx->channel_layout;
