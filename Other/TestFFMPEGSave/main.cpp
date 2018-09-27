@@ -30,6 +30,7 @@ extern "C"
 #include "libavutil/opt.h"
 #include "libavutil/pixdesc.h"
 #include "libavdevice/avdevice.h"
+#include "libswscale/swscale.h"
 };
 
 #define AV_CODEC_FLAG_GLOBAL_HEADER (1 << 22)
@@ -38,12 +39,15 @@ extern "C"
 
 static AVFormatContext *ifmt_ctx;
 static AVFormatContext *ofmt_ctx;
+static AVCodecContext *pCodecCtx = NULL;
 typedef struct FilteringContext{
     AVFilterContext*buffersink_ctx;
     AVFilterContext*buffersrc_ctx;
     AVFilterGraph*filter_graph;
 } FilteringContext;
 static FilteringContext *filter_ctx;
+static bool isLocalCamera = false;
+static bool isRawVideo = false;
 
 static void printError(int ret)
 {
@@ -54,10 +58,17 @@ static void printError(int ret)
 
 static int open_input_file(const char *filename)
 {
+    std::string head = "http";
+    std::string input(filename);
+    isLocalCamera = !(input.compare(0, head.size(), head) == 0);
+    if(isLocalCamera)
+    {
+        avdevice_register_all();
+    }
+
     int ret;
     unsigned int i;
     ifmt_ctx =NULL;
-    avdevice_register_all();
     AVInputFormat *inputFmt = NULL;
 #ifdef Q_OS_WIN
     inputFmt = av_find_input_format("dshow");
@@ -65,31 +76,49 @@ static int open_input_file(const char *filename)
     inputFmt = av_find_input_format("video4linux2");
 #endif
     AVDictionary *avdic=NULL;
-    char option_key[]="rtsp_transport";
-    char option_value[]="tcp";
-    av_dict_set(&avdic,option_key,option_value,0);
+    av_dict_set(&avdic, "rtsp_transport", "tcp", 0);
     av_dict_set(&avdic, "max_delay", "100", 0);
     av_dict_set(&avdic, "framerate", "30", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
     av_dict_set(&avdic, "video_size", "1280x720", 0);
 
-    if ((ret = avformat_open_input(&ifmt_ctx,filename, inputFmt, &avdic)) < 0) {
-        av_log(NULL, AV_LOG_ERROR, "Cannot openinput file\n");
-        printError(ret);
-        return ret;
+    if(!isLocalCamera)
+    {
+
+        if ((ret = avformat_open_input(&ifmt_ctx,filename, NULL, NULL)) < 0)
+        {
+            av_log(NULL, AV_LOG_ERROR, "Cannot openinput file\n");
+            printError(ret);
+            return ret;
+        }
+    }
+    else
+    {
+        if ((ret = avformat_open_input(&ifmt_ctx,filename, inputFmt, &avdic)) < 0)
+        {
+            av_log(NULL, AV_LOG_ERROR, "Cannot openinput file\n");
+            printError(ret);
+            return ret;
+        }
     }
     if ((ret = avformat_find_stream_info(ifmt_ctx, NULL))< 0) {
         av_log(NULL, AV_LOG_ERROR, "Cannot findstream information\n");
         return ret;
     }
-    for (i = 0; i < ifmt_ctx->nb_streams; i++) {
+    for (i = 0; i < ifmt_ctx->nb_streams; i++)
+    {
         AVStream*stream;
         AVCodecContext *codec_ctx;
         stream =ifmt_ctx->streams[i];
         codec_ctx =stream->codec;
         /* Reencode video & audio and remux subtitles etc. */
         if (codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO
-                ||codec_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
+                ||codec_ctx->codec_type == AVMEDIA_TYPE_AUDIO)
+        {
+            if(codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
+            {
+                pCodecCtx = codec_ctx;
+            }
             /* Open decoder */
             ret =avcodec_open2(codec_ctx,
                                avcodec_find_decoder(codec_ctx->codec_id), NULL);
@@ -102,6 +131,7 @@ static int open_input_file(const char *filename)
     av_dump_format(ifmt_ctx, 0, filename, 0);
     return 0;
 }
+
 static int open_output_file(const char *filename)
 {
     AVStream*out_stream;
@@ -111,14 +141,16 @@ static int open_output_file(const char *filename)
     int ret;
     unsigned int i;
     ofmt_ctx =NULL;
-    avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
+    avformat_alloc_output_context2(&ofmt_ctx, NULL, "avi", filename);
     if (!ofmt_ctx) {
         av_log(NULL, AV_LOG_ERROR, "Could notcreate output context\n");
         return AVERROR_UNKNOWN;
     }
-    for (i = 0; i < ifmt_ctx->nb_streams; i++) {
+    for (i = 0; i < ifmt_ctx->nb_streams; i++)
+    {
         out_stream= avformat_new_stream(ofmt_ctx, NULL);
-        if (!out_stream) {
+        if (!out_stream)
+        {
             av_log(NULL, AV_LOG_ERROR, "Failed allocating output stream\n");
             return AVERROR_UNKNOWN;
         }
@@ -126,9 +158,28 @@ static int open_output_file(const char *filename)
         dec_ctx =in_stream->codec;
         enc_ctx =out_stream->codec;
         if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO
-                ||dec_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
+                ||dec_ctx->codec_type == AVMEDIA_TYPE_AUDIO)
+        {
             /* in this example, we choose transcoding to same codec */
+
+#ifdef Q_OS_WIN
+            if(dec_ctx->codec_id == AV_CODEC_ID_MJPEG && isLocalCamera)
+            {
+                //encoder= avcodec_find_encoder(AV_CODEC_ID_H264);
+                encoder = avcodec_find_encoder(dec_ctx->codec_id);
+            }
+            if(dec_ctx->codec_id == AV_CODEC_ID_RAWVIDEO)
+            {
+                encoder = avcodec_find_encoder(AV_CODEC_ID_MJPEG);
+                isRawVideo = true;
+            }
+            else
+            {
+                encoder= avcodec_find_encoder(dec_ctx->codec_id);
+            }
+#else
             encoder= avcodec_find_encoder(dec_ctx->codec_id);//dec_ctx->codec_id);//AV_CODEC_ID_H264//AV_CODEC_ID_MJPEG
+#endif
             /* In this example, we transcode to same properties(picture size,
             * sample rate etc.). These properties can be changed for output
             * streams easily using filters */
@@ -139,7 +190,8 @@ static int open_output_file(const char *filename)
             enc_ctx->qmax = 51;
             enc_ctx->qcompress = 0.6;
 
-            if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
+            if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
+            {
                 AVRational ar;
                 ar.num = 1;
                 ar.den = 30;
@@ -147,7 +199,33 @@ static int open_output_file(const char *filename)
                 enc_ctx->width = dec_ctx->width;
                 enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
                 /* take first format from list of supported formats */
-                enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;//AV_PIX_FMT_YUV422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
+                if(encoder->pix_fmts != NULL)
+                {
+                    if(dec_ctx->codec_id == AV_CODEC_ID_MJPEG)
+                    {
+                        if(isLocalCamera)
+                        {
+                            enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;
+                        }
+                        else
+                        {
+                            enc_ctx->pix_fmt = encoder->pix_fmts[0];
+                        }
+                    }
+                    else if(dec_ctx->codec_id == AV_CODEC_ID_H264)
+                    {
+                        enc_ctx->pix_fmt = AV_PIX_FMT_YUV422P;
+                    }
+                    else
+                    {
+                        enc_ctx->pix_fmt = encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ422P;//AV_PIX_FMT_YUV422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
+                    }
+                }
+                else
+                {
+                    enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;
+                    enc_ctx->codec_tag = 0;
+                }
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                 enc_ctx->time_base = dec_ctx->time_base;
 
@@ -378,8 +456,17 @@ static int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, in
     enc_pkt.data =NULL;
     enc_pkt.size =0;
     av_init_packet(&enc_pkt);
-    ret =enc_func(ofmt_ctx->streams[stream_index]->codec, &enc_pkt,
-                  filt_frame, got_frame);
+    if(isRawVideo)
+    {
+        AVCodecContext *code = ofmt_ctx->streams[stream_index]->codec;
+        ret =enc_func(code, &enc_pkt,
+                      filt_frame, got_frame);
+    }
+    else
+    {
+        ret =enc_func(ofmt_ctx->streams[stream_index]->codec, &enc_pkt,
+                      filt_frame, got_frame);
+    }
     //av_frame_free(&filt_frame);
     if (ret < 0)
         return ret;
@@ -421,7 +508,8 @@ static int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index)
         return ret;
     }
     /* pull filtered frames from the filtergraph */
-    while (1) {
+    while (1)
+    {
         filt_frame= av_frame_alloc();
         if (!filt_frame) {
             ret =AVERROR(ENOMEM);
@@ -488,12 +576,44 @@ int main(int argc, char **argv)
         return 1;
     if ((ret = init_filters()) < 0)
         return 1;
+    int framecount = 25;
+    QTime frameControlTimer;
+    double framerate = 0.0;
+    int frametime = 0;
+    frameControlTimer.start();
+    int eachframetime = 1000 / framecount;
+
+    struct SwsContext *img_convert_ctx;
+    AVFrame *pFrameYUV = av_frame_alloc();
+    //AVPacket videoPacket = NULL;
+    uint8_t *out_buffer;
+    int numBytes;
+    if(pCodecCtx != NULL && isRawVideo)
+    {
+        ///这里我们改成了 将解码后的YUV数据转换成RGB32
+        AVPixelFormat pixpmt = AV_PIX_FMT_YUVJ420P;
+        img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
+                                         pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
+                                         pixpmt, SWS_BICUBIC, NULL, NULL, NULL);//AV_PIX_FMT_BGR24
+
+        numBytes = avpicture_get_size(pixpmt, pCodecCtx->width, pCodecCtx->height);
+
+        out_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
+        avpicture_fill((AVPicture *) pFrameYUV, out_buffer, pixpmt,
+                       pCodecCtx->width, pCodecCtx->height);
+
+        //        int y_size = pCodecCtx->width * pCodecCtx->height;
+        //        videoPacket = (AVPacket *) malloc(sizeof(AVPacket)); //分配一个packet
+        //        av_new_packet(videoPacket, y_size); //分配packet的数据
+    }
+
     /* read all packets */
-    while (1) {
+    while (frameindex < 300000)
+    {
         if ((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
             break;
         stream_index = packet.stream_index;
-        type =ifmt_ctx->streams[packet.stream_index]->codec->codec_type;
+        type = ifmt_ctx->streams[packet.stream_index]->codec->codec_type;
         av_log(NULL, AV_LOG_DEBUG, "Demuxergave frame of stream_index %u\n",
                stream_index);
         if (filter_ctx[stream_index].filter_graph)
@@ -522,23 +642,52 @@ int main(int argc, char **argv)
             frameindex++;
             dec_func = (type == AVMEDIA_TYPE_VIDEO) ? avcodec_decode_video2 :
                                                       avcodec_decode_audio4;
-            ret =dec_func(ifmt_ctx->streams[stream_index]->codec, frame,
-                          &got_frame, &packet);
-            if (ret < 0) {
+            ret = dec_func(ifmt_ctx->streams[stream_index]->codec, frame,
+                           &got_frame, &packet);
+            if (ret < 0)
+            {
                 av_frame_free(&frame);
-                av_log(NULL, AV_LOG_ERROR, "Decodingfailed\n");
+                av_log(NULL, AV_LOG_ERROR, "Decoding failed\n");
                 break;
             }
-            if (got_frame) {
-                frame->pts = av_frame_get_best_effort_timestamp(frame);
-                ret= filter_encode_write_frame(frame, stream_index);
-                av_frame_free(&frame);
-                if (ret< 0)
-                    goto end;
-            } else {
+            if (got_frame)
+            {
+                frametime = frameControlTimer.elapsed();
+                if(1)//frametime >= eachframetime)
+                {
+                    frame->pts = av_frame_get_best_effort_timestamp(frame);
+                    if(isRawVideo)
+                    {
+                        sws_scale(img_convert_ctx,
+                                  (uint8_t const * const *) frame->data,
+                                  frame->linesize, 0, pCodecCtx->height, pFrameYUV->data,
+                                  pFrameYUV->linesize);
+                        ret= filter_encode_write_frame(pFrameYUV, stream_index);
+                    }
+                    else
+                    {
+                        ret= filter_encode_write_frame(frame, stream_index);
+                    }
+                    frameControlTimer.restart();
+                    framerate = 1000.0 / frametime;
+                    qDebug() << "FPS:" << framerate;
+                    av_frame_free(&frame);
+                    if (ret< 0)
+                    {
+                        goto end;
+                    }
+                }
+                else
+                {
+                    printf("Skip frame\n");
+                }
+            } else
+            {
                 av_frame_free(&frame);
             }
-        } else {
+        }
+        else
+        {
             /* remux this frame without reencoding */
 
             packet.dts = av_rescale_q_rnd(packet.dts,
@@ -554,7 +703,7 @@ int main(int argc, char **argv)
                 goto end;
         }
         av_free_packet(&packet);
-        //QThread::msleep(30);
+        QThread::msleep(2);
     }
     /* flush filters and encoders */
     for (i = 0; i < ifmt_ctx->nb_streams; i++)
@@ -591,6 +740,9 @@ end:
         avio_close(ofmt_ctx->pb);
     avformat_free_context(ofmt_ctx);
     if (ret < 0)
-        av_log(NULL, AV_LOG_ERROR, "Erroroccurred\n");
+    {
+        //printError(ret);
+        av_log(NULL, AV_LOG_ERROR, "Erroro ccurred\n");
+    }
     return (ret? 1:0);
 }
