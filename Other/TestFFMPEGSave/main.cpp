@@ -141,7 +141,7 @@ static int open_output_file(const char *filename)
     int ret;
     unsigned int i;
     ofmt_ctx =NULL;
-    avformat_alloc_output_context2(&ofmt_ctx, NULL, "avi", filename);
+    avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     if (!ofmt_ctx) {
         av_log(NULL, AV_LOG_ERROR, "Could notcreate output context\n");
         return AVERROR_UNKNOWN;
@@ -180,7 +180,7 @@ static int open_output_file(const char *filename)
 #else
             encoder= avcodec_find_encoder(dec_ctx->codec_id);//dec_ctx->codec_id);//AV_CODEC_ID_H264//AV_CODEC_ID_MJPEG
 #endif
-            encoder = avcodec_find_encoder(AV_CODEC_ID_H264);
+            //encoder = avcodec_find_encoder(AV_CODEC_ID_H264);
             /* In this example, we transcode to same properties(picture size,
             * sample rate etc.). These properties can be changed for output
             * streams easily using filters */
@@ -227,13 +227,13 @@ static int open_output_file(const char *filename)
                     enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;
                     enc_ctx->codec_tag = 0;
                 }
-                enc_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
+                //enc_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                 enc_ctx->time_base = dec_ctx->time_base;
 
                 enc_ctx->bit_rate = 25000000;
 
-                enc_ctx->bit_rate = 1500000;
+                //enc_ctx->bit_rate = 1500000;
                 //enc_ctx->width = 640;
                 //enc_ctx->height = 480;
                 //enc_ctx->time_base.num = 1;
@@ -645,11 +645,11 @@ int main(int argc, char **argv)
     av_register_all();
     avfilter_register_all();
     avcodec_register_all();
-//    AVCodec *  pH264Codec = avcodec_find_encoder(AV_CODEC_ID_H264);
-//    if(pH264Codec == NULL)
-//    {
-//        printf("no h264lib");
-//    }
+    AVCodec *  pH264Codec = avcodec_find_encoder(AV_CODEC_ID_H264);
+    if(pH264Codec == NULL)
+    {
+        printf("no h264lib");
+    }
     int frameindex = 0;
     int ret;
     AVPacket packet;
