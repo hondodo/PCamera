@@ -62,7 +62,7 @@ FORMS += \
     cameracontrolopengl.ui
 
 win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
-unix:LIBS += -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
+unix:LIBS += -L/usr/local/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
 
 INCLUDEPATH += D:/ffmpeg/dev/include
 
