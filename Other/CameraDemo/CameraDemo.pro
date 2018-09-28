@@ -36,7 +36,8 @@ SOURCES += \
     3rd/gl_widget.cpp \
     cameracontrolgl.cpp \
     cameracontrolopengl.cpp \
-    3rd/glplayer.cpp
+    3rd/glplayer.cpp \
+    camerathread.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -51,7 +52,8 @@ HEADERS += \
     3rd/gl_widget.h \
     cameracontrolgl.h \
     cameracontrolopengl.h \
-    3rd/glplayer.h
+    3rd/glplayer.h \
+    camerathread.h
 
 FORMS += \
         mainwindow.ui \
