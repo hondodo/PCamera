@@ -6,6 +6,81 @@ CameraThread::CameraThread(QObject *parent) : QThread(parent)
     filter_ctx = NULL;
     isLocalCamera = false;
     isRawVideo = false;
+    _isRunning = false;
+
+    cameraType = CAMERATYPE_LOCAL;
+#ifdef Q_OS_WIN
+    cameraUrl = "video=";
+    outputFileName = "D:/Rec/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
+#else
+    cameraUrl = "/dev/video0";
+    outputFileName = "/home/pi/REC/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
+#endif
+    _isRunning = false;
+    checkBrighness = false;
+    fixBrighnessByTime = false;
+    cameraName = "";
+}
+
+void CameraThread::setStop()
+{
+    _isRunning = false;
+}
+
+void CameraThread::run()
+{
+    int code = caputuer();
+    qDebug() << "Thread end at code:" << code;
+}
+
+bool CameraThread::getFixBrighnessByTime() const
+{
+    return fixBrighnessByTime;
+}
+
+void CameraThread::setFixBrighnessByTime(bool value)
+{
+    fixBrighnessByTime = value;
+}
+
+bool CameraThread::getCheckBrighness() const
+{
+    return checkBrighness;
+}
+
+void CameraThread::setCheckBrighness(bool value)
+{
+    checkBrighness = value;
+}
+
+QString CameraThread::getCameraName() const
+{
+    return cameraName;
+}
+
+void CameraThread::setCameraName(const QString &value)
+{
+    cameraName = value;
+}
+
+CAMERATYPE CameraThread::getCameraType() const
+{
+    return cameraType;
+}
+
+void CameraThread::setCameraType(const CAMERATYPE &value)
+{
+    cameraType = value;
+}
+
+QString CameraThread::getCameraUrl() const
+{
+    return cameraUrl;
+}
+
+void CameraThread::setCameraUrl(const QString &value)
+{
+    cameraUrl = value;
 }
 
 /*
@@ -113,7 +188,7 @@ int CameraThread::open_output_file(const char *filename)
     int ret;
     unsigned int i;
     ofmt_ctx =NULL;
-    avformat_alloc_output_context2(&ofmt_ctx, NULL, "avi", filename);
+    avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     if (!ofmt_ctx) {
         av_log(NULL, AV_LOG_ERROR, "Could notcreate output context\n");
         return AVERROR_UNKNOWN;
@@ -152,6 +227,7 @@ int CameraThread::open_output_file(const char *filename)
 #else
             encoder= avcodec_find_encoder(dec_ctx->codec_id);//dec_ctx->codec_id);//AV_CODEC_ID_H264//AV_CODEC_ID_MJPEG
 #endif
+            //encoder = avcodec_find_encoder(AV_CODEC_ID_H264);
             /* In this example, we transcode to same properties(picture size,
             * sample rate etc.). These properties can be changed for output
             * streams easily using filters */
@@ -198,10 +274,13 @@ int CameraThread::open_output_file(const char *filename)
                     enc_ctx->pix_fmt = AV_PIX_FMT_YUVJ422P;
                     enc_ctx->codec_tag = 0;
                 }
+                //enc_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                 enc_ctx->time_base = dec_ctx->time_base;
 
                 enc_ctx->bit_rate = 25000000;
+
+                //enc_ctx->bit_rate = 1500000;
                 //enc_ctx->width = 640;
                 //enc_ctx->height = 480;
                 //enc_ctx->time_base.num = 1;
@@ -209,9 +288,10 @@ int CameraThread::open_output_file(const char *filename)
 
                 /* print output stream information*/
                 av_dump_format(ofmt_ctx, 0, filename, 1);
-
                 //enc_ctx->bit_rate = 2 * 1024 * 1024;
-            } else {
+            }
+            else
+            {
                 enc_ctx->sample_rate = dec_ctx->sample_rate;
                 enc_ctx->channel_layout = dec_ctx->channel_layout;
                 enc_ctx->channels = av_get_channel_layout_nb_channels(enc_ctx->channel_layout);
@@ -222,18 +302,23 @@ int CameraThread::open_output_file(const char *filename)
             }
             /* Third parameter can be used to pass settings to encoder*/
             ret =avcodec_open2(enc_ctx, encoder, NULL);
-            if (ret < 0) {
+            if (ret < 0)
+            {
                 av_log(NULL, AV_LOG_ERROR, "Cannot openvideo encoder for stream #%u\n", i);
                 return ret;
             }
-        } else if(dec_ctx->codec_type == AVMEDIA_TYPE_UNKNOWN) {
+        }
+        else if(dec_ctx->codec_type == AVMEDIA_TYPE_UNKNOWN)
+        {
             av_log(NULL, AV_LOG_FATAL, "Elementarystream #%d is of unknown type, cannot proceed\n", i);
             return AVERROR_INVALIDDATA;
-        } else {
+        } else
+        {
             /* if this stream must be remuxed */
             ret =avcodec_copy_context(ofmt_ctx->streams[i]->codec,
                                       ifmt_ctx->streams[i]->codec);
-            if (ret < 0) {
+            if (ret < 0)
+            {
                 av_log(NULL, AV_LOG_ERROR, "Copyingstream context failed\n");
                 return ret;
             }
@@ -242,9 +327,11 @@ int CameraThread::open_output_file(const char *filename)
             enc_ctx->flags |= CODEC_FLAG_GLOBAL_HEADER;
     }
     av_dump_format(ofmt_ctx, 0, filename, 1);
-    if (!(ofmt_ctx->oformat->flags &AVFMT_NOFILE)) {
+    if (!(ofmt_ctx->oformat->flags &AVFMT_NOFILE))
+    {
         ret =avio_open(&ofmt_ctx->pb, filename, AVIO_FLAG_WRITE);
-        if (ret < 0) {
+        if (ret < 0)
+        {
             av_log(NULL, AV_LOG_ERROR, "Could notopen output file '%s'", filename);
             return ret;
         }
@@ -416,8 +503,15 @@ int CameraThread::init_filters(void)
              ||ifmt_ctx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO))
             continue;
         if (ifmt_ctx->streams[i]->codec->codec_type== AVMEDIA_TYPE_VIDEO)
-            filter_spec = "[in]drawtext=fontfile=D\\\\:arial.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=D\\\\:arial.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
-        else
+        {
+#ifdef Q_OS_WIN
+            filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
+#else
+            filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
+            filter_spec = "null";
+#endif
+        }
+            else
             filter_spec = "anull"; /* passthrough (dummy) filter for audio */
         ret = init_filter(&filter_ctx[i], ifmt_ctx->streams[i]->codec,
                           ofmt_ctx->streams[i]->codec, filter_spec);
@@ -587,7 +681,8 @@ int CameraThread::flush_encoder(unsigned int stream_index)
     if(!(ofmt_ctx->streams[stream_index]->codec->codec->capabilities&
          AV_CODEC_CAP_DELAY))
         return 0;
-    while (1) {
+    while (1)
+    {
         av_log(NULL, AV_LOG_INFO, "Flushing stream #%u encoder\n", stream_index);
         ret =encode_write_frame(NULL, stream_index, &got_frame);
         if (ret < 0)
@@ -598,8 +693,12 @@ int CameraThread::flush_encoder(unsigned int stream_index)
     return ret;
 }
 
-int CameraThread::caputuer(int argc, char **argv)
+int CameraThread::caputuer()
 {
+    av_register_all();
+    avfilter_register_all();
+    avcodec_register_all();
+    bool filtercorrect = false;
     int frameindex = 0;
     int ret;
     AVPacket packet;
@@ -609,37 +708,33 @@ int CameraThread::caputuer(int argc, char **argv)
     unsigned int i;
     int got_frame;
     int (*dec_func)(AVCodecContext *, AVFrame *, int *, const AVPacket*);
-    if (argc != 3)
-    {
-        av_log(NULL, AV_LOG_ERROR, "Usage: %s<input file> <output file>\n", argv[0]);
+
+    if ((ret = open_input_file(cameraUrl.toLocal8Bit().data())) < 0)
         return 1;
-    }
-    av_register_all();
-    avfilter_register_all();
-    if ((ret = open_input_file(argv[1])) < 0)
-        return 1;
-    if ((ret = open_output_file(argv[2])) < 0)
+    if ((ret = open_output_file(outputFileName.toLocal8Bit().data())) < 0)
         return 1;
     if ((ret = init_filters()) < 0)
-        return 1;
-    int framecount = 25;
+    {
+        filtercorrect = false;
+    }
+    else
+    {
+        filtercorrect = true;
+    }
     QTime frameControlTimer;
     double framerate = 0.0;
     int frametime = 0;
     frameControlTimer.start();
-    int eachframetime = 1000 / framecount;
-
-    struct SwsContext *yuv_convert_ctx, *bgr_convert_ctx;
+    struct SwsContext *img_convert_ctx;
     AVFrame *pFrameYUV = av_frame_alloc();
-    AVFrame *pFrameBGR = av_frame_alloc();
     //AVPacket videoPacket = NULL;
-    uint8_t *out_buffer, *bgrout_buffer;
-    int numBytes, bgrnumBytes;
-    if(pCodecCtx != NULL)
+    uint8_t *out_buffer;
+    int numBytes;
+    if(pCodecCtx != NULL && isRawVideo)
     {
-        ///这里我们改成了 将解码后的YUV数据转换
+        ///这里我们改成了 将解码后的数据转换
         AVPixelFormat pixpmt = AV_PIX_FMT_YUVJ420P;
-        yuv_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
+        img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
                                          pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
                                          pixpmt, SWS_BICUBIC, NULL, NULL, NULL);//AV_PIX_FMT_BGR24
 
@@ -648,21 +743,11 @@ int CameraThread::caputuer(int argc, char **argv)
         out_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
         avpicture_fill((AVPicture *) pFrameYUV, out_buffer, pixpmt,
                        pCodecCtx->width, pCodecCtx->height);
-
-        pixpmt = AV_PIX_FMT_BGR24;
-        bgr_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
-                                         pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
-                                         pixpmt, SWS_BICUBIC, NULL, NULL, NULL);
-
-        bgrnumBytes = avpicture_get_size(pixpmt, pCodecCtx->width, pCodecCtx->height);
-
-        bgrout_buffer = (uint8_t *) av_malloc(bgrnumBytes * sizeof(uint8_t));
-        avpicture_fill((AVPicture *) pFrameBGR, bgrout_buffer, pixpmt,
-                       pCodecCtx->width, pCodecCtx->height);
     }
 
     /* read all packets */
-    while (frameindex < 300000)
+    _isRunning = true;
+    while(_isRunning)
     {
         if ((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
             break;
@@ -710,16 +795,10 @@ int CameraThread::caputuer(int argc, char **argv)
                 if(1)//frametime >= eachframetime)
                 {
                     frame->pts = av_frame_get_best_effort_timestamp(frame);
-
                     if(isRawVideo)
                     {
                         //filter_encode_no_write_frame(frame, stream_index);
-                        if(pCodecCtx == NULL)
-                        {
-                            printf("Input code context is null\n");
-                            goto end;
-                        }
-                        sws_scale(yuv_convert_ctx,
+                        sws_scale(img_convert_ctx,
                                   (uint8_t const * const *) frame->data,
                                   frame->linesize, 0, pCodecCtx->height, pFrameYUV->data,
                                   pFrameYUV->linesize);
@@ -730,13 +809,17 @@ int CameraThread::caputuer(int argc, char **argv)
                         pFrameYUV->pkt_pts = frame->pkt_pts;
                         pFrameYUV->pkt_dts = frame->pkt_dts;
                         pFrameYUV->pkt_size = frame->pkt_size;
-                        ret= filter_encode_write_frame(pFrameYUV, stream_index);
+                        ret = filter_encode_write_frame(pFrameYUV, stream_index);
                     }
                     else
                     {
-                        filter_encode_no_write_frame(frame, stream_index);
-                        ret= filter_encode_write_frame(frame, stream_index);
+                        if(filtercorrect)
+                        {
+                            filter_encode_no_write_frame(frame, stream_index);
+                        }
+                        ret = filter_encode_write_frame(frame, stream_index);
                     }
+
                     frametime = frameControlTimer.elapsed();
                     frameControlTimer.restart();
                     framerate = 1000.0 / frametime;
@@ -797,14 +880,26 @@ int CameraThread::caputuer(int argc, char **argv)
 end:
     av_free_packet(&packet);
     av_frame_free(&frame);
-    for (i = 0; i < ifmt_ctx->nb_streams; i++) {
+    for (i = 0; i < ifmt_ctx->nb_streams; i++)
+    {
         avcodec_close(ifmt_ctx->streams[i]->codec);
         if (ofmt_ctx && ofmt_ctx->nb_streams >i && ofmt_ctx->streams[i] &&ofmt_ctx->streams[i]->codec)
+        {
             avcodec_close(ofmt_ctx->streams[i]->codec);
+        }
         if(filter_ctx && filter_ctx[i].filter_graph)
+        {
             avfilter_graph_free(&filter_ctx[i].filter_graph);
+        }
+//        if(filter_ctx && filter_ctx[i].buffersink_ctx)
+//        {
+//            avfilter_free(filter_ctx[i].buffersink_ctx);
+//        }
+//        if(filter_ctx && filter_ctx[i].buffersrc_ctx)
+//        {
+//            avfilter_free(filter_ctx[i].buffersrc_ctx);
+//        }
     }
-    av_free(filter_ctx);
     avformat_close_input(&ifmt_ctx);
     if (ofmt_ctx &&!(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
         avio_close(ofmt_ctx->pb);
@@ -814,5 +909,5 @@ end:
         //printError(ret);
         av_log(NULL, AV_LOG_ERROR, "Erroro ccurred\n");
     }
-    return (ret? 1 : 0);
+    return (ret? 1:0);
 }

@@ -7,6 +7,11 @@
 #include <QThread>
 #include <QDebug>
 #include <QTime>
+#include <QImage>
+#include <QDateTime>
+
+#include "cameratype.h"
+#include "mathelper.h"
 
 extern "C"
 {
@@ -20,7 +25,7 @@ extern "C"
 #include "libavutil/pixdesc.h"
 #include "libavdevice/avdevice.h"
 #include "libswscale/swscale.h"
-};
+}
 
 #define AV_CODEC_FLAG_GLOBAL_HEADER (1 << 22)
 #define CODEC_FLAG_GLOBAL_HEADER AV_CODEC_FLAG_GLOBAL_HEADER
@@ -38,13 +43,44 @@ class CameraThread : public QThread
     Q_OBJECT
 public:
     explicit CameraThread(QObject *parent = nullptr);
+    void setStop();
 
+    QString getCameraUrl() const;
+    void setCameraUrl(const QString &value);
 
-signals:
+    CAMERATYPE getCameraType() const;
+    void setCameraType(const CAMERATYPE &value);
 
-public slots:
+    QString getCameraName() const;
+    void setCameraName(const QString &value);
+
+    bool getCheckBrighness() const;
+    void setCheckBrighness(bool value);
+
+    bool getFixBrighnessByTime() const;
+    void setFixBrighnessByTime(bool value);
+
+protected:
+    void run();
+
+signals:signals:
+    void onFrame(QImage);
+    void onFrameSize(int width, int height);
+    void onFrame(unsigned char *yuvData);
+
+protected slots:
 
 private:
+    bool _isRunning;
+
+    QString cameraUrl;
+    CAMERATYPE cameraType;//0-local 1-web
+    QString cameraName;
+    bool checkBrighness;
+    bool fixBrighnessByTime;
+
+    QString outputFileName;
+
     AVFormatContext *ifmt_ctx;
     AVFormatContext *ofmt_ctx;
     AVCodecContext *pCodecCtx;
@@ -62,7 +98,7 @@ private:
     int filter_encode_no_write_frame(AVFrame *frame, unsigned int stream_index);
     int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index);
     int flush_encoder(unsigned int stream_index);
-    int caputuer(int argc, char **argv);
+    int caputuer();
 };
 
 #endif // CAMERATHREAD_H
