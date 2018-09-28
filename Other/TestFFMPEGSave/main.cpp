@@ -835,16 +835,26 @@ int main(int argc, char **argv)
 end:
     av_free_packet(&packet);
     av_frame_free(&frame);
-    for (i = 0; i < ifmt_ctx->nb_streams; i++) {
+    for (i = 0; i < ifmt_ctx->nb_streams; i++)
+    {
         avcodec_close(ifmt_ctx->streams[i]->codec);
         if (ofmt_ctx && ofmt_ctx->nb_streams >i && ofmt_ctx->streams[i] &&ofmt_ctx->streams[i]->codec)
+        {
             avcodec_close(ofmt_ctx->streams[i]->codec);
+        }
         if(filter_ctx && filter_ctx[i].filter_graph)
+        {
             avfilter_graph_free(&filter_ctx[i].filter_graph);
+        }
+//        if(filter_ctx && filter_ctx[i].buffersink_ctx)
+//        {
+//            avfilter_free(filter_ctx[i].buffersink_ctx);
+//        }
+//        if(filter_ctx && filter_ctx[i].buffersrc_ctx)
+//        {
+//            avfilter_free(filter_ctx[i].buffersrc_ctx);
+//        }
     }
-    avfilter_free(filter_ctx->buffersink_ctx);
-    avfilter_free(filter_ctx->buffersrc_ctx);
-    avfilter_graph_free(&filter_ctx->filter_graph);
     avformat_close_input(&ifmt_ctx);
     if (ofmt_ctx &&!(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
         avio_close(ofmt_ctx->pb);
