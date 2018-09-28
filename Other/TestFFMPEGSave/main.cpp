@@ -459,7 +459,7 @@ static int init_filters(void)
             filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
 #else
             filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
-            filter_spec = "boxblur";
+            filter_spec = "null";
 #endif
         }
             else
@@ -646,11 +646,7 @@ int main(int argc, char **argv)
     av_register_all();
     avfilter_register_all();
     avcodec_register_all();
-    AVCodec *  pH264Codec = avcodec_find_encoder(AV_CODEC_ID_H264);
-    if(pH264Codec == NULL)
-    {
-        printf("no h264lib");
-    }
+    bool filtercorrect = false;
     int frameindex = 0;
     int ret;
     AVPacket packet;
@@ -671,7 +667,13 @@ int main(int argc, char **argv)
     if ((ret = open_output_file(argv[2])) < 0)
         return 1;
     if ((ret = init_filters()) < 0)
-        return 1;
+    {
+        filtercorrect = false;
+    }
+    else
+    {
+        filtercorrect = true;
+    }
     int framecount = 25;
     QTime frameControlTimer;
     double framerate = 0.0;
@@ -763,12 +765,15 @@ int main(int argc, char **argv)
                         pFrameYUV->pkt_pts = frame->pkt_pts;
                         pFrameYUV->pkt_dts = frame->pkt_dts;
                         pFrameYUV->pkt_size = frame->pkt_size;
-                        ret= filter_encode_write_frame(pFrameYUV, stream_index);
+                        ret = filter_encode_write_frame(pFrameYUV, stream_index);
                     }
                     else
                     {
-                        //filter_encode_no_write_frame(frame, stream_index);
-                        ret= filter_encode_write_frame(frame, stream_index);
+                        if(filtercorrect)
+                        {
+                            filter_encode_no_write_frame(frame, stream_index);
+                        }
+                        ret = filter_encode_write_frame(frame, stream_index);
                     }
                     frametime = frameControlTimer.elapsed();
                     frameControlTimer.restart();

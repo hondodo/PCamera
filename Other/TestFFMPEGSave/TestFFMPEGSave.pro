@@ -19,6 +19,7 @@ SOURCES += \
 
 win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
 unix:LIBS += -L/usr/local/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
+unix:LIBS += -lfreetype
 
 INCLUDEPATH += D:/ffmpeg/dev/include
 
