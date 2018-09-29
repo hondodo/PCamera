@@ -22,6 +22,7 @@ CameraThread::CameraThread(QObject *parent) : QThread(parent)
     checkBrighness = false;
     fixBrighnessByTime = false;
     cameraName = "";
+    isSaveTurn = false;
 }
 
 void CameraThread::setStop()
@@ -136,7 +137,7 @@ int CameraThread::open_input_file(const char *filename)
 
         if ((ret = avformat_open_input(&ifmt_ctx,filename, NULL, NULL)) < 0)
         {
-            av_log(NULL, AV_LOG_ERROR, "Cannot openinput file\n");
+            av_log(NULL, AV_LOG_ERROR, "Cannot open input file\n");
             printError(ret);
             return ret;
         }
@@ -145,13 +146,13 @@ int CameraThread::open_input_file(const char *filename)
     {
         if ((ret = avformat_open_input(&ifmt_ctx,filename, inputFmt, &avdic)) < 0)
         {
-            av_log(NULL, AV_LOG_ERROR, "Cannot openinput file\n");
+            av_log(NULL, AV_LOG_ERROR, "Cannot open input file\n");
             printError(ret);
             return ret;
         }
     }
     if ((ret = avformat_find_stream_info(ifmt_ctx, NULL))< 0) {
-        av_log(NULL, AV_LOG_ERROR, "Cannot findstream information\n");
+        av_log(NULL, AV_LOG_ERROR, "Cannot find stream information\n");
         return ret;
     }
     for (i = 0; i < ifmt_ctx->nb_streams; i++)
@@ -183,16 +184,16 @@ int CameraThread::open_input_file(const char *filename)
 
 int CameraThread::open_output_file(const char *filename)
 {
-    AVStream*out_stream;
-    AVStream*in_stream;
-    AVCodecContext*dec_ctx, *enc_ctx;
-    AVCodec*encoder;
+    AVStream *out_stream;
+    AVStream *in_stream;
+    AVCodecContext *dec_ctx, *enc_ctx;
+    AVCodec *encoder;
     int ret;
     unsigned int i;
-    ofmt_ctx =NULL;
+    ofmt_ctx = NULL;
     avformat_alloc_output_context2(&ofmt_ctx, NULL, NULL, filename);
     if (!ofmt_ctx) {
-        av_log(NULL, AV_LOG_ERROR, "Could notcreate output context\n");
+        av_log(NULL, AV_LOG_ERROR, "Could not create output context\n");
         return AVERROR_UNKNOWN;
     }
     for (i = 0; i < ifmt_ctx->nb_streams; i++)
@@ -203,14 +204,13 @@ int CameraThread::open_output_file(const char *filename)
             av_log(NULL, AV_LOG_ERROR, "Failed allocating output stream\n");
             return AVERROR_UNKNOWN;
         }
-        in_stream =ifmt_ctx->streams[i];
-        dec_ctx =in_stream->codec;
-        enc_ctx =out_stream->codec;
+        in_stream = ifmt_ctx->streams[i];
+        dec_ctx = in_stream->codec;
+        enc_ctx = out_stream->codec;
         if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO
                 ||dec_ctx->codec_type == AVMEDIA_TYPE_AUDIO)
         {
             /* in this example, we choose transcoding to same codec */
-
 #ifdef Q_OS_WIN
             if(dec_ctx->codec_id == AV_CODEC_ID_MJPEG && isLocalCamera)
             {
@@ -304,16 +304,16 @@ int CameraThread::open_output_file(const char *filename)
                 enc_ctx->time_base = time_base;
             }
             /* Third parameter can be used to pass settings to encoder*/
-            ret =avcodec_open2(enc_ctx, encoder, NULL);
+            ret = avcodec_open2(enc_ctx, encoder, NULL);
             if (ret < 0)
             {
-                av_log(NULL, AV_LOG_ERROR, "Cannot openvideo encoder for stream #%u\n", i);
+                av_log(NULL, AV_LOG_ERROR, "Cannot open video encoder for stream #%u\n", i);
                 return ret;
             }
         }
         else if(dec_ctx->codec_type == AVMEDIA_TYPE_UNKNOWN)
         {
-            av_log(NULL, AV_LOG_FATAL, "Elementarystream #%d is of unknown type, cannot proceed\n", i);
+            av_log(NULL, AV_LOG_FATAL, "Elementary stream #%d is of unknown type, cannot proceed\n", i);
             return AVERROR_INVALIDDATA;
         } else
         {
@@ -322,7 +322,7 @@ int CameraThread::open_output_file(const char *filename)
                                       ifmt_ctx->streams[i]->codec);
             if (ret < 0)
             {
-                av_log(NULL, AV_LOG_ERROR, "Copyingstream context failed\n");
+                av_log(NULL, AV_LOG_ERROR, "Copying stream context failed\n");
                 return ret;
             }
         }
@@ -418,14 +418,14 @@ int CameraThread::init_filter(FilteringContext* fctx, AVCodecContext *dec_ctx,
                  dec_ctx->time_base.num, dec_ctx->time_base.den,dec_ctx->sample_rate,
                  av_get_sample_fmt_name(dec_ctx->sample_fmt),
                  dec_ctx->channel_layout);
-        ret =avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
+        ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
                                           args, NULL, filter_graph);
         if (ret < 0)
         {
             av_log(NULL, AV_LOG_ERROR, "Cannot create audio buffer source\n");
             goto end;
         }
-        ret =avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out",
+        ret = avfilter_graph_create_filter(&buffersink_ctx, buffersink, "out",
                                           NULL, NULL, filter_graph);
         if (ret < 0) {
             av_log(NULL, AV_LOG_ERROR, "Cannot create audio buffer sink\n");
@@ -631,6 +631,8 @@ int CameraThread::filter_encode_no_write_frame(AVFrame *frame, unsigned int stre
 
 int CameraThread::filter_encode_write_frame(AVFrame *frame, unsigned int stream_index)
 {
+    isSaveTurn = !isSaveTurn;
+    if(!isSaveTurn) return 0;
     int ret;
 
     ret = encode_write_frame(frame, stream_index, NULL);

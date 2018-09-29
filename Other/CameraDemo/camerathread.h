@@ -88,6 +88,7 @@ private:
     FilteringContext *filter_ctx;
     bool isLocalCamera = false;
     bool isRawVideo = false;
+    bool isSaveTurn;
     char buf[1024];
 
     void printError(int ret);
