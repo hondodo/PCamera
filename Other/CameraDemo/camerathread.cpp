@@ -767,7 +767,8 @@ int CameraThread::caputuer()
 
     /* read all packets */
     _isRunning = true;
-    while(_isRunning && frameindex < 600000)
+    bool savefile = false;
+    while(_isRunning)
     {
         if ((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
             break;
@@ -831,7 +832,10 @@ int CameraThread::caputuer()
                         pFrameYUV->pkt_pts = frame->pkt_pts;
                         pFrameYUV->pkt_dts = frame->pkt_dts;
                         pFrameYUV->pkt_size = frame->pkt_size;
-                        ret = filter_encode_write_frame(pFrameYUV, stream_index);
+                        if(savefile)
+                        {
+                            ret = filter_encode_write_frame(pFrameYUV, stream_index);
+                        }
                     }
                     else
                     {
@@ -839,7 +843,10 @@ int CameraThread::caputuer()
                         {
                             filter_encode_no_write_frame(frame, stream_index);
                         }
-                        ret = filter_encode_write_frame(frame, stream_index);
+                        if(savefile)
+                        {
+                            ret = filter_encode_write_frame(frame, stream_index);
+                        }
                     }
 
                     sws_scale(imgConvertCtcRGB, (uint8_t const * const *) frame->data,
