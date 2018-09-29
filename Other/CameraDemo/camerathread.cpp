@@ -16,6 +16,7 @@ CameraThread::CameraThread(QObject *parent) : QThread(parent)
 #else
     cameraUrl = "/dev/video0";
     outputFileName = "/home/pi/REC/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
+    outputFileName = "/media/pi/USB/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
 #endif
     _isRunning = false;
     checkBrighness = false;
@@ -267,7 +268,7 @@ int CameraThread::open_output_file(const char *filename)
                     }
                     else
                     {
-                        enc_ctx->pix_fmt = encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ422P;//AV_PIX_FMT_YUV422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ422P;//encoder->pix_fmts[0];//AV_PIX_FMT_YUVJ420P
+                        enc_ctx->pix_fmt = encoder->pix_fmts[0];
                     }
                 }
                 else
@@ -812,6 +813,7 @@ int CameraThread::caputuer()
                 av_log(NULL, AV_LOG_ERROR, "Decoding failed\n");
                 break;
             }
+            savefile = frameindex < 30000;
             if (got_frame)
             {
                 frametime = frameControlTimer.elapsed();
@@ -897,7 +899,7 @@ int CameraThread::caputuer()
                 goto end;
         }
         av_free_packet(&packet);
-        QThread::msleep(2);
+        QThread::msleep(5);
     }
     /* flush filters and encoders */
     for (i = 0; i < ifmt_ctx->nb_streams; i++)
