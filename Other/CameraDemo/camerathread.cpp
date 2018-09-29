@@ -3,7 +3,6 @@
 CameraThread::CameraThread(QObject *parent) : QThread(parent)
 {
     pCodecCtx = NULL;
-    pCodecCtxOut = NULL;
     filter_ctx = NULL;
     isLocalCamera = false;
     isRawVideo = false;
@@ -243,8 +242,8 @@ int CameraThread::open_output_file(const char *filename)
             if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
             {
                 AVRational ar;
-                ar.num = 1;
-                ar.den = 30;
+                ar.num = 100;
+                ar.den = 3000;
                 enc_ctx->height = dec_ctx->height;
                 enc_ctx->width = dec_ctx->width;
                 enc_ctx->sample_aspect_ratio = dec_ctx->sample_aspect_ratio;
@@ -291,7 +290,6 @@ int CameraThread::open_output_file(const char *filename)
                 /* print output stream information*/
                 av_dump_format(ofmt_ctx, 0, filename, 1);
                 //enc_ctx->bit_rate = 2 * 1024 * 1024;
-                pCodecCtxOut = enc_ctx;
             }
             else
             {
@@ -340,9 +338,9 @@ int CameraThread::open_output_file(const char *filename)
         }
     }
     /* init muxer, write output file header */
-    ret =avformat_write_header(ofmt_ctx, NULL);
+    ret = avformat_write_header(ofmt_ctx, NULL);
     if (ret < 0) {
-        av_log(NULL,AV_LOG_ERROR, "Error occurred when openingoutput file\n");
+        av_log(NULL, AV_LOG_ERROR, "Error occurred when openingoutput file\n");
         return ret;
     }
     return 0;
@@ -492,7 +490,7 @@ end:
 
 int CameraThread::init_filters(void)
 {
-    const char*filter_spec;
+    const char *filter_spec;
     unsigned int i;
     int ret;
     filter_ctx =(FilteringContext *)av_malloc_array(ifmt_ctx->nb_streams, sizeof(*filter_ctx));
@@ -631,10 +629,13 @@ int CameraThread::filter_encode_no_write_frame(AVFrame *frame, unsigned int stre
 
 int CameraThread::filter_encode_write_frame(AVFrame *frame, unsigned int stream_index)
 {
+#ifdef Q_OS_WIN
+#else
     isSaveTurn = !isSaveTurn;
     if(!isSaveTurn) return 0;
-    int ret;
+#endif
 
+    int ret;
     ret = encode_write_frame(frame, stream_index, NULL);
     return ret;
 
@@ -672,7 +673,7 @@ int CameraThread::filter_encode_write_frame(AVFrame *frame, unsigned int stream_
             break;
         }
         filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
-        ret =encode_write_frame(filt_frame, stream_index, NULL);
+        ret = encode_write_frame(filt_frame, stream_index, NULL);
         if (ret < 0)
             break;
     }
@@ -771,6 +772,12 @@ int CameraThread::caputuer()
     /* read all packets */
     _isRunning = true;
     bool savefile = false;
+
+    //计算出的偏差值，小于1表示比较正常，大于1表示存在亮度异常；
+    //当cast异常时，da大于0表示过亮，da小于0表示过暗
+    float brightnessCast = 0, brightnessDA = 0;
+    double brightnessA = 2.2, brightnessB = 50;//a 1.0-3.0 b 0-100
+
     while(_isRunning)
     {
         if ((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
@@ -859,7 +866,91 @@ int CameraThread::caputuer()
 
                     mRGB.data =(uchar*)pFrameRGB->data[0];
 
-                    cv::cvtColor(mRGB, temp,CV_BGR2RGB);
+                    if(checkBrighness)
+                    {
+                        if(fixBrighnessByTime)
+                        {
+                            QDateTime now = QDateTime::currentDateTime();
+                            if(now.time().hour() > 6 && now.time().hour() < 18)
+                            {}
+                            else
+                            {
+                                cv::resize(mRGB, small, cv::Size(50, 50));
+                                MatHelper::Init->brightnessException(small, brightnessCast, brightnessDA);
+                                if(brightnessCast > 1.0)
+                                {
+                                    if(brightnessDA < 0)
+                                    {
+                                        mRGB.convertTo(mRGB, -1, brightnessA, brightnessB);
+                                        cv::resize(mRGB, small, cv::Size(150, 100));
+                                        MatHelper::Init->brightnessException(small, brightnessCast, brightnessDA);
+                                        if(brightnessCast > 1.0)
+                                        {
+                                            if(brightnessDA < -10)
+                                            {
+                                                brightnessB += 1;
+                                            }
+                                            else if(brightnessDA > 10)
+                                            {
+                                                brightnessB -= 1;
+                                            }
+                                            if(brightnessB > 100)
+                                            {
+                                                brightnessB = 100;
+                                            }
+                                            if(brightnessB < 0)
+                                            {
+                                                brightnessB = 0;
+                                            }
+                                            qDebug() << "BRIGHTNESS:" << brightnessB;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            QDateTime now = QDateTime::currentDateTime();
+                            if(now.time().hour() > 6 && now.time().hour() < 18)
+                            {}
+                            else
+                            {
+                                cv::resize(mRGB, small, cv::Size(50, 50));
+                                MatHelper::Init->brightnessException(small, brightnessCast, brightnessDA);
+                                if(brightnessCast > 1.0)
+                                {
+                                    if(brightnessDA < 0)
+                                    {
+                                        mRGB.convertTo(mRGB, -1, brightnessA, brightnessB);
+                                        cv::resize(mRGB, small, cv::Size(150, 100));
+                                        MatHelper::Init->brightnessException(small, brightnessCast, brightnessDA);
+                                        if(brightnessCast > 1.0)
+                                        {
+                                            if(brightnessDA < -10)
+                                            {
+                                                brightnessB += 1;
+                                            }
+                                            else if(brightnessDA > 10)
+                                            {
+                                                brightnessB -= 1;
+                                            }
+                                            if(brightnessB > 100)
+                                            {
+                                                brightnessB = 100;
+                                            }
+                                            if(brightnessB < 0)
+                                            {
+                                                brightnessB = 0;
+                                            }
+                                            qDebug() << "BRIGHTNESS:" << brightnessB;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    cv::cvtColor(mRGB, temp, CV_BGR2RGB);
                     QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
                     QImage image(dest);
                     image.detach();
@@ -938,23 +1029,23 @@ end:
         {
             avfilter_graph_free(&filter_ctx[i].filter_graph);
         }
-//        if(filter_ctx && filter_ctx[i].buffersink_ctx)
-//        {
-//            avfilter_free(filter_ctx[i].buffersink_ctx);
-//        }
-//        if(filter_ctx && filter_ctx[i].buffersrc_ctx)
-//        {
-//            avfilter_free(filter_ctx[i].buffersrc_ctx);
-//        }
     }
     avformat_close_input(&ifmt_ctx);
-    if (ofmt_ctx &&!(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
-        avio_close(ofmt_ctx->pb);
-    avformat_free_context(ofmt_ctx);
+    closeOutputFile();
     if (ret < 0)
     {
         //printError(ret);
         av_log(NULL, AV_LOG_ERROR, "Erroro ccurred\n");
     }
     return (ret? 1:0);
+}
+
+void CameraThread::closeOutputFile()
+{
+    if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
+    {
+        avio_close(ofmt_ctx->pb);
+    }
+    avformat_free_context(ofmt_ctx);
+    ofmt_ctx = NULL;
 }
