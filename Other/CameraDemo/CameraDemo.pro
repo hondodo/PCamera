@@ -37,7 +37,8 @@ SOURCES += \
     cameracontrolgl.cpp \
     cameracontrolopengl.cpp \
     3rd/glplayer.cpp \
-    camerathread.cpp
+    camerathread.cpp \
+    camerathreadmux.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -53,7 +54,8 @@ HEADERS += \
     cameracontrolgl.h \
     cameracontrolopengl.h \
     3rd/glplayer.h \
-    camerathread.h
+    camerathread.h \
+    camerathreadmux.h
 
 FORMS += \
         mainwindow.ui \

@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include "3rd/videoplayer.h"
-#include "camerathread.h"
+#include "camerathreadmux.h"
 
 namespace Ui {
 class CameraControl;
@@ -49,7 +49,7 @@ private:
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
     QString cameraName;
-    CameraThread *player;
+    CameraThreadMUX *player;
     int imageWidth, imageHeight;
     bool checkBrighness;
     bool fixBrighnessByTime;
