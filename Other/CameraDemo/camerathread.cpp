@@ -767,7 +767,7 @@ int CameraThread::caputuer()
 
     /* read all packets */
     _isRunning = true;
-    while(_isRunning && frameindex < 900000)
+    while(_isRunning && frameindex < 600000)
     {
         if ((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
             break;
