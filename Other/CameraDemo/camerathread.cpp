@@ -3,6 +3,7 @@
 CameraThread::CameraThread(QObject *parent) : QThread(parent)
 {
     pCodecCtx = NULL;
+    pCodecCtxOut = NULL;
     filter_ctx = NULL;
     isLocalCamera = false;
     isRawVideo = false;
@@ -289,6 +290,7 @@ int CameraThread::open_output_file(const char *filename)
                 /* print output stream information*/
                 av_dump_format(ofmt_ctx, 0, filename, 1);
                 //enc_ctx->bit_rate = 2 * 1024 * 1024;
+                pCodecCtxOut = enc_ctx;
             }
             else
             {
@@ -508,7 +510,7 @@ int CameraThread::init_filters(void)
             filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
 #else
             filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
-            filter_spec = "null";
+            //filter_spec = "null";
 #endif
         }
             else
@@ -727,7 +729,6 @@ int CameraThread::caputuer()
     frameControlTimer.start();
     struct SwsContext *img_convert_ctx;
     AVFrame *pFrameYUV = av_frame_alloc();
-    //AVPacket videoPacket = NULL;
     uint8_t *out_buffer;
     int numBytes;
     if(pCodecCtx != NULL && isRawVideo)
@@ -745,6 +746,25 @@ int CameraThread::caputuer()
                        pCodecCtx->width, pCodecCtx->height);
     }
 
+    AVFrame *pFrameRGB = av_frame_alloc();
+    struct SwsContext *imgConvertCtcRGB;
+    AVPixelFormat rgbFmt = AV_PIX_FMT_BGR24;
+    int rgbBytes;
+    uint8_t *rgbOutBuffer;
+    cv::Mat mRGB, temp, small;
+    //if(pCodecCtxOut != NULL)
+    //{
+        imgConvertCtcRGB = sws_getContext(pCodecCtx->width, pCodecCtx->height,
+                                          pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
+                                          rgbFmt, SWS_BICUBIC, NULL, NULL, NULL);
+        rgbBytes = avpicture_get_size(rgbFmt, pCodecCtx->width, pCodecCtx->height);
+        rgbOutBuffer = (uint8_t *) av_malloc(rgbBytes * sizeof(uint8_t));
+        avpicture_fill((AVPicture *)pFrameRGB, rgbOutBuffer, rgbFmt,
+                       pCodecCtx->width, pCodecCtx->height);
+
+        mRGB = cv::Mat(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
+    //}
+
     /* read all packets */
     _isRunning = true;
     while(_isRunning)
@@ -753,30 +773,32 @@ int CameraThread::caputuer()
             break;
         stream_index = packet.stream_index;
         type = ifmt_ctx->streams[packet.stream_index]->codec->codec_type;
-        av_log(NULL, AV_LOG_DEBUG, "Demuxergave frame of stream_index %u\n",
+        av_log(NULL, AV_LOG_DEBUG, "Demuxer gave frame of stream_index %u\n",
                stream_index);
         if (filter_ctx[stream_index].filter_graph)
         {
-            av_log(NULL, AV_LOG_DEBUG, "Going toreencode&filter the frame\n");
-            frame =av_frame_alloc();
+            av_log(NULL, AV_LOG_DEBUG, "Going to reencode & filter the frame\n");
+            frame = av_frame_alloc();
             if (!frame) {
                 ret = AVERROR(ENOMEM);
                 break;
             }
 
-            //qDebug() << packet.dts << packet.pts;
-            //qDebug() << ifmt_ctx->streams[stream_index]->time_base.num << ifmt_ctx->streams[stream_index]->time_base.den;
-            //qDebug() << ofmt_ctx->streams[stream_index]->time_base.num << ofmt_ctx->streams[stream_index]->time_base.den;
-            //packet.dts = av_rescale_q_rnd(packet.dts,
-            //                              ifmt_ctx->streams[stream_index]->time_base,
-            //                              ifmt_ctx->streams[stream_index]->codec->time_base,
-            //                              (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-            //packet.pts = av_rescale_q_rnd(packet.pts,
-            //                              ifmt_ctx->streams[stream_index]->time_base,
-            //                              ifmt_ctx->streams[stream_index]->codec->time_base,
-            //                              (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-            //qDebug() << packet.dts << packet.pts;
-            //qDebug() << "----- -----";
+            /*
+            qDebug() << packet.dts << packet.pts;
+            qDebug() << ifmt_ctx->streams[stream_index]->time_base.num << ifmt_ctx->streams[stream_index]->time_base.den;
+            qDebug() << ofmt_ctx->streams[stream_index]->time_base.num << ofmt_ctx->streams[stream_index]->time_base.den;
+            packet.dts = av_rescale_q_rnd(packet.dts,
+                                          ifmt_ctx->streams[stream_index]->time_base,
+                                          ifmt_ctx->streams[stream_index]->codec->time_base,
+                                          (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            packet.pts = av_rescale_q_rnd(packet.pts,
+                                          ifmt_ctx->streams[stream_index]->time_base,
+                                          ifmt_ctx->streams[stream_index]->codec->time_base,
+                                          (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
+            qDebug() << packet.dts << packet.pts;
+            qDebug() << "----- -----";
+            */
             packet.dts = packet.pts = frameindex;
             frameindex++;
             dec_func = (type == AVMEDIA_TYPE_VIDEO) ? avcodec_decode_video2 :
@@ -819,6 +841,18 @@ int CameraThread::caputuer()
                         }
                         ret = filter_encode_write_frame(frame, stream_index);
                     }
+
+                    sws_scale(imgConvertCtcRGB, (uint8_t const * const *) frame->data,
+                              frame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
+                              pFrameRGB->linesize);
+
+                    mRGB.data =(uchar*)pFrameRGB->data[0];
+
+                    cv::cvtColor(mRGB, temp,CV_BGR2RGB);
+                    QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+                    QImage image(dest);
+                    image.detach();
+                    emit onFrame(image);
 
                     frametime = frameControlTimer.elapsed();
                     frameControlTimer.restart();
@@ -880,6 +914,8 @@ int CameraThread::caputuer()
 end:
     av_free_packet(&packet);
     av_frame_free(&frame);
+    av_frame_free(&pFrameYUV);
+    av_frame_free(&pFrameRGB);
     for (i = 0; i < ifmt_ctx->nb_streams; i++)
     {
         avcodec_close(ifmt_ctx->streams[i]->codec);

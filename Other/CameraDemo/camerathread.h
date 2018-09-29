@@ -84,6 +84,7 @@ private:
     AVFormatContext *ifmt_ctx;
     AVFormatContext *ofmt_ctx;
     AVCodecContext *pCodecCtx;
+    AVCodecContext *pCodecCtxOut;
     FilteringContext *filter_ctx;
     bool isLocalCamera = false;
     bool isRawVideo = false;
