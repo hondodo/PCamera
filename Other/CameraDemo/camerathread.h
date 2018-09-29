@@ -102,7 +102,6 @@ private:
     int flush_encoder(unsigned int stream_index);
     int caputuer();
     void closeOutputFile();
-    int open_output_file(const char *filename, AVFormatContext *ofmt_ctx);
 };
 
 #endif // CAMERATHREAD_H
