@@ -190,10 +190,10 @@ void MainWindow::resizeCameraControl()
     {
         if(camBigShowingWidget != Q_NULLPTR)
         {
-            int tabcamwidth = ui->widgetCamBig->width() - 25;
-            int tabcamheight = ui->widgetCamBig->height() - 10;
-            int mw = maxwidth - 25;
-            int mh = maxheight - 10;
+            int tabcamwidth = ui->widgetCamBig->width() - 4;
+            int tabcamheight = ui->widgetCamBig->height() - 4;
+            int mw = maxwidth - 4;
+            int mh = maxheight - 4;
             if(tabcamwidth > mw || tabcamheight > mh)
             {
                 ui->tabCam4->setMaximumSize(mw, mh);
@@ -213,10 +213,10 @@ void MainWindow::resizeCameraControl()
     }
     else if(ui->tabWidget->currentWidget() == ui->tabCam4)
     {
-        int tabcamwidth = ui->tabCam4->width() - 25;
-        int tabcamheight = ui->tabCam4->height() - 25;
-        int mw = maxwidth - 25;
-        int mh = maxheight - 25;
+        int tabcamwidth = ui->tabCam4->width() - 4;
+        int tabcamheight = ui->tabCam4->height() - 4;
+        int mw = maxwidth - 4;
+        int mh = maxheight - 4;
         if(tabcamwidth > mw || tabcamheight > mh)
         {
             ui->tabCam4->setMaximumSize(mw, mh);
