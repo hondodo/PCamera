@@ -48,7 +48,9 @@ SOURCES += \
     Core/mogdetectobject.cpp \
     Core/oled12864.cpp \
     Core/ringhelper.cpp \
-    Core/videoprop.cpp
+    Core/videoprop.cpp \
+    datetimecontrol.cpp \
+    3rd/chineseyear.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -76,13 +78,16 @@ HEADERS += \
     Core/mogdetectobject.h \
     Core/oled12864.h \
     Core/ringhelper.h \
-    Core/videoprop.h
+    Core/videoprop.h \
+    datetimecontrol.h \
+    3rd/chineseyear.h
 
 FORMS += \
         mainwindow.ui \
     cameracontrol.ui \
     addcameraform.ui \
-    cameracontrolopengl.ui
+    cameracontrolopengl.ui \
+    datetimecontrol.ui
 
 win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
 unix:LIBS += -L/usr/local/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample

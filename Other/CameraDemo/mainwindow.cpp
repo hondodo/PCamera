@@ -6,6 +6,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    isFirstShow = true;
     existsCameraUrls.clear();
     allCameraControls.clear();
     QRect rect = QApplication::desktop()->availableGeometry();
@@ -18,6 +19,8 @@ MainWindow::MainWindow(QWidget *parent) :
     camBigShowingWidget = Q_NULLPTR;
     ui->widgetHide->setVisible(false);
     VideoFileThread::Init->start();
+    timeControl = NULL;
+    showDateTimeControlToCamerasComtrol = false;
 }
 
 MainWindow::~MainWindow()
@@ -28,6 +31,18 @@ MainWindow::~MainWindow()
         allCameraControls.at(i)->stop();
     }
     delete ui;
+}
+
+void MainWindow::showEvent(QShowEvent *event)
+{
+    Q_UNUSED(event)
+    if(isFirstShow)
+    {
+        isFirstShow = false;
+        timeControl = new DateTimeControl();
+        ui->verticalLayoutTime->addWidget(timeControl);
+        timeControl->start();
+    }
 }
 
 void MainWindow::resizeEvent(QResizeEvent *event)
@@ -93,30 +108,37 @@ void MainWindow::onAddCameraFormClose(int code)
     {
         if(code == 0)
         {
-            QString url = form->getCameraUrl();
-            if(!existsCameraUrls.contains(url.toLower()))
+            if(form->getCameraType() == CAMERATYPE_LOCAL || form->getCameraType() == CAMERATYPE_WEB)
             {
-                existsCameraUrls.append(url.toLower());
-                CameraControl *control = new CameraControl();
-                allCameraControls.append(control);
-                if(form->getCameraType() == CAMERATYPE_LOCAL)
+                QString url = form->getCameraUrl();
+                if(!existsCameraUrls.contains(url.toLower()))
                 {
+                    existsCameraUrls.append(url.toLower());
+                    CameraControl *control = new CameraControl();
+                    allCameraControls.append(control);
+                    if(form->getCameraType() == CAMERATYPE_LOCAL)
+                    {
 #ifdef Q_OS_WIN
-                    control->setCheckBrighness(true);
-                    control->setFixBrighnessByTime(true);
+                        control->setCheckBrighness(true);
+                        control->setFixBrighnessByTime(true);
 #else
-                    control->setCheckBrighness(true);
-                    control->setFixBrighnessByTime(true);
+                        control->setCheckBrighness(true);
+                        control->setFixBrighnessByTime(true);
 #endif
+                    }
+                    control->setCameraUrl(url);
+                    control->setCameraType(form->getCameraType());
+                    control->setCameraName(form->getCameraName());
+                    control->start();
+                    ui->verticalLayoutHide->removeWidget(camBigShowingWidget);
+                    camBigShowingWidget = control;
+                    ui->verticalLayoutCamBig->addWidget(camBigShowingWidget);
+                    showCamera();
                 }
-                control->setCameraUrl(url);
-                control->setCameraType(form->getCameraType());
-                control->setCameraName(form->getCameraName());
-                control->start();
-                ui->verticalLayoutHide->removeWidget(camBigShowingWidget);
-                camBigShowingWidget = control;
-                ui->verticalLayoutCamBig->addWidget(camBigShowingWidget);
-                showCamera();
+            }
+            else if(form->getCameraType() == CAMERATYPE_NOTCAMERA_DATETIMECONTROL)
+            {
+                showDateTimeControlToCamerasComtrol = true;
             }
         }
         form->deleteLater();
@@ -132,6 +154,7 @@ void MainWindow::showCamera()
     }
     else if(ui->tabWidget->currentWidget() == ui->tabCam4)
     {
+        bool isshowedtimecontrol = false;
         for(int i = 0; i < 4; i++)
         {
             if(allCameraControls.count() > i)
@@ -140,6 +163,17 @@ void MainWindow::showCamera()
                 if(i == 1) ui->verticalLayoutCams2->addWidget(allCameraControls.at(i));
                 if(i == 2) ui->verticalLayoutCams3->addWidget(allCameraControls.at(i));
                 if(i == 3) ui->verticalLayoutCams4->addWidget(allCameraControls.at(i));
+            }
+            else
+            {
+                if(!isshowedtimecontrol && showDateTimeControlToCamerasComtrol)
+                {
+                    isshowedtimecontrol = true;
+                    if(i == 0) ui->verticalLayoutCams1->addWidget(timeControl);
+                    if(i == 1) ui->verticalLayoutCams2->addWidget(timeControl);
+                    if(i == 2) ui->verticalLayoutCams3->addWidget(timeControl);
+                    if(i == 3) ui->verticalLayoutCams4->addWidget(timeControl);
+                }
             }
         }
     }
@@ -204,6 +238,10 @@ void MainWindow::resizeCameraControl()
     else if(ui->tabWidget->currentWidget() == ui->tabCamBigAndSmall)
     {
 
+    }
+    else if(ui->tabWidget->currentWidget() == ui->tabTime)
+    {
+        ui->verticalLayoutTime->addWidget(timeControl);
     }
 }
 

@@ -130,9 +130,18 @@ void AddCameraForm::on_pushButtonOK_clicked()
             state = 1;
         }
     }
-    else
+    else if(ui->comboBoxType->currentIndex() == 1)
     {
         cameraType = CAMERATYPE_WEB;
+        cameraUrl = ui->lineEditUrl->text().trimmed();
+        if(existsCameraUrls.contains(cameraUrl.toLower()))
+        {
+            state = 1;
+        }
+    }
+    else if(ui->comboBoxType->currentIndex() == 2)
+    {
+        cameraType = CAMERATYPE_NOTCAMERA_DATETIMECONTROL;
         cameraUrl = ui->lineEditUrl->text().trimmed();
         if(existsCameraUrls.contains(cameraUrl.toLower()))
         {

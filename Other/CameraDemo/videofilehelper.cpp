@@ -53,6 +53,8 @@ void VideoFileThread::setStop()
 
 void VideoFileThread::run()
 {
+    return;
+
     _isRunning = true;
     while (_isRunning)
     {

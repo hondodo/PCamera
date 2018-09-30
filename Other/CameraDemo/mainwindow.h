@@ -12,6 +12,7 @@
 #include "rendercontrol.h"
 #include "addcameraform.h"
 #include "cameracontrolgl.h"
+#include "datetimecontrol.h"
 
 namespace Ui {
 class MainWindow;
@@ -28,6 +29,7 @@ public:
 protected:
     void resizeEvent(QResizeEvent *event);
     void timerEvent(QTimerEvent *event);
+    void showEvent(QShowEvent *event);
 
 public slots:
 
@@ -38,8 +40,12 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+    bool isFirstShow;
     QList<QString> existsCameraUrls;
     QList<CameraControl *> allCameraControls;
+    DateTimeControl *timeControl;
+
+    bool showDateTimeControlToCamerasComtrol;
 
     void showCamera();
     void resizeCameraControl();
