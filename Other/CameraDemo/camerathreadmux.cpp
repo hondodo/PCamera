@@ -789,9 +789,14 @@ int CameraThreadMUX::caputuer()
     AVFormatContext *ofmt_ctx_same_to_save = NULL;
     AVCodecContext *enc_ctx_same_to_save = NULL;
     bool isNewRecFile = true;
-    QDateTime needRecLastTime = QDateTime::currentDateTime();
-    int minRecMS = 60 * 1000;
+    QDateTime now = QDateTime::currentDateTime();
+    QDateTime needRecLastTime = now;
+    int minRecMS = 30 * 1000;
     int maxFrames = 30 * 30 * 60;
+    int lastSecond = QDateTime::currentDateTime().time().second();
+    bool isSameSecond = true;
+    QDateTime nextCreatNewFile = now;
+    bool isRecBySourceRate = true;
     while(_isRunning)
     {
         if((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
@@ -799,9 +804,11 @@ int CameraThreadMUX::caputuer()
             qDebug() << "No fram, end thread.";
             break;
         }
+        isNewRecFile = QDateTime::currentDateTime().toMSecsSinceEpoch() > nextCreatNewFile.toMSecsSinceEpoch();
         if(isNewRecFile)
         {
             isNewRecFile = false;
+            nextCreatNewFile = QDateTime::currentDateTime().addSecs(30 * 60);
             if(ofmt_ctx_same_to_save != NULL || enc_ctx_same_to_save != NULL)
             {
                 closeOutputFile(&ofmt_ctx_same_to_save, &enc_ctx_same_to_save);
@@ -834,7 +841,7 @@ int CameraThreadMUX::caputuer()
             }
 
             packet.dts = packet.pts = frameindex;
-            frameindex++;
+
             dec_func = (type == AVMEDIA_TYPE_VIDEO) ? avcodec_decode_video2 :
                                                       avcodec_decode_audio4;
             ret = dec_func(ifmt_ctx->streams[stream_index]->codec, frame,
@@ -846,7 +853,14 @@ int CameraThreadMUX::caputuer()
                 break;
             }
             int elsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - needRecLastTime.toMSecsSinceEpoch();
-            savefile = (elsp < minRecMS) && (frameindex < maxFrames); //frameindex < 30000;
+            isSameSecond = QDateTime::currentDateTime().time().second() == lastSecond;
+            if(!isSameSecond)
+            {
+                lastSecond = QDateTime::currentDateTime().time().second();
+            }
+            isRecBySourceRate = elsp < minRecMS;
+            savefile = isRecBySourceRate || (!isSameSecond);
+            //(elsp < minRecMS) && (frameindex < maxFrames);
             if (got_frame)
             {
                 frametime = frameControlTimer.elapsed();
@@ -974,20 +988,14 @@ int CameraThreadMUX::caputuer()
 
                 cv::cvtColor(mRGB, temp, CV_BGR2RGB);
 
-                int remainelst = (minRecMS - elsp) > 5000;
-                if(remainelst > 5000)
-                {}
-                else
+                mogRect = CameraCollectorThread::Init->findMog(currentCameraId, mRGB);
+                if(!mogRect.empty() && mogRect.size() > 0)
                 {
-                    mogRect = CameraCollectorThread::Init->findMog(currentCameraId, mRGB);
-                    if(!mogRect.empty() && mogRect.size() > 0)
-                    {
-                        needRecLastTime = QDateTime::currentDateTime();
-                        if(!savefile)
-                        {
-                            isNewRecFile = true;
-                        }
-                    }
+                    needRecLastTime = QDateTime::currentDateTime();
+                    //if(!savefile)
+                    //{
+                    //    isNewRecFile = true;
+                    //}
                 }
 
                 QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
@@ -1014,11 +1022,15 @@ int CameraThreadMUX::caputuer()
             }
             if(!savefile)
             {
-                if(ofmt_ctx_same_to_save != NULL || enc_ctx_same_to_save != NULL)
-                {
-                    closeOutputFile(&ofmt_ctx_same_to_save, &enc_ctx_same_to_save);
-                    ofmt_ctx_same_to_save = NULL;
-                }
+//                if(ofmt_ctx_same_to_save != NULL || enc_ctx_same_to_save != NULL)
+//                {
+//                    closeOutputFile(&ofmt_ctx_same_to_save, &enc_ctx_same_to_save);
+//                    ofmt_ctx_same_to_save = NULL;
+//                }
+            }
+            else
+            {
+                frameindex++;
             }
         }
         else
