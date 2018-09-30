@@ -60,8 +60,11 @@ void CameraControl::stop()
     if(player != Q_NULLPTR)
     {
         player->setStop();
-        player->wait(3000);
-        player->terminate();
+        if(player->isRunning())
+        {
+            player->wait(3000);
+            player->terminate();
+        }
         player->deleteLater();
         player = Q_NULLPTR;
     }

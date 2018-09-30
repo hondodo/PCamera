@@ -41,6 +41,7 @@ void CameraThreadMUX::setStop()
 void CameraThreadMUX::run()
 {
     int code = caputuer();
+    _isRunning = false;
     qDebug() << "Thread end at code:" << code;
 }
 
@@ -789,12 +790,15 @@ int CameraThreadMUX::caputuer()
     AVCodecContext *enc_ctx_same_to_save = NULL;
     bool isNewRecFile = true;
     QDateTime needRecLastTime = QDateTime::currentDateTime();
-    int minRecMS = 30 * 1000;
-    int maxFrames = 10 * 30 * 60;
+    int minRecMS = 60 * 1000;
+    int maxFrames = 30 * 30 * 60;
     while(_isRunning)
     {
         if((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
+        {
+            qDebug() << "No fram, end thread.";
             break;
+        }
         if(isNewRecFile)
         {
             isNewRecFile = false;
@@ -970,8 +974,11 @@ int CameraThreadMUX::caputuer()
 
                 cv::cvtColor(mRGB, temp, CV_BGR2RGB);
 
-                //if(frameindex % 5 == 0)
-                //{
+                int remainelst = (minRecMS - elsp) > 5000;
+                if(remainelst > 5000)
+                {}
+                else
+                {
                     mogRect = CameraCollectorThread::Init->findMog(currentCameraId, mRGB);
                     if(!mogRect.empty() && mogRect.size() > 0)
                     {
@@ -981,7 +988,7 @@ int CameraThreadMUX::caputuer()
                             isNewRecFile = true;
                         }
                     }
-                //}
+                }
 
                 QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
                 QImage image(dest);
@@ -991,7 +998,10 @@ int CameraThreadMUX::caputuer()
                 frametime = frameControlTimer.elapsed();
                 frameControlTimer.restart();
                 framerate = 1000.0 / frametime;
-                qDebug() << "FPS:" << framerate;
+                if(frameindex % 100 == 0)
+                {
+                    qDebug() << "FPS:" << framerate << "@" << cameraName;
+                }
                 av_frame_free(&frame);
                 if (ret< 0)
                 {

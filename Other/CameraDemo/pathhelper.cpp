@@ -77,6 +77,12 @@ void PathHelper::creatNewFileName()
     {
         dir.mkdir(path);
     }
+    path = path + QDateTime::currentDateTime().toString("yyyyMMdd") + "/";
+    dir.setPath(path);
+    if(!dir.exists())
+    {
+        dir.mkdir(path);
+    }
     currentFileName = path + getCameraNameForFileName() + "_" +
             QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".avi";
 }
