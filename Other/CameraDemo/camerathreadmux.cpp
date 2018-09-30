@@ -574,7 +574,7 @@ int CameraThreadMUX::encodeWriteFrame(AVFrame *filt_frame, unsigned int stream_i
              AVMEDIA_TYPE_VIDEO) ? avcodec_encode_video2 : avcodec_encode_audio2;
     if (!got_frame)
         got_frame =&got_frame_local;
-    av_log(NULL,AV_LOG_INFO, "Encoding frame\n");
+    //av_log(NULL,AV_LOG_INFO, "Encoding frame\n");
     /* encode filtered frame */
     enc_pkt.data =NULL;
     enc_pkt.size =0;
@@ -620,7 +620,7 @@ int CameraThreadMUX::filterEncodeNoWriteFrame(AVFrame *frame, unsigned int strea
     int ret;
 
     AVFrame *filt_frame;
-    av_log(NULL,AV_LOG_INFO, "Pushing decoded frame tofilters\n");
+    //av_log(NULL,AV_LOG_INFO, "Pushing decoded frame tofilters\n");
     /* push the decoded frame into the filtergraph */
     ret = av_buffersrc_add_frame_flags(filter_ctx[stream_index].buffersrc_ctx,
                                        frame, 0);
