@@ -11,11 +11,13 @@ CameraThread::CameraThread(QObject *parent) : QThread(parent)
     cameraType = CAMERATYPE_LOCAL;
 #ifdef Q_OS_WIN
     cameraUrl = "video=";
-    outputFileName = "D:/Rec/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
+    outputFileNameForTemp = "D:/Rec/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
+    fontFile = "D\\\\:font.ttf";
 #else
     cameraUrl = "/dev/video0";
     outputFileName = "/home/pi/REC/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
     outputFileName = "/media/pi/USB/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
+    fontFile = "/home/pi/Font/font.ttf";
 #endif
     _isRunning = false;
     checkBrighness = false;
@@ -33,6 +35,16 @@ void CameraThread::run()
 {
     int code = caputuer();
     qDebug() << "Thread end at code:" << code;
+}
+
+QString CameraThread::getFontFile() const
+{
+    return fontFile;
+}
+
+void CameraThread::setFontFile(const QString &value)
+{
+    fontFile = value;
 }
 
 bool CameraThread::getFixBrighnessByTime() const
@@ -63,6 +75,13 @@ QString CameraThread::getCameraName() const
 void CameraThread::setCameraName(const QString &value)
 {
     cameraName = value;
+}
+
+QString CameraThread::getCameraNameForFileName() const
+{
+    QString result = cameraName;
+    result = result.replace("\\", "_").replace("/", "_").replace(" ", "_");
+    return result;
 }
 
 CAMERATYPE CameraThread::getCameraType() const
@@ -505,8 +524,13 @@ int CameraThread::init_filters(void)
             continue;
         if (ifmt_ctx->streams[i]->codec->codec_type== AVMEDIA_TYPE_VIDEO)
         {
+            QString filtertext = "drawtext=fontfile=" + fontFile +
+                    ":fontcolor=black:fontsize=50:text='" + "Camera: " +
+                    cameraName +
+                    "  %{localtime}'"
+                    ":x=20:y=20:shadowcolor=black:shadowx=5:shadowy=5";
 #ifdef Q_OS_WIN
-            filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
+            filter_spec = filtertext.toLocal8Bit().data();//"drawtext=fontfile=D\\\\:font.ttf:fontcolor=black:fontsize=50:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=5:shadowy=5"; /* passthrough (dummy) filter for video */
 #else
             filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
             //filter_spec = "null";
@@ -717,7 +741,7 @@ int CameraThread::caputuer()
 
     if ((ret = open_input_file(cameraUrl.toLocal8Bit().data())) < 0)
         return 1;
-    if ((ret = open_output_file(outputFileName.toLocal8Bit().data())) < 0)
+    if ((ret = open_output_file(outputFileNameForTemp.toLocal8Bit().data())) < 0)
         return 1;
     if ((ret = init_filters()) < 0)
     {

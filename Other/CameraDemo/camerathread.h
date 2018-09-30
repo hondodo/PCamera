@@ -53,12 +53,16 @@ public:
 
     QString getCameraName() const;
     void setCameraName(const QString &value);
+    QString getCameraNameForFileName() const;
 
     bool getCheckBrighness() const;
     void setCheckBrighness(bool value);
 
     bool getFixBrighnessByTime() const;
     void setFixBrighnessByTime(bool value);
+
+    QString getFontFile() const;
+    void setFontFile(const QString &value);
 
 protected:
     void run();
@@ -79,7 +83,8 @@ private:
     bool checkBrighness;
     bool fixBrighnessByTime;
 
-    QString outputFileName;
+    QString outputFileNameForTemp;
+    QString fontFile;
 
     AVFormatContext *ifmt_ctx;
     AVFormatContext *ofmt_ctx;

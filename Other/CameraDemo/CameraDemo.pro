@@ -37,8 +37,18 @@ SOURCES += \
     cameracontrolgl.cpp \
     cameracontrolopengl.cpp \
     3rd/glplayer.cpp \
-    camerathread.cpp \
-    camerathreadmux.cpp
+    #camerathread.cpp \
+    camerathreadmux.cpp \
+    pathhelper.cpp \
+    cameracollectorhepler.cpp \
+    #Core/cascadedetectoradapter.cpp \
+    Core/diskhelper.cpp \
+    Core/facedetecthelper.cpp \
+    Core/ImageFormat.cpp \
+    Core/mogdetectobject.cpp \
+    Core/oled12864.cpp \
+    Core/ringhelper.cpp \
+    Core/videoprop.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -54,8 +64,19 @@ HEADERS += \
     cameracontrolgl.h \
     cameracontrolopengl.h \
     3rd/glplayer.h \
-    camerathread.h \
-    camerathreadmux.h
+    #camerathread.h \
+    camerathreadmux.h \
+    pathhelper.h \
+    cameracollectorhelper.h \
+    Core/Blob.h \
+    #Core/cascadedetectoradapter.h \
+    Core/diskhelper.h \
+    Core/facedetecthelper.h \
+    Core/ImageFormat.h \
+    Core/mogdetectobject.h \
+    Core/oled12864.h \
+    Core/ringhelper.h \
+    Core/videoprop.h
 
 FORMS += \
         mainwindow.ui \
@@ -67,11 +88,6 @@ win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavd
 unix:LIBS += -L/usr/local/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
 
 INCLUDEPATH += D:/ffmpeg/dev/include
-
-win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include
-             D:\Potatokid\OpenCV\build\include\opencv
-             D:\Potatokid\OpenCV\build\include\opencv2
-win32: LIBS += D:\Potatokid\OpenCV\buildOpenCV\lib\libopencv_*.a
 
 win32: INCLUDEPATH+=D:\Potatokid\OpenCV\build\include
              D:\Potatokid\OpenCV\build\include\opencv

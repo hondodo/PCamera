@@ -1,5 +1,9 @@
 #include "camerathreadmux.h"
 
+using namespace std;
+using namespace cv;
+
+int CameraThreadMUX::cameraId = 0;
 CameraThreadMUX::CameraThreadMUX(QObject *parent) : QThread(parent)
 {
     pCodecCtx = NULL;
@@ -10,18 +14,23 @@ CameraThreadMUX::CameraThreadMUX(QObject *parent) : QThread(parent)
 
     cameraType = CAMERATYPE_LOCAL;
 #ifdef Q_OS_WIN
+    pathHelper.setRootPath("D:/");
     cameraUrl = "video=";
-    outputFileName = "D:/Rec/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
+    outputFileNameForTemp = pathHelper.getTempFileName();//"D:/Rec/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
+    fontFile = "D\\\\:font.ttf";
 #else
+    pathHelper.setRootPath("/media/pi/USB/");
     cameraUrl = "/dev/video0";
-    outputFileName = "/home/pi/REC/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
-    outputFileName = "/media/pi/USB/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
+    outputFileName = pathHelper.getTempFileName();
+    fontFile = "/home/pi/Font/font.ttf";
 #endif
     _isRunning = false;
     checkBrighness = false;
     fixBrighnessByTime = false;
     cameraName = "";
     isSaveTurn = false;
+    currentCameraId = cameraId;
+    cameraId++;
 }
 
 void CameraThreadMUX::setStop()
@@ -33,6 +42,16 @@ void CameraThreadMUX::run()
 {
     int code = caputuer();
     qDebug() << "Thread end at code:" << code;
+}
+
+QString CameraThreadMUX::getFontFile() const
+{
+    return fontFile;
+}
+
+void CameraThreadMUX::setFontFile(const QString &value)
+{
+    fontFile = value;
 }
 
 bool CameraThreadMUX::getFixBrighnessByTime() const
@@ -63,6 +82,9 @@ QString CameraThreadMUX::getCameraName() const
 void CameraThreadMUX::setCameraName(const QString &value)
 {
     cameraName = value;
+    pathHelper.setCameraName(cameraName);
+    pathHelper.init();
+    outputFileNameForTemp = pathHelper.getTempFileName();
 }
 
 CAMERATYPE CameraThreadMUX::getCameraType() const
@@ -513,10 +535,18 @@ int CameraThreadMUX::initFilters(AVFormatContext *ofmt_ctx)
             continue;
         if (ifmt_ctx->streams[i]->codec->codec_type== AVMEDIA_TYPE_VIDEO)
         {
+            QString filtertext = "[in]drawtext=fontfile=" + fontFile +
+                    ":fontcolor=white:fontsize=40:text='%{localtime}':"
+                    "x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];"
+                    "[a]drawtext=fontfile=" + fontFile +
+                    ":fontcolor=white:fontsize=30:text='" + cameraName.replace(":", "\\:") +
+                    "':x=20:y=60:shadowcolor=black:shadowx=2:shadowy=2[out]";
+            filtertext = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=30:text='World Facing Right':x=20:y=60:shadowcolor=black:shadowx=2:shadowy=2[out]";
+            qDebug() << filtertext;
 #ifdef Q_OS_WIN
-            filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
+            filter_spec = "drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2";
 #else
-            filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
+            filter_spec = "drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2"//"[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
             //filter_spec = "null";
 #endif
         }
@@ -525,7 +555,10 @@ int CameraThreadMUX::initFilters(AVFormatContext *ofmt_ctx)
         ret = initFilter(&filter_ctx[i], ifmt_ctx->streams[i]->codec,
                          ofmt_ctx->streams[i]->codec, filter_spec);
         if (ret)
+        {
+            printError(ret);
             return ret;
+        }
     }
     return 0;
 }
@@ -687,12 +720,16 @@ int CameraThreadMUX::caputuer()
     if ((ret = openInputFile(cameraUrl.toLocal8Bit().data())) < 0)
         return 1;
     AVCodecContext *enc_ctx = NULL;
-    ofmt_ctx = openOutputFile(outputFileName.toLocal8Bit().data(), &ret, &enc_ctx);
+    ofmt_ctx = openOutputFile(outputFileNameForTemp.toLocal8Bit().data(), &ret, &enc_ctx);
     if (ret < 0)
         return 1;
     if ((ret = initFilters(ofmt_ctx)) < 0)
     {
         filtercorrect = false;
+        qDebug() << "Init filter error:" << buf;
+        avformat_close_input(&ifmt_ctx);
+        closeOutputFile(&ofmt_ctx, &enc_ctx);
+        return 1;
     }
     else
     {
@@ -738,12 +775,12 @@ int CameraThreadMUX::caputuer()
                    pCodecCtx->width, pCodecCtx->height);
 
     mRGB = cv::Mat(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
+    std::vector<cv::Rect> mogRect;
     //}
 
     /* read all packets */
     _isRunning = true;
     bool savefile = false;
-
     //计算出的偏差值，小于1表示比较正常，大于1表示存在亮度异常；
     //当cast异常时，da大于0表示过亮，da小于0表示过暗
     float brightnessCast = 0, brightnessDA = 0;
@@ -751,6 +788,9 @@ int CameraThreadMUX::caputuer()
     AVFormatContext *ofmt_ctx_same_to_save = NULL;
     AVCodecContext *enc_ctx_same_to_save = NULL;
     bool isNewRecFile = true;
+    QDateTime needRecLastTime = QDateTime::currentDateTime();
+    int minRecMS = 30 * 1000;
+    int maxFrames = 10 * 30 * 60;
     while(_isRunning)
     {
         if((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
@@ -764,7 +804,8 @@ int CameraThreadMUX::caputuer()
             }
             ofmt_ctx_same_to_save = NULL;
             frameindex = 0;
-            QString savefilename = "D:/REC/Camera_" + QDateTime::currentDateTime().toString("hhmmmss") + ".avi";
+            pathHelper.creatNewFileName();
+            QString savefilename = pathHelper.getCurrentFileName();//"D:/REC/Camera_" + QDateTime::currentDateTime().toString("hhmmmss") + ".avi";
             ofmt_ctx_same_to_save = openOutputFile(savefilename.toLocal8Bit().data(), &ret, &enc_ctx_same_to_save);
             if (ret < 0)
             {
@@ -800,7 +841,8 @@ int CameraThreadMUX::caputuer()
                 av_log(NULL, AV_LOG_ERROR, "Decoding failed\n");
                 break;
             }
-            savefile = frameindex < 30000;
+            int elsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - needRecLastTime.toMSecsSinceEpoch();
+            savefile = (elsp < minRecMS) && (frameindex < maxFrames); //frameindex < 30000;
             if (got_frame)
             {
                 frametime = frameControlTimer.elapsed();
@@ -927,6 +969,20 @@ int CameraThreadMUX::caputuer()
                 }
 
                 cv::cvtColor(mRGB, temp, CV_BGR2RGB);
+
+                //if(frameindex % 5 == 0)
+                //{
+                    mogRect = CameraCollectorThread::Init->findMog(currentCameraId, mRGB);
+                    if(!mogRect.empty() && mogRect.size() > 0)
+                    {
+                        needRecLastTime = QDateTime::currentDateTime();
+                        if(!savefile)
+                        {
+                            isNewRecFile = true;
+                        }
+                    }
+                //}
+
                 QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
                 QImage image(dest);
                 image.detach();
@@ -953,7 +1009,6 @@ int CameraThreadMUX::caputuer()
                     closeOutputFile(&ofmt_ctx_same_to_save, &enc_ctx_same_to_save);
                     ofmt_ctx_same_to_save = NULL;
                 }
-                isNewRecFile = true;
             }
         }
         else
@@ -1031,6 +1086,7 @@ end:
         //printError(ret);
         av_log(NULL, AV_LOG_ERROR, "Erroro ccurred\n");
     }
+    _isRunning = false;
     return (ret? 1:0);
 }
 

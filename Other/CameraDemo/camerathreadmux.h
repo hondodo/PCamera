@@ -12,6 +12,8 @@
 
 #include "cameratype.h"
 #include "mathelper.h"
+#include "pathhelper.h"
+#include "cameracollectorhelper.h"
 
 extern "C"
 {
@@ -65,6 +67,9 @@ public:
     bool getFixBrighnessByTime() const;
     void setFixBrighnessByTime(bool value);
 
+    QString getFontFile() const;
+    void setFontFile(const QString &value);
+
 protected:
     void run();
 
@@ -77,6 +82,8 @@ protected slots:
 
 private:
     bool _isRunning;
+    static int cameraId;
+    int currentCameraId;
 
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
@@ -84,7 +91,9 @@ private:
     bool checkBrighness;
     bool fixBrighnessByTime;
 
-    QString outputFileName;
+    QString outputFileNameForTemp;
+    QString fontFile;
+    PathHelper pathHelper;
 
     AVFormatContext *ifmt_ctx;
     //AVFormatContext *ofmt_ctx;
