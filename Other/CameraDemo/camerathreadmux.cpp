@@ -21,7 +21,7 @@ CameraThreadMUX::CameraThreadMUX(QObject *parent) : QThread(parent)
 #else
     pathHelper.setRootPath("/media/pi/USB/");
     cameraUrl = "/dev/video0";
-    outputFileName = pathHelper.getTempFileName();
+    outputFileNameForTemp = pathHelper.getTempFileName();
     fontFile = "/home/pi/Font/font.ttf";
 #endif
     _isRunning = false;
@@ -546,7 +546,7 @@ int CameraThreadMUX::initFilters(AVFormatContext *ofmt_ctx)
 #ifdef Q_OS_WIN
             filter_spec = "drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2";
 #else
-            filter_spec = "drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2"//"[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
+            filter_spec = "drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2";//"[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=black:fontsize=30:text='%{localtime}':x=20:y=20[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='%{localtime}':x=18:y=18[out]"; /* passthrough (dummy) filter for video */
             //filter_spec = "null";
 #endif
         }
