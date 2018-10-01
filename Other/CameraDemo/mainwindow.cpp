@@ -255,6 +255,8 @@ void MainWindow::resizeCameraControl()
                 allCameraControls.at(i)->setImageHeight(eachheight);
             }
         }
+        timeControl->setMaximumSize(QSize(eachwidth, eachheight));
+        weatherControl->setMaximumSize(QSize(eachwidth, eachheight));
     }
     else if(ui->tabWidget->currentWidget() == ui->tabCamBigAndSmall)
     {
@@ -263,10 +265,12 @@ void MainWindow::resizeCameraControl()
     else if(ui->tabWidget->currentWidget() == ui->tabTime)
     {
         ui->verticalLayoutTime->addWidget(timeControl);
+        timeControl->setMaximumSize(ui->tabTime->size());
     }
     else if(ui->tabWidget->currentWidget() == ui->tabWeatherReport)
     {
         ui->verticalLayoutWeatherReport->addWidget(weatherControl);
+        weatherControl->setMaximumSize(ui->tabWeatherReport->size());
     }
 }
 

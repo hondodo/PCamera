@@ -70,7 +70,7 @@ void CameraControl::stop()
     }
 }
 
-void CameraControl::onImage(QImage image)
+void CameraControl::onImage(const QImage &image)
 {
     if(image.isNull())
     {

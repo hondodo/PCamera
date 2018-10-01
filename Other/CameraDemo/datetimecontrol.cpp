@@ -132,9 +132,9 @@ QString DateTimeControl::buildHtmlText()
 
 QString DateTimeControl::buildHtmlParagraph(QString text, int fontsize)
 {
-    //<p><span style=" font-size:200px; font-weight:600;">This is a paragraph.</span></p>
+    //<p><span style=" font-size:200px;">This is a paragraph.</span></p>
     QString html ="<p align=\"center\"><span style=\" font-size:" + QString::number(fontsize, 'f', 0) +
-                  "px; font-weight:600;\">" + text +
+                  "px;\">" + text +
                   "</span></p>";
     return html;
 }

@@ -835,7 +835,8 @@ int CameraThreadMUX::caputuer()
         {
             av_log(NULL, AV_LOG_DEBUG, "Going to reencode & filter the frame\n");
             frame = av_frame_alloc();
-            if (!frame) {
+            if (!frame)
+            {
                 ret = AVERROR(ENOMEM);
                 break;
             }
@@ -1020,37 +1021,40 @@ int CameraThreadMUX::caputuer()
             {
                 av_frame_free(&frame);
             }
-            if(!savefile)
-            {
-//                if(ofmt_ctx_same_to_save != NULL || enc_ctx_same_to_save != NULL)
-//                {
-//                    closeOutputFile(&ofmt_ctx_same_to_save, &enc_ctx_same_to_save);
-//                    ofmt_ctx_same_to_save = NULL;
-//                }
-            }
-            else
+            if(savefile)
             {
                 frameindex++;
             }
         }
-        else
+        if(frame != NULL)
         {
-            /* remux this frame without reencoding */
-            /*
-            packet.dts = av_rescale_q_rnd(packet.dts,
-                                          ifmt_ctx->streams[stream_index]->time_base,
-                                          ofmt_ctx->streams[stream_index]->time_base,
-                                          (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-            packet.pts = av_rescale_q_rnd(packet.pts,
-                                          ifmt_ctx->streams[stream_index]->time_base,
-                                          ofmt_ctx->streams[stream_index]->time_base,
-                                          (AVRounding)(AV_ROUND_NEAR_INF|AV_ROUND_PASS_MINMAX));
-            ret = av_interleaved_write_frame(ofmt_ctx, &packet);
-            if (ret < 0)
-                goto end;
-            */
+            qDebug() << "**************Frame*********";
+            av_frame_free(&frame);
         }
         av_free_packet(&packet);
+
+        if(ofmt_ctx_same_to_save != NULL)
+        {
+            /* flush filters and encoders */
+            for (i = 0; i < ifmt_ctx->nb_streams; i++)
+            {
+                /* flush filter */
+                if (!filter_ctx[i].filter_graph)
+                    continue;
+                ret = filterEncodeWriteFrame(NULL, i, ofmt_ctx_same_to_save);
+                if (ret < 0) {
+                    av_log(NULL, AV_LOG_ERROR, "Flushingfilter failed\n");
+                    goto end;
+                }
+                /* flush encoder */
+                ret = flushEncoder(i, ofmt_ctx_same_to_save);
+                if (ret < 0) {
+                    av_log(NULL, AV_LOG_ERROR, "Flushingencoder failed\n");
+                    goto end;
+                }
+            }
+        }
+
         QThread::msleep(5);
     }
     if(ofmt_ctx_same_to_save != NULL)

@@ -42,7 +42,7 @@ public:
     void setFixBrighnessByTime(bool value);
 
 private slots:
-    void onImage(QImage image);
+    void onImage(const QImage &image);
 
 private:
     Ui::CameraControl *ui;

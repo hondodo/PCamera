@@ -74,7 +74,7 @@ protected:
     void run();
 
 signals:signals:
-    void onFrame(QImage);
+    void onFrame(const QImage &image);
     void onFrameSize(int width, int height);
     void onFrame(unsigned char *yuvData);
 
