@@ -791,8 +791,8 @@ int CameraThreadMUX::caputuer()
     bool isNewRecFile = true;
     QDateTime now = QDateTime::currentDateTime();
     QDateTime needRecLastTime = now;
-    int minRecMS = 30 * 1000;
-    int maxFrames = 30 * 30 * 60;
+    int minRecMS = 10 * 1000;
+    //int maxFrames = 30 * 30 * 60;
     int lastSecond = QDateTime::currentDateTime().time().second();
     bool isSameSecond = true;
     QDateTime nextCreatNewFile = now;
