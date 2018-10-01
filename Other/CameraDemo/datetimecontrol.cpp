@@ -16,6 +16,7 @@ DateTimeControl::DateTimeControl(QWidget *parent) :
     timeFontSize = 200;
     weekFontSize = 62;
     yearFontSize = 32;
+    setMaximumSize(QSize(2048, 2048));
 }
 
 DateTimeControl::~DateTimeControl()
@@ -169,7 +170,7 @@ bool DateTimeControl::isCanDown()
 
 bool DateTimeControl::isCanUp()
 {
-    return dateFontSize < 300 && timeFontSize < 300 && weekFontSize < 300 && yearFontSize < 300;
+    return dateFontSize < 250 && timeFontSize < 250 && weekFontSize < 250 && yearFontSize < 250;
 }
 
 void DateTimeControl::resizeFontSize()
