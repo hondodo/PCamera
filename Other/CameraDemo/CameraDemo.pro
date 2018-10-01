@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui multimedia opengl
+QT       += core gui multimedia opengl network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -52,7 +52,9 @@ SOURCES += \
     datetimecontrol.cpp \
     3rd/chineseyear.cpp \
     oledthread.cpp \
-    ringthread.cpp
+    ringthread.cpp \
+    weathercontrol.cpp \
+    weatherreportcontrol.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -84,14 +86,18 @@ HEADERS += \
     datetimecontrol.h \
     3rd/chineseyear.h \
     oledthread.h \
-    ringthread.h
+    ringthread.h \
+    weathercontrol.h \
+    weatherreportcontrol.h
 
 FORMS += \
         mainwindow.ui \
     cameracontrol.ui \
     addcameraform.ui \
     cameracontrolopengl.ui \
-    datetimecontrol.ui
+    datetimecontrol.ui \
+    weathercontrol.ui \
+    weatherreportcontrol.ui
 
 win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
 unix:LIBS += -L/usr/local/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
@@ -115,3 +121,6 @@ win32:LIBS += -lOpengl32 \
                 -lglu32 \
                 -lglut
 unix: LIBS += -lGL -lGLU -lglut
+
+RESOURCES += \
+    rcs.qrc

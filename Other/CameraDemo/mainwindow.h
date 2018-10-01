@@ -13,6 +13,7 @@
 #include "addcameraform.h"
 #include "cameracontrolgl.h"
 #include "datetimecontrol.h"
+#include "weathercontrol.h"
 
 namespace Ui {
 class MainWindow;
@@ -38,6 +39,10 @@ private slots:
     void onAddCameraFormClose(int code);
     void on_tabWidget_currentChanged(int index);
 
+    void on_checkBoxTimeControl_stateChanged(int arg1);
+
+    void on_checkBoxWeatherControl_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     bool isFirstShow;
@@ -46,6 +51,7 @@ private:
     DateTimeControl *timeControl;
 
     bool showDateTimeControlToCamerasComtrol;
+    bool showWeathControl;
 
     void showCamera();
     void resizeCameraControl();
@@ -56,6 +62,7 @@ private:
     int timerFrames;
     int camBigIndex;
     CameraControl *camBigShowingWidget;
+    WeatherControl *weatherControl;
 };
 
 #endif // MAINWINDOW_H

@@ -20,7 +20,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widgetHide->setVisible(false);
     VideoFileThread::Init->start();
     timeControl = NULL;
-    showDateTimeControlToCamerasComtrol = false;
+    weatherControl = NULL;
+    showDateTimeControlToCamerasComtrol = ui->checkBoxTimeControl->isChecked();
+    showWeathControl = ui->checkBoxWeatherControl->isChecked();
 }
 
 MainWindow::~MainWindow()
@@ -42,6 +44,13 @@ void MainWindow::showEvent(QShowEvent *event)
         timeControl = new DateTimeControl();
         ui->verticalLayoutTime->addWidget(timeControl);
         timeControl->start();
+        weatherControl = new WeatherControl();
+        ui->verticalLayoutWeatherReport->addWidget(weatherControl);
+        weatherControl->startDateTime();
+        weatherControl->setCanShowLive(true);
+        weatherControl->setCanShowReport(true);
+        weatherControl->updateWeather();
+        weatherControl->switchView();
     }
 }
 
@@ -90,6 +99,11 @@ void MainWindow::timerEvent(QTimerEvent *event)
         {
             timerFrames = 0;
         }
+
+        if(timerFrames % 100 == 0)
+        {
+            weatherControl->switchView();
+        }
     }
 }
 
@@ -136,10 +150,6 @@ void MainWindow::onAddCameraFormClose(int code)
                     showCamera();
                 }
             }
-            else if(form->getCameraType() == CAMERATYPE_NOTCAMERA_DATETIMECONTROL)
-            {
-                showDateTimeControlToCamerasComtrol = true;
-            }
         }
         form->deleteLater();
         form = Q_NULLPTR;
@@ -155,6 +165,7 @@ void MainWindow::showCamera()
     else if(ui->tabWidget->currentWidget() == ui->tabCam4)
     {
         bool isshowedtimecontrol = false;
+        bool isshowedweathercontrol = false;
         for(int i = 0; i < 4; i++)
         {
             if(allCameraControls.count() > i)
@@ -173,6 +184,16 @@ void MainWindow::showCamera()
                     if(i == 1) ui->verticalLayoutCams2->addWidget(timeControl);
                     if(i == 2) ui->verticalLayoutCams3->addWidget(timeControl);
                     if(i == 3) ui->verticalLayoutCams4->addWidget(timeControl);
+                    continue;
+                }
+                if(!isshowedweathercontrol && showWeathControl)
+                {
+                    isshowedweathercontrol = true;
+                    if(i == 0) ui->verticalLayoutCams1->addWidget(weatherControl);
+                    if(i == 1) ui->verticalLayoutCams2->addWidget(weatherControl);
+                    if(i == 2) ui->verticalLayoutCams3->addWidget(weatherControl);
+                    if(i == 3) ui->verticalLayoutCams4->addWidget(weatherControl);
+                    continue;
                 }
             }
         }
@@ -243,10 +264,26 @@ void MainWindow::resizeCameraControl()
     {
         ui->verticalLayoutTime->addWidget(timeControl);
     }
+    else if(ui->tabWidget->currentWidget() == ui->tabWeatherReport)
+    {
+        ui->verticalLayoutWeatherReport->addWidget(weatherControl);
+    }
 }
 
 void MainWindow::on_tabWidget_currentChanged(int index)
 {
     Q_UNUSED(index);
     showCamera();
+}
+
+void MainWindow::on_checkBoxTimeControl_stateChanged(int arg1)
+{
+    Q_UNUSED(arg1);
+    showDateTimeControlToCamerasComtrol = ui->checkBoxTimeControl->isChecked();
+}
+
+void MainWindow::on_checkBoxWeatherControl_stateChanged(int arg1)
+{
+    Q_UNUSED(arg1);
+    showWeathControl = ui->checkBoxWeatherControl->isChecked();
 }

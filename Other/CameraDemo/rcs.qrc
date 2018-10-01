@@ -1,0 +1,41 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Rcs/cloudy1.png</file>
+        <file>Rcs/cloudy1_night.png</file>
+        <file>Rcs/cloudy2.png</file>
+        <file>Rcs/cloudy2_night.png</file>
+        <file>Rcs/cloudy3.png</file>
+        <file>Rcs/cloudy3_night.png</file>
+        <file>Rcs/cloudy4.png</file>
+        <file>Rcs/cloudy4_night.png</file>
+        <file>Rcs/cloudy5.png</file>
+        <file>Rcs/fog.png</file>
+        <file>Rcs/fog_night.png</file>
+        <file>Rcs/hail.png</file>
+        <file>Rcs/light_rain.png</file>
+        <file>Rcs/mist.png</file>
+        <file>Rcs/mist_night.png</file>
+        <file>Rcs/overcast.png</file>
+        <file>Rcs/shower1.png</file>
+        <file>Rcs/shower1_night.png</file>
+        <file>Rcs/shower2.png</file>
+        <file>Rcs/shower2_night.png</file>
+        <file>Rcs/shower3.png</file>
+        <file>Rcs/sleet.png</file>
+        <file>Rcs/snow1.png</file>
+        <file>Rcs/snow1_night.png</file>
+        <file>Rcs/snow2.png</file>
+        <file>Rcs/snow2_night.png</file>
+        <file>Rcs/snow3.png</file>
+        <file>Rcs/snow3_night.png</file>
+        <file>Rcs/snow4.png</file>
+        <file>Rcs/snow5.png</file>
+        <file>Rcs/sunny.png</file>
+        <file>Rcs/sunny_night.png</file>
+        <file>Rcs/tstorm1.png</file>
+        <file>Rcs/tstorm1_night.png</file>
+        <file>Rcs/tstorm2.png</file>
+        <file>Rcs/tstorm2_night.png</file>
+        <file>Rcs/tstorm3.png</file>
+    </qresource>
+</RCC>

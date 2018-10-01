@@ -12,6 +12,10 @@ DateTimeControl::DateTimeControl(QWidget *parent) :
     ChineseYear::InitLunar();
     ringThread = Q_NULLPTR;
     nextTipTime = QDateTime::currentDateTime().addMSecs(1000 * 60 * 60).time().hour();
+    dateFontSize = 62;
+    timeFontSize = 200;
+    weekFontSize = 62;
+    yearFontSize = 32;
 }
 
 DateTimeControl::~DateTimeControl()
@@ -33,22 +37,23 @@ void DateTimeControl::timerEvent(QTimerEvent *event)
 {
     if(event->timerId() == timeId)
     {
-        QDateTime time = QDateTime::currentDateTime();
-        int lunaryear = 0, lunarmonth = 0, lunarday = 0;
-        QString lunarstring = ChineseYear::GetLunarStringX(time.date().year(),
-                                                           time.date().month(),
-                                                           time.date().day(),
-                                                           lunaryear,
-                                                           lunarmonth,
-                                                           lunarday);
+        ui->label->setText(buildHtmlText());
+//        QDateTime time = QDateTime::currentDateTime();
+//        int lunaryear = 0, lunarmonth = 0, lunarday = 0;
+//        QString lunarstring = ChineseYear::GetLunarStringX(time.date().year(),
+//                                                           time.date().month(),
+//                                                           time.date().day(),
+//                                                           lunaryear,
+//                                                           lunarmonth,
+//                                                           lunarday);
 
-        ui->labelData->setText(time.toString("yyyy-MM-dd"));
-        ui->labelTime->setText(time.toString("hh:mm:ss"));
-        ui->labelChineseData->setText(lunarstring + " 星期" + XinQi[time.date().dayOfWeek()]);
-        QString shengxiao = ChineseYear::GetShengXiao(lunaryear);
-        QString xinzuo = ChineseYear::GetXinZuo(time.date().month(), time.date().day());
-        QString yearname = ChineseYear::GetYearName(lunaryear);
-        ui->labelShengXiaoXinZuo->setText(yearname + QString("年") + " " + shengxiao + " " + xinzuo);
+//        ui->labelData->setText(time.toString("yyyy-MM-dd"));
+//        ui->labelTime->setText(time.toString("hh:mm:ss"));
+//        ui->labelChineseData->setText(lunarstring + " 星期" + XinQi[time.date().dayOfWeek()]);
+//        QString shengxiao = ChineseYear::GetShengXiao(lunaryear);
+//        QString xinzuo = ChineseYear::GetXinZuo(time.date().month(), time.date().day());
+//        QString yearname = ChineseYear::GetYearName(lunaryear);
+//        ui->labelShengXiaoXinZuo->setText(yearname + QString("年") + " " + shengxiao + " " + xinzuo);
         //TipTime
         {
             if(nextTipTime == QDateTime::currentDateTime().time().hour())
@@ -67,6 +72,12 @@ void DateTimeControl::timerEvent(QTimerEvent *event)
             }
         }
     }
+}
+
+void DateTimeControl::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+    resizeFontSize();
 }
 
 void DateTimeControl::deleteRingThread()
@@ -88,5 +99,97 @@ void DateTimeControl::startNewRingThread(QString filename)
         ringThread = new RingThread();
         ringThread->setFileName(filename);
         ringThread->start();
+    }
+}
+
+QString DateTimeControl::buildHtmlText()
+{
+    QDateTime time = QDateTime::currentDateTime();
+    int lunaryear = 0, lunarmonth = 0, lunarday = 0;
+    QString lunarstring = ChineseYear::GetLunarStringX(time.date().year(),
+                                                       time.date().month(),
+                                                       time.date().day(),
+                                                       lunaryear,
+                                                       lunarmonth,
+                                                       lunarday);
+
+    //ui->labelData->setText(time.toString("yyyy-MM-dd"));
+    //ui->labelTime->setText(time.toString("hh:mm:ss"));
+    //ui->labelChineseData->setText(lunarstring + " 星期" + XinQi[time.date().dayOfWeek()]);
+    QString shengxiao = ChineseYear::GetShengXiao(lunaryear);
+    QString xinzuo = ChineseYear::GetXinZuo(time.date().month(), time.date().day());
+    QString yearname = ChineseYear::GetYearName(lunaryear);
+    //ui->labelShengXiaoXinZuo->setText(yearname + QString("年") + " " + shengxiao + " " + xinzuo);
+
+    QString html = buildHtmlParagraph(time.toString("yyyy-MM-dd"), dateFontSize) +
+            buildHtmlParagraph(time.toString("hh:mm:ss"), timeFontSize) +
+            buildHtmlParagraph(lunarstring + " 星期" + XinQi[time.date().dayOfWeek()], weekFontSize) +
+            buildHtmlParagraph(yearname + QString("年") + " " + shengxiao + " " + xinzuo, yearFontSize);
+
+    return html;
+}
+
+QString DateTimeControl::buildHtmlParagraph(QString text, int fontsize)
+{
+    //<p><span style=" font-size:200px; font-weight:600;">This is a paragraph.</span></p>
+    QString html ="<p align=\"center\"><span style=\" font-size:" + QString::number(fontsize, 'f', 0) +
+                  "px; font-weight:600;\">" + text +
+                  "</span></p>";
+    return html;
+}
+
+void DateTimeControl::trimFonSize(bool up)
+{
+    if(up)
+    {
+        if(isCanUp())
+        {
+            dateFontSize++;
+            timeFontSize++;
+            weekFontSize++;
+            yearFontSize++;
+        }
+    }
+    else
+    {
+        if(isCanDown())
+        {
+            dateFontSize--;
+            timeFontSize--;
+            weekFontSize--;
+            yearFontSize--;
+        }
+    }
+}
+
+bool DateTimeControl::isCanDown()
+{
+    return dateFontSize > 10 && timeFontSize > 10 && weekFontSize > 10 && yearFontSize > 10;
+}
+
+bool DateTimeControl::isCanUp()
+{
+    return dateFontSize < 300 && timeFontSize < 300 && weekFontSize < 300 && yearFontSize < 300;
+}
+
+void DateTimeControl::resizeFontSize()
+{
+    int wwidth = 5 * timeFontSize;
+    int wheight = dateFontSize + timeFontSize + weekFontSize + yearFontSize;
+    int swidth = ui->scrollArea->width() - 50;
+    int sheight = ui->scrollArea->height() - 200;
+    while((wwidth < swidth || wheight < sheight) && isCanUp())
+    {
+        trimFonSize(true);
+        ui->label->setText(buildHtmlText());
+        wwidth = 5 * timeFontSize;
+        wheight = 20 + dateFontSize + timeFontSize + weekFontSize + yearFontSize;
+    }
+    while((wwidth > swidth || wheight > sheight) && isCanDown())
+    {
+        trimFonSize(false);
+        ui->label->setText(buildHtmlText());
+        wwidth = 5 * timeFontSize;
+        wheight = dateFontSize + timeFontSize + weekFontSize + yearFontSize;
     }
 }

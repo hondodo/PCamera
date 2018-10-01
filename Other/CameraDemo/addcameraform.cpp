@@ -139,15 +139,7 @@ void AddCameraForm::on_pushButtonOK_clicked()
             state = 1;
         }
     }
-    else if(ui->comboBoxType->currentIndex() == 2)
-    {
-        cameraType = CAMERATYPE_NOTCAMERA_DATETIMECONTROL;
-        cameraUrl = ui->lineEditUrl->text().trimmed();
-        if(existsCameraUrls.contains(cameraUrl.toLower()))
-        {
-            state = 1;
-        }
-    }
+
     if(state == 1)
     {
         ui->labelError->setText("Camera exist");
