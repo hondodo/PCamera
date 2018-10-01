@@ -50,7 +50,9 @@ SOURCES += \
     Core/ringhelper.cpp \
     Core/videoprop.cpp \
     datetimecontrol.cpp \
-    3rd/chineseyear.cpp
+    3rd/chineseyear.cpp \
+    oledthread.cpp \
+    ringthread.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -80,7 +82,9 @@ HEADERS += \
     Core/ringhelper.h \
     Core/videoprop.h \
     datetimecontrol.h \
-    3rd/chineseyear.h
+    3rd/chineseyear.h \
+    oledthread.h \
+    ringthread.h
 
 FORMS += \
         mainwindow.ui \

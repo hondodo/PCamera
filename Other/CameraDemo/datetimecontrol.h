@@ -5,6 +5,7 @@
 #include <QDateTime>
 #include <QTimerEvent>
 #include "3rd/chineseyear.h"
+#include "ringthread.h"
 
 namespace Ui {
 class DateTimeControl;
@@ -26,6 +27,10 @@ protected:
 private:
     Ui::DateTimeControl *ui;
     int timeId;
+    int nextTipTime;
+    RingThread *ringThread;
+    void deleteRingThread();
+    void startNewRingThread(QString filename);
 };
 
 #endif // DATETIMECONTROL_H

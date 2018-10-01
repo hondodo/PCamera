@@ -10,6 +10,8 @@ DateTimeControl::DateTimeControl(QWidget *parent) :
     ui->setupUi(this);
     timeId = 0;
     ChineseYear::InitLunar();
+    ringThread = Q_NULLPTR;
+    nextTipTime = QDateTime::currentDateTime().addMSecs(1000 * 60 * 60).time().hour();
 }
 
 DateTimeControl::~DateTimeControl()
@@ -47,5 +49,44 @@ void DateTimeControl::timerEvent(QTimerEvent *event)
         QString xinzuo = ChineseYear::GetXinZuo(time.date().month(), time.date().day());
         QString yearname = ChineseYear::GetYearName(lunaryear);
         ui->labelShengXiaoXinZuo->setText(yearname + QString("年") + " " + shengxiao + " " + xinzuo);
+        //TipTime
+        {
+            if(nextTipTime == QDateTime::currentDateTime().time().hour())
+            {
+                QString filename = QString::number(nextTipTime, 'f', 0) + ".mp3";
+                nextTipTime = QDateTime::currentDateTime().addMSecs(1000 * 60 * 60).time().hour();
+    #ifdef Q_OS_WIN
+                filename = "D:/Data/TimeMp3/" + filename;
+    #else
+                filename = "/home/pi/Music/TimeMp3/" + filename;
+    #endif
+                if(nextTipTime >= 6 && nextTipTime <= 21)
+                {
+                    startNewRingThread(filename);
+                }
+            }
+        }
+    }
+}
+
+void DateTimeControl::deleteRingThread()
+{
+    if(ringThread != Q_NULLPTR)
+    {
+        ringThread->setStop();
+        ringThread->wait(1000);
+        ringThread->terminate();
+        ringThread = Q_NULLPTR;
+    }
+}
+
+void DateTimeControl::startNewRingThread(QString filename)
+{
+    if(QDateTime::currentDateTime().time().hour() > 6 &&
+            QDateTime::currentDateTime().time().hour() <= 21)
+    {
+        ringThread = new RingThread();
+        ringThread->setFileName(filename);
+        ringThread->start();
     }
 }
