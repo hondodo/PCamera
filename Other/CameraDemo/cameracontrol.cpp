@@ -14,6 +14,7 @@ CameraControl::CameraControl(QWidget *parent) :
     checkBrighness = false;
     fixBrighnessByTime = false;
     player = Q_NULLPTR;
+    QPixmapCache::setCacheLimit(1024 * 10);
 }
 
 CameraControl::~CameraControl()
@@ -51,7 +52,7 @@ void CameraControl::start()
     player->setCameraName(cameraName);
     player->setCheckBrighness(checkBrighness);
     player->setFixBrighnessByTime(fixBrighnessByTime);
-    connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)));
+    connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)), Qt::DirectConnection);
     player->start();
 }
 
@@ -113,7 +114,7 @@ int CameraControl::getImageHeight() const
 
 void CameraControl::setImageHeight(int value)
 {
-    imageHeight = value > 720? 720 : value;
+    imageHeight = value > 900? 900 : value;
 }
 
 int CameraControl::getImageWidth() const
@@ -123,7 +124,7 @@ int CameraControl::getImageWidth() const
 
 void CameraControl::setImageWidth(int value)
 {
-    imageWidth = value > 1280? 1280 : value;
+    imageWidth = value > 1400? 1400 : value;
 }
 
 QString CameraControl::getCameraName() const

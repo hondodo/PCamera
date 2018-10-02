@@ -2,6 +2,7 @@
 #define CAMERACONTROL_H
 
 #include <QWidget>
+#include <QPixmapCache>
 #include "3rd/videoplayer.h"
 #include "camerathreadmux.h"
 

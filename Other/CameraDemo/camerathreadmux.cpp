@@ -1035,7 +1035,7 @@ int CameraThreadMUX::caputuer()
                 QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
                 QImage image(dest);
                 image.detach();
-                emit onFrame(image);//QIMAGE 内存问题
+                emit onFrame(image.copy());//QIMAGE 内存问题
 
                 frametime = frameControlTimer.elapsed();
                 frameControlTimer.restart();
@@ -1044,6 +1044,7 @@ int CameraThreadMUX::caputuer()
                 {
                     qDebug() << "FPS:" << framerate << "@" << cameraName;
                 }
+
                 av_frame_free(&frame);
                 if (ret< 0)
                 {
