@@ -148,11 +148,9 @@ int CameraThreadMUX::openInputFile(const char *filename)
     inputFmt = av_find_input_format("video4linux2");
 #endif
     AVDictionary *avdic=NULL;
-    av_dict_set(&avdic, "rtsp_transport", "tcp", 0);
-    av_dict_set(&avdic, "max_delay", "100", 0);
     av_dict_set(&avdic, "framerate", "30", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
-    av_dict_set(&avdic, "video_size", "1280x720", 0);
+    av_dict_set(&avdic, "video_size", "1920x1080", 0);
 
     if(!isLocalCamera)
     {
@@ -168,9 +166,21 @@ int CameraThreadMUX::openInputFile(const char *filename)
     {
         if ((ret = avformat_open_input(&ifmt_ctx,filename, inputFmt, &avdic)) < 0)
         {
-            av_log(NULL, AV_LOG_ERROR, "Cannot open input file\n");
-            printError(ret);
-            return ret;
+            av_dict_set(&avdic, "video_size", "1280x720", 0);
+            if ((ret = avformat_open_input(&ifmt_ctx,filename, inputFmt, &avdic)) < 0)
+            {
+                av_log(NULL, AV_LOG_ERROR, "Cannot open input file\n");
+                printError(ret);
+                return ret;
+            }
+            else
+            {
+                qDebug() << "Open camera @ 1280 * 720 @" << cameraName;
+            }
+        }
+        else
+        {
+            qDebug() << "Open camera @ 1920 * 1080 @" << cameraName;
         }
     }
     if ((ret = avformat_find_stream_info(ifmt_ctx, NULL))< 0) {
@@ -190,6 +200,10 @@ int CameraThreadMUX::openInputFile(const char *filename)
             if(codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
             {
                 pCodecCtx = codec_ctx;
+                pCodecCtx->time_base.den = 1;
+                pCodecCtx->time_base.num = 75;
+                av_opt_set(pCodecCtx->priv_data, "preset", "superfast", 0);
+                av_opt_set(pCodecCtx->priv_data, "tune", "zerolatency", 0);
             }
             /* Open decoder */
             ret =avcodec_open2(codec_ctx,
