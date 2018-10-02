@@ -38,10 +38,9 @@ private slots:
     void on_pushButtonAddCamera_clicked();
     void onAddCameraFormClose(int code);
     void on_tabWidget_currentChanged(int index);
-
     void on_checkBoxTimeControl_stateChanged(int arg1);
-
     void on_checkBoxWeatherControl_stateChanged(int arg1);
+    void onCameraControlRequestRemove();
 
 private:
     Ui::MainWindow *ui;

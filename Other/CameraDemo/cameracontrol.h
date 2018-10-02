@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QPixmapCache>
+#include <QMenu>
 #include "3rd/videoplayer.h"
 #include "camerathreadmux.h"
 
@@ -42,8 +43,18 @@ public:
     bool getFixBrighnessByTime() const;
     void setFixBrighnessByTime(bool value);
 
+protected:
+    bool eventFilter(QObject *watched, QEvent *event);
+
+signals:
+    void onRemoveRequest();
+
 private slots:
     void onImage(const QImage &image);
+    void on_label_customContextMenuRequested(const QPoint &pos);
+    void onMenuClickRemove();
+    void onMenuClickCheckBrighness();
+    void onMenuClickFixBrighnessbyTime();
 
 private:
     Ui::CameraControl *ui;
@@ -54,6 +65,10 @@ private:
     int imageWidth, imageHeight;
     bool checkBrighness;
     bool fixBrighnessByTime;
+    void initMenu();
+    void disConnectMenu();
+    QMenu *menu;
+    QAction *removeAction, *checkBrighnessAction, *fixBrighnessByTimeAction;
 };
 
 #endif // CAMERACONTROL_H

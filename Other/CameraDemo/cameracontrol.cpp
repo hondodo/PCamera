@@ -15,11 +15,64 @@ CameraControl::CameraControl(QWidget *parent) :
     fixBrighnessByTime = false;
     player = Q_NULLPTR;
     QPixmapCache::setCacheLimit(1024 * 10);
+    menu = NULL;
+    removeAction = NULL;
+    checkBrighnessAction = NULL;
+    fixBrighnessByTimeAction = NULL;
+    initMenu();
+
+    ui->label->installEventFilter(this);
+}
+
+void CameraControl::initMenu()
+{
+    if(menu != NULL)
+    {
+        menu->deleteLater();
+        menu = NULL;
+    }
+    if(removeAction != NULL)
+    {
+        removeAction->deleteLater();
+        removeAction = NULL;
+    }
+    if(checkBrighnessAction != NULL)
+    {
+        checkBrighnessAction->deleteLater();
+        checkBrighnessAction = NULL;
+    }
+    if(fixBrighnessByTimeAction != NULL)
+    {
+        fixBrighnessByTimeAction->deleteLater();
+        fixBrighnessByTimeAction = NULL;
+    }
+    menu = new QMenu();
+    removeAction = menu->addAction("Remove");
+    removeAction->setData("remove");
+    connect(removeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRemove()));
+    checkBrighnessAction = menu->addAction("Check Brighness");
+    checkBrighnessAction->setData("checkbrighness");
+    checkBrighnessAction->setCheckable(true);
+    checkBrighnessAction->setChecked(checkBrighness);
+    connect(checkBrighnessAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickCheckBrighness()));
+    fixBrighnessByTimeAction = menu->addAction("Fix Brighness By Time");
+    fixBrighnessByTimeAction->setData("fixbrighnessbytime");
+    fixBrighnessByTimeAction->setCheckable(true);
+    fixBrighnessByTimeAction->setChecked(fixBrighnessByTime);
+    connect(fixBrighnessByTimeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFixBrighnessbyTime()));
+}
+
+void CameraControl::disConnectMenu()
+{
+    disconnect(removeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRemove()));
+    disconnect(checkBrighnessAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickCheckBrighness()));
+    disconnect(fixBrighnessByTimeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFixBrighnessbyTime()));
 }
 
 CameraControl::~CameraControl()
 {
     stop();
+    qDebug() << "Remove camera control";
     delete ui;
 }
 
@@ -97,6 +150,19 @@ void CameraControl::setFixBrighnessByTime(bool value)
     fixBrighnessByTime = value;
 }
 
+bool CameraControl::eventFilter(QObject *watched, QEvent *event)
+{
+    if(event->type() == QEvent::ContextMenu)
+    {
+        if(watched == ui->label)
+        {
+            on_label_customContextMenuRequested(QCursor::pos());
+            return true;
+        }
+    }
+    return QWidget::eventFilter(watched, event);
+}
+
 bool CameraControl::getCheckBrighness() const
 {
     return checkBrighness;
@@ -136,4 +202,39 @@ void CameraControl::setCameraName(const QString &value)
 {
     cameraName = value;
     ui->label->setText("Camera:" + cameraName);
+}
+
+void CameraControl::on_label_customContextMenuRequested(const QPoint &pos)
+{
+    Q_UNUSED(pos);
+    initMenu();
+    menu->exec(QCursor::pos());
+}
+
+void CameraControl::onMenuClickRemove()
+{
+    disConnectMenu();
+    emit onRemoveRequest();
+}
+
+void CameraControl::onMenuClickCheckBrighness()
+{
+    disConnectMenu();
+    checkBrighness = !checkBrighness;
+    checkBrighnessAction->setChecked(checkBrighness);
+    if(player != NULL)
+    {
+        player->setCheckBrighness(checkBrighness);
+    }
+}
+
+void CameraControl::onMenuClickFixBrighnessbyTime()
+{
+    disConnectMenu();
+    fixBrighnessByTime = !fixBrighnessByTime;
+    fixBrighnessByTimeAction->setChecked(fixBrighnessByTime);
+    if(player != NULL)
+    {
+        player->setFixBrighnessByTime(fixBrighnessByTime);
+    }
 }

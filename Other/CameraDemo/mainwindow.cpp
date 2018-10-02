@@ -129,6 +129,7 @@ void MainWindow::onAddCameraFormClose(int code)
                 {
                     existsCameraUrls.append(url.toLower());
                     CameraControl *control = new CameraControl();
+                    connect(control, SIGNAL(onRemoveRequest()), this, SLOT(onCameraControlRequestRemove()));
                     allCameraControls.append(control);
                     if(form->getCameraType() == CAMERATYPE_LOCAL)
                     {
@@ -290,4 +291,23 @@ void MainWindow::on_checkBoxWeatherControl_stateChanged(int arg1)
 {
     Q_UNUSED(arg1);
     showWeathControl = ui->checkBoxWeatherControl->isChecked();
+}
+
+void MainWindow::onCameraControlRequestRemove()
+{
+    CameraControl *control = qobject_cast<CameraControl *>(QObject::sender());
+    if(control != NULL)
+    {
+        allCameraControls.removeAll(control);
+        ui->verticalLayoutHide->removeWidget(control);
+        ui->verticalLayoutCamBig->removeWidget(control);
+        ui->verticalLayoutCams1->removeWidget(control);
+        ui->verticalLayoutCams2->removeWidget(control);
+        ui->verticalLayoutCams3->removeWidget(control);
+        ui->verticalLayoutCams4->removeWidget(control);
+        control->stop();
+        control->deleteLater();
+        control = Q_NULLPTR;
+        camBigIndex = 0;
+    }
 }
