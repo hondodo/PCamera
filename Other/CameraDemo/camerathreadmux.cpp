@@ -739,6 +739,12 @@ int CameraThreadMUX::caputuer()
 
     if ((ret = openInputFile(cameraUrl.toLocal8Bit().data())) < 0)
         return 1;
+
+    pCodecCtx->bit_rate = 0;   //初始化为0
+    pCodecCtx->time_base.num = 1;  //下面两行：一秒钟25帧
+    pCodecCtx->time_base.den = 30;
+    pCodecCtx->frame_number = 1;  //每包一个视频帧
+
     AVCodecContext *enc_ctx = NULL;
     ofmt_ctx = openOutputFile(outputFileNameForTemp.toLocal8Bit().data(), &ret, &enc_ctx);
     if (ret < 0)
@@ -817,7 +823,6 @@ int CameraThreadMUX::caputuer()
     QDateTime nextCreatNewFile = now;
     bool isRecBySourceRate = true;
 
-    int allframes = 0;
     while(_isRunning)
     {
         if((ret = av_read_frame(ifmt_ctx, &packet)) < 0)
@@ -825,15 +830,6 @@ int CameraThreadMUX::caputuer()
             qDebug() << "No fram, end thread.";
             break;
         }
-
-#ifdef Q_OS_WIN
-#else
-        if(allframes % 3 != 0)
-        {
-            av_free_packet(&packet);
-            continue;
-        }
-#endif
 
         isNewRecFile = QDateTime::currentDateTime().toMSecsSinceEpoch() > nextCreatNewFile.toMSecsSinceEpoch();
         if(isNewRecFile)
