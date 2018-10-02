@@ -200,10 +200,10 @@ int CameraThreadMUX::openInputFile(const char *filename)
             if(codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
             {
                 pCodecCtx = codec_ctx;
-                pCodecCtx->time_base.den = 1;
-                pCodecCtx->time_base.num = 75;
-                av_opt_set(pCodecCtx->priv_data, "preset", "superfast", 0);
-                av_opt_set(pCodecCtx->priv_data, "tune", "zerolatency", 0);
+                //pCodecCtx->time_base.den = 1;
+                //pCodecCtx->time_base.num = 75;
+                //av_opt_set(pCodecCtx->priv_data, "preset", "superfast", 0);
+                //av_opt_set(pCodecCtx->priv_data, "tune", "zerolatency", 0);
             }
             /* Open decoder */
             ret =avcodec_open2(codec_ctx,
@@ -603,6 +603,10 @@ int CameraThreadMUX::encodeWriteFrame(AVFrame *filt_frame, unsigned int stream_i
     {
         ret =enc_func(ofmt_ctx->streams[stream_index]->codec, &enc_pkt,
                       filt_frame, got_frame);
+        if(ret)
+        {
+            printError(ret);
+        }
     }
     //av_frame_free(&filt_frame);
     if (ret < 0)
@@ -852,6 +856,10 @@ int CameraThreadMUX::caputuer()
             if (!frame)
             {
                 ret = AVERROR(ENOMEM);
+                if(ret)
+                {
+                    qDebug() << ret;
+                }
                 break;
             }
 
@@ -864,7 +872,8 @@ int CameraThreadMUX::caputuer()
             if (ret < 0)
             {
                 av_frame_free(&frame);
-                av_log(NULL, AV_LOG_ERROR, "Decoding failed\n");
+                //av_log(NULL, AV_LOG_ERROR, "Decoding failed\n");
+                qDebug() << "Decoding failed";
                 break;
             }
             int elsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - needRecLastTime.toMSecsSinceEpoch();
@@ -880,6 +889,7 @@ int CameraThreadMUX::caputuer()
             {
                 frametime = frameControlTimer.elapsed();
                 frame->pts = av_frame_get_best_effort_timestamp(frame);
+                frame->pict_type = AV_PICTURE_TYPE_NONE;
                 if(isRawVideo)
                 {
                     //filter_encode_no_write_frame(frame, stream_index);
@@ -897,6 +907,10 @@ int CameraThreadMUX::caputuer()
                     if(savefile && ofmt_ctx_same_to_save != NULL)
                     {
                         ret = filterEncodeWriteFrame(pFrameYUV, stream_index, ofmt_ctx_same_to_save);
+                        if(ret)
+                        {
+                            qDebug() << ret;
+                        }
                     }
                 }
                 else
@@ -908,6 +922,10 @@ int CameraThreadMUX::caputuer()
                     if(savefile && ofmt_ctx_same_to_save != NULL)
                     {
                         ret = filterEncodeWriteFrame(frame, stream_index, ofmt_ctx_same_to_save);
+                        if(ret)
+                        {
+                            qDebug() << ret;
+                        }
                     }
                 }
 
