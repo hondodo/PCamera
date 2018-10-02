@@ -816,13 +816,25 @@ int CameraThreadMUX::caputuer()
     bool isSameSecond = true;
     QDateTime nextCreatNewFile = now;
     bool isRecBySourceRate = true;
+
+    int allframes = 0;
     while(_isRunning)
     {
-        if((ret= av_read_frame(ifmt_ctx, &packet)) < 0)
+        if((ret = av_read_frame(ifmt_ctx, &packet)) < 0)
         {
             qDebug() << "No fram, end thread.";
             break;
         }
+
+#ifdef Q_OS_WIN
+#else
+        if(allframes % 3 != 0)
+        {
+            av_free_packet(&packet);
+            continue;
+        }
+#endif
+
         isNewRecFile = QDateTime::currentDateTime().toMSecsSinceEpoch() > nextCreatNewFile.toMSecsSinceEpoch();
         if(isNewRecFile)
         {
