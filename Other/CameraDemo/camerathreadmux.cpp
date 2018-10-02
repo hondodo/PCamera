@@ -150,7 +150,8 @@ int CameraThreadMUX::openInputFile(const char *filename)
     AVDictionary *avdic=NULL;
     av_dict_set(&avdic, "framerate", "30", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
-    av_dict_set(&avdic, "video_size", "1920x1080", 0);
+    //av_dict_set(&avdic, "video_size", "1920x1080", 0);
+    av_dict_set(&avdic, "video_size", "1280x720", 0);
 
     if(!isLocalCamera)
     {
