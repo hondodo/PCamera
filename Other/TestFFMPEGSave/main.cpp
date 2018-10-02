@@ -165,10 +165,10 @@ static int open_output_file(const char *filename)
 #ifdef Q_OS_WIN
             if(dec_ctx->codec_id == AV_CODEC_ID_MJPEG && isLocalCamera)
             {
-                //encoder= avcodec_find_encoder(AV_CODEC_ID_H264);
-                encoder = avcodec_find_encoder(dec_ctx->codec_id);
+                encoder= avcodec_find_encoder(AV_CODEC_ID_H264);
+                //encoder = avcodec_find_encoder(dec_ctx->codec_id);
             }
-            if(dec_ctx->codec_id == AV_CODEC_ID_RAWVIDEO)
+            else if(dec_ctx->codec_id == AV_CODEC_ID_RAWVIDEO)
             {
                 encoder = avcodec_find_encoder(AV_CODEC_ID_MJPEG);
                 isRawVideo = true;
@@ -178,7 +178,7 @@ static int open_output_file(const char *filename)
                 encoder= avcodec_find_encoder(dec_ctx->codec_id);
             }
 #else
-            encoder= avcodec_find_encoder(dec_ctx->codec_id);//dec_ctx->codec_id);//AV_CODEC_ID_H264//AV_CODEC_ID_MJPEG
+            encoder= avcodec_find_encoder(dec_ctx->codec_id);
 #endif
             //encoder = avcodec_find_encoder(AV_CODEC_ID_H264);
             /* In this example, we transcode to same properties(picture size,
@@ -231,7 +231,7 @@ static int open_output_file(const char *filename)
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                 enc_ctx->time_base = dec_ctx->time_base;
 
-                enc_ctx->bit_rate = 25000000;
+                //enc_ctx->bit_rate = 25000000;
 
                 //enc_ctx->bit_rate = 1500000;
                 //enc_ctx->width = 640;
