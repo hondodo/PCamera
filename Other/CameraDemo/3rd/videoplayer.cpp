@@ -303,10 +303,10 @@ void VideoPlayer::run()
 
                 dealtime = othertime.elapsed();
                 othertime.restart();
-                if(writer.isOpened())
-                {
-                    writer.write(mRGB);
-                }
+                //if(writer.isOpened())
+                //{
+                //    writer.write(mRGB);
+                //}
                 savetime = othertime.elapsed();
                 othertime.restart();
                 emit onFrame(image);
