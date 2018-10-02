@@ -178,7 +178,20 @@ static int open_output_file(const char *filename)
                 encoder= avcodec_find_encoder(dec_ctx->codec_id);
             }
 #else
-            encoder= avcodec_find_encoder(dec_ctx->codec_id);
+            if(dec_ctx->codec_id == AV_CODEC_ID_MJPEG && isLocalCamera)
+            {
+                encoder= avcodec_find_encoder(AV_CODEC_ID_H264);
+                //encoder = avcodec_find_encoder(dec_ctx->codec_id);
+            }
+            else if(dec_ctx->codec_id == AV_CODEC_ID_RAWVIDEO)
+            {
+                encoder = avcodec_find_encoder(AV_CODEC_ID_MJPEG);
+                isRawVideo = true;
+            }
+            else
+            {
+                encoder= avcodec_find_encoder(dec_ctx->codec_id);
+            }
 #endif
             //encoder = avcodec_find_encoder(AV_CODEC_ID_H264);
             /* In this example, we transcode to same properties(picture size,
