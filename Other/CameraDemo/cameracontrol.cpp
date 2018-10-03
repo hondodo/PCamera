@@ -34,7 +34,7 @@ CameraControl::CameraControl(QWidget *parent) :
 #endif
     initMenu();
 
-    restartByNoImageElsp = 1000 * 5;
+    restartByNoImageElsp = 1000 * 60;
 
     ui->label->installEventFilter(this);
 }

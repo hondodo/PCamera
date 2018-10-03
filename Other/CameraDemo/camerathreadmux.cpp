@@ -21,7 +21,7 @@ CameraThreadMUX::CameraThreadMUX(QObject *parent) : QThread(parent)
     outputFileNameForTemp = pathHelper.getTempFileName();//"D:/Rec/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
     fontFile = "D\\\\:font.ttf";
 #else
-    pathHelper.setRootPath("/media/pi/USB/");
+    pathHelper.setRootPath("/home/pi/");
     cameraUrl = "/dev/video0";
     outputFileNameForTemp = pathHelper.getTempFileName();
     fontFile = "/home/pi/Font/font.ttf";
@@ -130,20 +130,6 @@ void CameraThreadMUX::setCameraUrl(const QString &value)
     cameraUrl = value;
 }
 
-/*
- *最简单的基于FFmpeg的转码器
- *Simplest FFmpeg Transcoder
- *
- *雷霄骅 Lei Xiaohua
- *leixiaohua1020@126.com
- *中国传媒大学/数字电视技术
- *Communication University of China / DigitalTV Technology
- *http://blog.csdn.net/leixiaohua1020
- *
- *本程序实现了视频格式之间的转换。是一个最简单的视频转码程序。
- *
- */
-
 void CameraThreadMUX::printError(int ret)
 {
     av_strerror(ret, buf, 1024);
@@ -223,10 +209,6 @@ int CameraThreadMUX::openInputFile(const char *filename)
             if(codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
             {
                 pCodecCtx = codec_ctx;
-                //pCodecCtx->time_base.den = 1;
-                //pCodecCtx->time_base.num = 75;
-                //av_opt_set(pCodecCtx->priv_data, "preset", "superfast", 0);
-                //av_opt_set(pCodecCtx->priv_data, "tune", "zerolatency", 0);
             }
             /* Open decoder */
             ret =avcodec_open2(codec_ctx,
@@ -275,7 +257,6 @@ AVFormatContext * CameraThreadMUX::openOutputFile(const char *filename, int *ret
 #ifdef Q_OS_WIN
             if((dec_ctx)->codec_id == AV_CODEC_ID_MJPEG && isLocalCamera)
             {
-                //encoder= avcodec_find_encoder(AV_CODEC_ID_H264);
                 encoder = avcodec_find_encoder((dec_ctx)->codec_id);
             }
             if((dec_ctx)->codec_id == AV_CODEC_ID_RAWVIDEO)
@@ -288,24 +269,14 @@ AVFormatContext * CameraThreadMUX::openOutputFile(const char *filename, int *ret
                 encoder= avcodec_find_encoder((dec_ctx)->codec_id);
             }
 #else
-            encoder= avcodec_find_encoder((dec_ctx)->codec_id);//dec_ctx->codec_id);//AV_CODEC_ID_H264//AV_CODEC_ID_MJPEG
+            encoder= avcodec_find_encoder((dec_ctx)->codec_id);
 #endif
-            //encoder = avcodec_find_encoder(AV_CODEC_ID_H264);
             /* In this example, we transcode to same properties(picture size,
             * sample rate etc.). These properties can be changed for output
             * streams easily using filters */
 
-            (*enc_ctx)->me_range = 16;
-            (*enc_ctx)->max_qdiff = 4;
-            (*enc_ctx)->qmin = 10;
-            (*enc_ctx)->qmax = 51;
-            (*enc_ctx)->qcompress = 0.6;
-
             if ((dec_ctx)->codec_type == AVMEDIA_TYPE_VIDEO)
             {
-                AVRational ar;
-                ar.num = 100;
-                ar.den = 3000;
                 (*enc_ctx)->height = (dec_ctx)->height;
                 (*enc_ctx)->width = (dec_ctx)->width;
                 (*enc_ctx)->sample_aspect_ratio = (dec_ctx)->sample_aspect_ratio;
@@ -337,21 +308,11 @@ AVFormatContext * CameraThreadMUX::openOutputFile(const char *filename, int *ret
                     (*enc_ctx)->pix_fmt = AV_PIX_FMT_YUVJ422P;
                     (*enc_ctx)->codec_tag = 0;
                 }
-                //(*enc_ctx)->pix_fmt = AV_PIX_FMT_YUV420P;
                 /* video time_base can be set to whatever is handy andsupported by encoder */
                 (*enc_ctx)->time_base = (dec_ctx)->time_base;
-
                 (*enc_ctx)->bit_rate = 25000000;
-
-                //(*enc_ctx)->bit_rate = 1500000;
-                //(*enc_ctx)->width = 640;
-                //(*enc_ctx)->height = 480;
-                //(*enc_ctx)->time_base.num = 1;
-                //(*enc_ctx)->time_base.den = 30;
-
                 /* print output stream information*/
                 av_dump_format(ofmt_ctx, 0, filename, 1);
-                //(*enc_ctx)->bit_rate = 2 * 1024 * 1024;
             }
             else
             {
