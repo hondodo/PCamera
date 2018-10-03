@@ -190,7 +190,7 @@ static int open_output_file(const char *filename)
             }
             else
             {
-                encoder= avcodec_find_encoder(dec_ctx->codec_id);
+                encoder= avcodec_find_encoder_by_name("h264_omx");//avcodec_find_encoder(dec_ctx->codec_id);
             }
 #endif
             //encoder = avcodec_find_encoder(AV_CODEC_ID_H264);

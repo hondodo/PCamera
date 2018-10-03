@@ -43,6 +43,12 @@ public:
     bool getFixBrighnessByTime() const;
     void setFixBrighnessByTime(bool value);
 
+    bool getCheckMog() const;
+    void setCheckMog(bool value);
+
+    bool getSaveOnlyMog() const;
+    void setSaveOnlyMog(bool value);
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
 
@@ -55,6 +61,8 @@ private slots:
     void onMenuClickRemove();
     void onMenuClickCheckBrighness();
     void onMenuClickFixBrighnessbyTime();
+    void onMenuClickCheckMog();
+    void onMenuClickSaveOnlyMog();
 
 private:
     Ui::CameraControl *ui;
@@ -65,10 +73,13 @@ private:
     int imageWidth, imageHeight;
     bool checkBrighness;
     bool fixBrighnessByTime;
+    bool checkMog;
+    bool saveOnlyMog;
     void initMenu();
     void disConnectMenu();
     QMenu *menu;
-    QAction *removeAction, *checkBrighnessAction, *fixBrighnessByTimeAction;
+    QAction *removeAction, *checkBrighnessAction, *fixBrighnessByTimeAction,
+    *checkMogAction, *saveOnlyMogAction;
 };
 
 #endif // CAMERACONTROL_H

@@ -13,12 +13,16 @@ CameraControl::CameraControl(QWidget *parent) :
     cameraName = "";
     checkBrighness = false;
     fixBrighnessByTime = false;
+    checkMog = true;
+    saveOnlyMog = true;
     player = Q_NULLPTR;
     QPixmapCache::setCacheLimit(1024 * 10);
     menu = NULL;
     removeAction = NULL;
     checkBrighnessAction = NULL;
     fixBrighnessByTimeAction = NULL;
+    checkMogAction = NULL;
+    saveOnlyMogAction = NULL;
     initMenu();
 
     ui->label->installEventFilter(this);
@@ -46,6 +50,16 @@ void CameraControl::initMenu()
         fixBrighnessByTimeAction->deleteLater();
         fixBrighnessByTimeAction = NULL;
     }
+    if(checkMogAction != NULL)
+    {
+        checkMogAction->deleteLater();
+        checkMogAction = NULL;
+    }
+    if(saveOnlyMogAction != NULL)
+    {
+        saveOnlyMogAction->deleteLater();
+        saveOnlyMogAction = NULL;
+    }
     menu = new QMenu();
     removeAction = menu->addAction("Remove");
     removeAction->setData("remove");
@@ -60,6 +74,17 @@ void CameraControl::initMenu()
     fixBrighnessByTimeAction->setCheckable(true);
     fixBrighnessByTimeAction->setChecked(fixBrighnessByTime);
     connect(fixBrighnessByTimeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFixBrighnessbyTime()));
+
+    checkMogAction = menu->addAction("Check MOG");
+    checkMogAction->setData("fixbrighnessbytime");
+    checkMogAction->setCheckable(true);
+    checkMogAction->setChecked(checkMog);
+    connect(checkMogAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickCheckMog()));
+    saveOnlyMogAction = menu->addAction("Save Only Mog");
+    saveOnlyMogAction->setData("fixbrighnessbytime");
+    saveOnlyMogAction->setCheckable(true);
+    saveOnlyMogAction->setChecked(saveOnlyMog);
+    connect(saveOnlyMogAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickSaveOnlyMog()));
 }
 
 void CameraControl::disConnectMenu()
@@ -105,6 +130,8 @@ void CameraControl::start()
     player->setCameraName(cameraName);
     player->setCheckBrighness(checkBrighness);
     player->setFixBrighnessByTime(fixBrighnessByTime);
+    player->setCheckMog(checkMog);
+    player->setSaveOnlyMog(saveOnlyMog);
     connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)), Qt::DirectConnection);
     player->start();
 }
@@ -237,4 +264,46 @@ void CameraControl::onMenuClickFixBrighnessbyTime()
     {
         player->setFixBrighnessByTime(fixBrighnessByTime);
     }
+}
+
+void CameraControl::onMenuClickCheckMog()
+{
+    disConnectMenu();
+    checkMog = !checkMog;
+    checkMogAction->setChecked(checkMog);
+    if(player != NULL)
+    {
+        player->setCheckMog(checkMog);
+    }
+}
+
+void CameraControl::onMenuClickSaveOnlyMog()
+{
+    disConnectMenu();
+    saveOnlyMog = !saveOnlyMog;
+    saveOnlyMogAction->setChecked(saveOnlyMog);
+    if(player != NULL)
+    {
+        player->setSaveOnlyMog(saveOnlyMog);
+    }
+}
+
+bool CameraControl::getSaveOnlyMog() const
+{
+    return saveOnlyMog;
+}
+
+void CameraControl::setSaveOnlyMog(bool value)
+{
+    saveOnlyMog = value;
+}
+
+bool CameraControl::getCheckMog() const
+{
+    return checkMog;
+}
+
+void CameraControl::setCheckMog(bool value)
+{
+    checkMog = value;
 }

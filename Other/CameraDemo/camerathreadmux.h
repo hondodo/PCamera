@@ -70,6 +70,12 @@ public:
     QString getFontFile() const;
     void setFontFile(const QString &value);
 
+    bool getCheckMog() const;
+    void setCheckMog(bool value);
+
+    bool getSaveOnlyMog() const;
+    void setSaveOnlyMog(bool value);
+
 protected:
     void run();
 
@@ -90,6 +96,8 @@ private:
     QString cameraName;
     bool checkBrighness;
     bool fixBrighnessByTime;
+    bool checkMog;
+    bool saveOnlyMog;
 
     QString outputFileNameForTemp;
     QString fontFile;

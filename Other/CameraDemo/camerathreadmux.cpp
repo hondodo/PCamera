@@ -11,6 +11,8 @@ CameraThreadMUX::CameraThreadMUX(QObject *parent) : QThread(parent)
     isLocalCamera = false;
     isRawVideo = false;
     _isRunning = false;
+    checkMog = true;
+    saveOnlyMog = false;
 
     cameraType = CAMERATYPE_LOCAL;
 #ifdef Q_OS_WIN
@@ -43,6 +45,26 @@ void CameraThreadMUX::run()
     int code = caputuer();
     _isRunning = false;
     qDebug() << "Thread end at code:" << code;
+}
+
+bool CameraThreadMUX::getSaveOnlyMog() const
+{
+    return saveOnlyMog;
+}
+
+void CameraThreadMUX::setSaveOnlyMog(bool value)
+{
+    saveOnlyMog = value;
+}
+
+bool CameraThreadMUX::getCheckMog() const
+{
+    return checkMog;
+}
+
+void CameraThreadMUX::setCheckMog(bool value)
+{
+    checkMog = value;
 }
 
 QString CameraThreadMUX::getFontFile() const
@@ -817,7 +839,7 @@ int CameraThreadMUX::caputuer()
     QDateTime now = QDateTime::currentDateTime();
     QDateTime needRecLastTime = now;
     int minRecMS = 10 * 1000;
-    //int maxFrames = 30 * 30 * 60;
+    int maxFrames = 30 * 30 * 60;
     int lastSecond = QDateTime::currentDateTime().time().second();
     bool isSameSecond = true;
     QDateTime nextCreatNewFile = now;
@@ -831,7 +853,12 @@ int CameraThreadMUX::caputuer()
             break;
         }
 
-        isNewRecFile = QDateTime::currentDateTime().toMSecsSinceEpoch() > nextCreatNewFile.toMSecsSinceEpoch();
+        if(checkMog && saveOnlyMog)
+        {}
+        else
+        {
+            isNewRecFile = QDateTime::currentDateTime().toMSecsSinceEpoch() > nextCreatNewFile.toMSecsSinceEpoch();
+        }
         if(isNewRecFile)
         {
             isNewRecFile = false;
@@ -892,8 +919,14 @@ int CameraThreadMUX::caputuer()
                 lastSecond = QDateTime::currentDateTime().time().second();
             }
             isRecBySourceRate = elsp < minRecMS;
-            savefile = isRecBySourceRate || (!isSameSecond);
-            //(elsp < minRecMS) && (frameindex < maxFrames);
+            if(checkMog && saveOnlyMog)
+            {
+                savefile = (elsp < minRecMS) && (frameindex < maxFrames);
+            }
+            else
+            {
+                savefile = isRecBySourceRate || (!isSameSecond);
+            }
             if (got_frame)
             {
                 frametime = frameControlTimer.elapsed();
@@ -1030,14 +1063,33 @@ int CameraThreadMUX::caputuer()
 
                 cv::cvtColor(mRGB, temp, CV_BGR2RGB);
 
-                mogRect = CameraCollectorThread::Init->findMog(currentCameraId, mRGB);
-                if(!mogRect.empty() && mogRect.size() > 0)
+                if(checkMog)
+                {
+                    mogRect = CameraCollectorThread::Init->findMog(currentCameraId, mRGB);
+                    if(!mogRect.empty() && mogRect.size() > 0)
+                    {
+                        needRecLastTime = QDateTime::currentDateTime();
+                        if(saveOnlyMog)
+                        {
+                            if(!savefile)
+                            {
+                                isNewRecFile = true;
+                            }
+                        }
+                    }
+                    if(!savefile)
+                    {
+                        if(ofmt_ctx_same_to_save != NULL || enc_ctx_same_to_save != NULL)
+                        {
+                            closeOutputFile(&ofmt_ctx_same_to_save, &enc_ctx_same_to_save);
+                        }
+                        ofmt_ctx_same_to_save = NULL;
+                        enc_ctx_same_to_save = NULL;
+                    }
+                }
+                else
                 {
                     needRecLastTime = QDateTime::currentDateTime();
-                    //if(!savefile)
-                    //{
-                    //    isNewRecFile = true;
-                    //}
                 }
 
                 QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
