@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPixmapCache>
 #include <QMenu>
+#include <QAction>
 #include <QTimerEvent>
 #include "3rd/videoplayer.h"
 #include "camerathreadmux.h"

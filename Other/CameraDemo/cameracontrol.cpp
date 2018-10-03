@@ -14,7 +14,7 @@ CameraControl::CameraControl(QWidget *parent) :
     checkBrighness = false;
     fixBrighnessByTime = false;
     checkMog = true;
-    saveOnlyMog = true;
+    saveOnlyMog = false;
     player = Q_NULLPTR;
     QPixmapCache::setCacheLimit(1024 * 10);
     menu = NULL;
@@ -28,6 +28,9 @@ CameraControl::CameraControl(QWidget *parent) :
     lastRestart = QDateTime::currentDateTime();
     restartTimerId = startTimer(1000);
     restartTimeElsp = 1000 * 60 * 30;
+#ifdef Q_OS_WIN
+    restartTimeElsp = 1000 * 60 * 120;
+#endif
     initMenu();
 
     ui->label->installEventFilter(this);
@@ -92,6 +95,9 @@ void CameraControl::initMenu()
     connect(saveOnlyMogAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickSaveOnlyMog()));
 
     restartPre30MinAction = menu->addAction("Restart Camera Pre 30 Min");
+#ifdef Q_OS_WIN
+    restartPre30MinAction->setText("Restart Camera Pre 30 Min");
+#endif
     restartPre30MinAction->setCheckable(true);
     restartPre30MinAction->setChecked(restartCameraPre30Min);
     connect(restartPre30MinAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRestartPre30Min()));
