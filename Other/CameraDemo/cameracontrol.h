@@ -85,8 +85,10 @@ private:
     bool saveOnlyMog;
     bool restartCameraPre30Min;
     QDateTime lastRestart;
+    QDateTime lastReceiveImageTime;
     int restartTimerId;
     int restartTimeElsp;
+    int restartByNoImageElsp;
     void initMenu();
     void disConnectMenu();
     QMenu *menu;

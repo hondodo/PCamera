@@ -24,14 +24,17 @@ CameraControl::CameraControl(QWidget *parent) :
     checkMogAction = NULL;
     saveOnlyMogAction = NULL;
     restartPre30MinAction = NULL;
-    restartCameraPre30Min = true;
+    restartCameraPre30Min = false;
     lastRestart = QDateTime::currentDateTime();
+    lastReceiveImageTime = QDateTime::currentDateTime();
     restartTimerId = startTimer(1000);
     restartTimeElsp = 1000 * 60 * 30;
 #ifdef Q_OS_WIN
     restartTimeElsp = 1000 * 60 * 120;
 #endif
     initMenu();
+
+    restartByNoImageElsp = 1000 * 5;
 
     ui->label->installEventFilter(this);
 }
@@ -154,6 +157,8 @@ void CameraControl::start()
     player->setSaveOnlyMog(saveOnlyMog);
     connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)), Qt::DirectConnection);
     player->start();
+    lastReceiveImageTime = QDateTime::currentDateTime();
+    lastRestart = QDateTime::currentDateTime();
 }
 
 void CameraControl::stop()
@@ -173,6 +178,7 @@ void CameraControl::stop()
 
 void CameraControl::onImage(const QImage &image)
 {
+    lastReceiveImageTime = QDateTime::currentDateTime();
     if(image.isNull())
     {
         return;
@@ -222,10 +228,21 @@ void CameraControl::timerEvent(QTimerEvent *event)
             {
                 if(player != Q_NULLPTR && player->isRunning())
                 {
-                    qDebug() << "Restart camera:" << player->getCameraName();
+                    qDebug() << "Restart camera (timerly):" << player->getCameraName();
                     stop();
                     start();
                 }
+            }
+        }
+
+        int imageElsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastReceiveImageTime.toMSecsSinceEpoch();
+        if(imageElsp > restartByNoImageElsp)
+        {
+            if(player != Q_NULLPTR)
+            {
+                qDebug() << "Restart camera (no image):" << player->getCameraName();
+                stop();
+                start();
             }
         }
     }
