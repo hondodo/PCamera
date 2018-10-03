@@ -23,6 +23,11 @@ CameraControl::CameraControl(QWidget *parent) :
     fixBrighnessByTimeAction = NULL;
     checkMogAction = NULL;
     saveOnlyMogAction = NULL;
+    restartPre30MinAction = NULL;
+    restartCameraPre30Min = true;
+    lastRestart = QDateTime::currentDateTime();
+    restartTimerId = startTimer(1000);
+    restartTimeElsp = 1000 * 60 * 30;
     initMenu();
 
     ui->label->installEventFilter(this);
@@ -60,31 +65,36 @@ void CameraControl::initMenu()
         saveOnlyMogAction->deleteLater();
         saveOnlyMogAction = NULL;
     }
+    if(restartPre30MinAction != NULL)
+    {
+        restartPre30MinAction->deleteLater();
+        restartPre30MinAction = NULL;
+    }
     menu = new QMenu();
     removeAction = menu->addAction("Remove");
-    removeAction->setData("remove");
     connect(removeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRemove()));
     checkBrighnessAction = menu->addAction("Check Brighness");
-    checkBrighnessAction->setData("checkbrighness");
     checkBrighnessAction->setCheckable(true);
     checkBrighnessAction->setChecked(checkBrighness);
     connect(checkBrighnessAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickCheckBrighness()));
     fixBrighnessByTimeAction = menu->addAction("Fix Brighness By Time");
-    fixBrighnessByTimeAction->setData("fixbrighnessbytime");
     fixBrighnessByTimeAction->setCheckable(true);
     fixBrighnessByTimeAction->setChecked(fixBrighnessByTime);
     connect(fixBrighnessByTimeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFixBrighnessbyTime()));
 
     checkMogAction = menu->addAction("Check MOG");
-    checkMogAction->setData("fixbrighnessbytime");
     checkMogAction->setCheckable(true);
     checkMogAction->setChecked(checkMog);
     connect(checkMogAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickCheckMog()));
     saveOnlyMogAction = menu->addAction("Save Only Mog");
-    saveOnlyMogAction->setData("fixbrighnessbytime");
     saveOnlyMogAction->setCheckable(true);
     saveOnlyMogAction->setChecked(saveOnlyMog);
     connect(saveOnlyMogAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickSaveOnlyMog()));
+
+    restartPre30MinAction = menu->addAction("Restart Camera Pre 30 Min");
+    restartPre30MinAction->setCheckable(true);
+    restartPre30MinAction->setChecked(restartCameraPre30Min);
+    connect(restartPre30MinAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRestartPre30Min()));
 }
 
 void CameraControl::disConnectMenu()
@@ -96,6 +106,10 @@ void CameraControl::disConnectMenu()
 
 CameraControl::~CameraControl()
 {
+    if(restartTimerId > 0)
+    {
+        killTimer(restartTimerId);
+    }
     stop();
     qDebug() << "Remove camera control";
     delete ui;
@@ -188,6 +202,27 @@ bool CameraControl::eventFilter(QObject *watched, QEvent *event)
         }
     }
     return QWidget::eventFilter(watched, event);
+}
+
+void CameraControl::timerEvent(QTimerEvent *event)
+{
+    if(event->timerId() == restartTimerId)
+    {
+        int mels = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastRestart.toMSecsSinceEpoch();
+        if(mels > restartTimeElsp)
+        {
+            lastRestart = QDateTime::currentDateTime();
+            if(restartCameraPre30Min)
+            {
+                if(player != Q_NULLPTR && player->isRunning())
+                {
+                    qDebug() << "Restart camera:" << player->getCameraName();
+                    stop();
+                    start();
+                }
+            }
+        }
+    }
 }
 
 bool CameraControl::getCheckBrighness() const
@@ -286,6 +321,22 @@ void CameraControl::onMenuClickSaveOnlyMog()
     {
         player->setSaveOnlyMog(saveOnlyMog);
     }
+}
+
+void CameraControl::onMenuClickRestartPre30Min()
+{
+    disConnectMenu();
+    restartCameraPre30Min = !restartCameraPre30Min;
+}
+
+bool CameraControl::getRestartCameraPre30Min() const
+{
+    return restartCameraPre30Min;
+}
+
+void CameraControl::setRestartCameraPre30Min(bool value)
+{
+    restartCameraPre30Min = value;
 }
 
 bool CameraControl::getSaveOnlyMog() const

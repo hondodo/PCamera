@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QPixmapCache>
 #include <QMenu>
+#include <QTimerEvent>
 #include "3rd/videoplayer.h"
 #include "camerathreadmux.h"
 
@@ -49,8 +50,12 @@ public:
     bool getSaveOnlyMog() const;
     void setSaveOnlyMog(bool value);
 
+    bool getRestartCameraPre30Min() const;
+    void setRestartCameraPre30Min(bool value);
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
+    void timerEvent(QTimerEvent *event);
 
 signals:
     void onRemoveRequest();
@@ -63,6 +68,8 @@ private slots:
     void onMenuClickFixBrighnessbyTime();
     void onMenuClickCheckMog();
     void onMenuClickSaveOnlyMog();
+    void onMenuClickRestartPre30Min();
+
 
 private:
     Ui::CameraControl *ui;
@@ -75,11 +82,15 @@ private:
     bool fixBrighnessByTime;
     bool checkMog;
     bool saveOnlyMog;
+    bool restartCameraPre30Min;
+    QDateTime lastRestart;
+    int restartTimerId;
+    int restartTimeElsp;
     void initMenu();
     void disConnectMenu();
     QMenu *menu;
     QAction *removeAction, *checkBrighnessAction, *fixBrighnessByTimeAction,
-    *checkMogAction, *saveOnlyMogAction;
+    *checkMogAction, *saveOnlyMogAction, *restartPre30MinAction;
 };
 
 #endif // CAMERACONTROL_H
