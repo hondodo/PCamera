@@ -2,6 +2,7 @@
 
 using namespace cv;
 
+OLedThread *OLedThread::Init = new OLedThread();
 OLedThread::OLedThread(QObject *parent) : QThread(parent)
 {
     _isRunning = false;

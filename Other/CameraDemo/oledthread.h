@@ -15,6 +15,7 @@ class OLedThread : public QThread
     Q_OBJECT
 public:
     explicit OLedThread(QObject *parent = nullptr);
+    static OLedThread *Init;
     ~OLedThread();
 
     void setStop();
