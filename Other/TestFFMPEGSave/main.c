@@ -35,6 +35,7 @@
 #include <libavutil/opt.h>
 #include <libavutil/pixdesc.h>
 #include <libavdevice/avdevice.h>
+#include <libavutil/time.h>
 
 static AVFormatContext *ifmt_ctx;
 static AVFormatContext *ofmt_ctx;
@@ -151,7 +152,7 @@ static int open_output_file(const char *filename)
         {
             if(dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
             {
-                encoder = avcodec_find_encoder(AV_CODEC_ID_H264);
+                encoder = avcodec_find_encoder_by_name("h264_omx");//avcodec_find_encoder(AV_CODEC_ID_H264);
             }
             else
             {
@@ -183,6 +184,11 @@ static int open_output_file(const char *filename)
                     enc_ctx->pix_fmt = dec_ctx->pix_fmt;
                 /* video time_base can be set to whatever is handy and supported by encoder */
                 enc_ctx->time_base = av_inv_q(dec_ctx->framerate);
+                enc_ctx->bit_rate = 3000000;
+                enc_ctx->gop_size = 250;
+                enc_ctx->max_b_frames = 3;
+                enc_ctx->qmin = 10;
+                enc_ctx->qmax = 51;
             }
             else
             {
@@ -195,7 +201,18 @@ static int open_output_file(const char *filename)
             }
 
             /* Third parameter can be used to pass settings to encoder */
-            ret = avcodec_open2(enc_ctx, encoder, NULL);
+
+            if(dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
+            {
+                AVDictionary *parm = 0;
+                av_dict_set(&parm, "preset", "fast", 0);
+                av_dict_set(&parm, "tune", "zerolatency", 0);
+                ret = avcodec_open2(enc_ctx, encoder, &parm);
+            }
+            else
+            {
+                ret = avcodec_open2(enc_ctx, encoder, NULL);
+            }
             if (ret < 0) {
                 av_log(NULL, AV_LOG_ERROR, "Cannot open video encoder for stream #%u\n", i);
                 return ret;
@@ -412,7 +429,7 @@ static int init_filters(void)
 
 
         if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
-            filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=30:text='World Facing Right':x=20:y=60:shadowcolor=black:shadowx=2:shadowy=2[out]"; /* passthrough (dummy) filter for video */
+            filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='World Facing Right':x=20:y=60:shadowcolor=black:shadowx=2:shadowy=2[out]"; /* passthrough (dummy) filter for video */
         else
             filter_spec = "anull"; /* passthrough (dummy) filter for audio */
         ret = init_filter(&filter_ctx[i], stream_ctx[i].dec_ctx,
@@ -601,6 +618,7 @@ int main(int argc, char **argv)
                 goto end;
         }
         av_packet_unref(&packet);
+        av_usleep(5000);
     }
 
     /* flush filters and encoders */
