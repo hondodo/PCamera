@@ -155,7 +155,7 @@ void CameraControl::start()
     player->setFixBrighnessByTime(fixBrighnessByTime);
     player->setCheckMog(checkMog);
     player->setSaveOnlyMog(saveOnlyMog);
-    connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)), Qt::DirectConnection);
+    connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)));
     player->start();
     lastReceiveImageTime = QDateTime::currentDateTime();
     lastRestart = QDateTime::currentDateTime();
@@ -180,6 +180,10 @@ void CameraControl::onImage(const QImage &image)
 {
     lastReceiveImageTime = QDateTime::currentDateTime();
     if(image.isNull())
+    {
+        return;
+    }
+    if(!this->isVisible() || imageWidth < 10 || imageHeight < 10 || imageWidth > 2000 || imageHeight > 2000)
     {
         return;
     }

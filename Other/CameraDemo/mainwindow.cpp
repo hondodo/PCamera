@@ -131,16 +131,6 @@ void MainWindow::onAddCameraFormClose(int code)
                     CameraControl *control = new CameraControl();
                     connect(control, SIGNAL(onRemoveRequest()), this, SLOT(onCameraControlRequestRemove()));
                     allCameraControls.append(control);
-                    if(form->getCameraType() == CAMERATYPE_LOCAL)
-                    {
-#ifdef Q_OS_WIN
-                        control->setCheckBrighness(true);
-                        control->setFixBrighnessByTime(true);
-#else
-                        control->setCheckBrighness(true);
-                        control->setFixBrighnessByTime(true);
-#endif
-                    }
                     control->setCameraUrl(url);
                     control->setCameraType(form->getCameraType());
                     control->setCameraName(form->getCameraName());

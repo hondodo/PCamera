@@ -24,6 +24,8 @@ WeatherControl::WeatherControl(QWidget *parent) :
 
     ui->widgetWeatherDay2->setVisible(false);
     ui->widgetWeatherDay3->setVisible(false);
+    setMaximumSize(QSize(2048, 2048));
+    setMinimumSize(QSize(10, 10));
 }
 
 WeatherControl::~WeatherControl()

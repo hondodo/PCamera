@@ -13,9 +13,10 @@ DateTimeControl::DateTimeControl(QWidget *parent) :
     ringThread = Q_NULLPTR;
     nextTipTime = QDateTime::currentDateTime().addMSecs(1000 * 60 * 60).time().hour();
     dateFontSize = 62;
-    timeFontSize = 200;
+    timeFontSize = 170;
     weekFontSize = 62;
     yearFontSize = 32;
+    setMinimumSize(QSize(10, 10));
     setMaximumSize(QSize(2048, 2048));
 }
 
@@ -38,6 +39,7 @@ void DateTimeControl::timerEvent(QTimerEvent *event)
 {
     if(event->timerId() == timeId)
     {
+        resizeFontSize();
         ui->label->setText(buildHtmlText());
 //        QDateTime time = QDateTime::currentDateTime();
 //        int lunaryear = 0, lunarmonth = 0, lunarday = 0;
@@ -78,7 +80,7 @@ void DateTimeControl::timerEvent(QTimerEvent *event)
 void DateTimeControl::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
-    resizeFontSize();
+    //resizeFontSize();
 }
 
 void DateTimeControl::deleteRingThread()
@@ -182,15 +184,14 @@ void DateTimeControl::resizeFontSize()
     while((wwidth < swidth || wheight < sheight) && isCanUp())
     {
         trimFonSize(true);
-        ui->label->setText(buildHtmlText());
         wwidth = 5 * timeFontSize;
         wheight = 20 + dateFontSize + timeFontSize + weekFontSize + yearFontSize;
     }
     while((wwidth > swidth || wheight > sheight) && isCanDown())
     {
         trimFonSize(false);
-        ui->label->setText(buildHtmlText());
         wwidth = 5 * timeFontSize;
         wheight = dateFontSize + timeFontSize + weekFontSize + yearFontSize;
     }
+    //ui->label->setText(buildHtmlText());
 }
