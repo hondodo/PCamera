@@ -205,7 +205,7 @@ static int open_output_file(const char *filename)
             if(dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
             {
                 AVDictionary *parm = 0;
-                av_dict_set(&parm, "preset", "fast", 0);
+                av_dict_set(&parm, "preset", "superfast", 0);
                 av_dict_set(&parm, "tune", "zerolatency", 0);
                 ret = avcodec_open2(enc_ctx, encoder, &parm);
             }
