@@ -186,7 +186,7 @@ static int open_output_file(const char *filename)
                 enc_ctx->time_base = av_inv_q(dec_ctx->framerate);
                 enc_ctx->bit_rate = 3000000;
                 enc_ctx->gop_size = 250;
-                enc_ctx->max_b_frames = 3;
+                enc_ctx->max_b_frames = 10;
                 enc_ctx->qmin = 10;
                 enc_ctx->qmax = 51;
             }
