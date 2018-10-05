@@ -38,12 +38,6 @@ extern "C"
 #define AVFMT_RAWPICTURE 0x0020
 #endif
 
-typedef struct FilteringContext
-{
-    AVFilterContext *buffersink_ctx;
-    AVFilterContext *buffersrc_ctx;
-    AVFilterGraph *filter_graph;
-} FilteringContext;
 
 class CameraThreadMUX : public QThread
 {
@@ -51,6 +45,13 @@ class CameraThreadMUX : public QThread
 public:
     explicit CameraThreadMUX(QObject *parent = nullptr);
     void setStop();
+
+    typedef struct FilteringContext
+    {
+        AVFilterContext *buffersink_ctx;
+        AVFilterContext *buffersrc_ctx;
+        AVFilterGraph *filter_graph;
+    } FilteringContext;
 
     QString getCameraUrl() const;
     void setCameraUrl(const QString &value);

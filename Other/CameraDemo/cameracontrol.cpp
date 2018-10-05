@@ -147,7 +147,7 @@ void CameraControl::setCameraType(const CAMERATYPE &value)
 void CameraControl::start()
 {
     stop();
-    player = new CameraThreadMUX();
+    player = new CameraThreadH264();
     player->setCameraType(cameraType);
     player->setCameraUrl(cameraUrl);
     player->setCameraName(cameraName);
@@ -168,7 +168,7 @@ void CameraControl::stop()
         player->setStop();
         if(player->isRunning())
         {
-            player->wait(3000);
+            player->wait(10000);
             player->terminate();
         }
         player->deleteLater();
@@ -242,12 +242,12 @@ void CameraControl::timerEvent(QTimerEvent *event)
         int imageElsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastReceiveImageTime.toMSecsSinceEpoch();
         if(imageElsp > restartByNoImageElsp)
         {
-            if(player != Q_NULLPTR)
-            {
-                qDebug() << "Restart camera (no image):" << player->getCameraName();
-                stop();
-                start();
-            }
+            //if(player != Q_NULLPTR)
+            //{
+            //    qDebug() << "Restart camera (no image):" << player->getCameraName();
+            //    stop();
+            //    start();
+            //}
         }
     }
 }

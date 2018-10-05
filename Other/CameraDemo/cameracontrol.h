@@ -8,6 +8,7 @@
 #include <QTimerEvent>
 #include "3rd/videoplayer.h"
 #include "camerathreadmux.h"
+#include "camerathreadh264.h"
 
 namespace Ui {
 class CameraControl;
@@ -77,7 +78,7 @@ private:
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
     QString cameraName;
-    CameraThreadMUX *player;
+    CameraThreadH264 *player;
     int imageWidth, imageHeight;
     bool checkBrighness;
     bool fixBrighnessByTime;
