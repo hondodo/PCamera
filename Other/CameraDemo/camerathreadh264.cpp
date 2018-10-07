@@ -3,10 +3,14 @@
 int CameraThreadH264::cameraId = 0;
 CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
 {
-    filter_ctx = NULL;
     _isRunning = false;
     checkMog = true;
     saveOnlyMog = false;
+
+    ifmt_ctx = NULL;
+    ofmt_ctx = NULL;
+    filter_ctx = NULL;
+    stream_ctx = NULL;
 
     cameraType = CAMERATYPE_LOCAL;
 #ifdef Q_OS_WIN
@@ -126,7 +130,7 @@ int CameraThreadH264::open_input_file(const char *filename)
     inputFmt = av_find_input_format("dshow");
     AVDictionary *avdic = NULL;
     av_dict_set(&avdic, "max_delay", "100", 0);
-    av_dict_set(&avdic, "framerate", "30", 0);
+    av_dict_set(&avdic, "framerate", "10", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
     av_dict_set(&avdic, "video_size", "640x480", 0);
 
@@ -679,12 +683,12 @@ int CameraThreadH264::caputuer()
         frameindex++;
         if ((ret = av_read_frame(ifmt_ctx, &packet)) < 0)
             break;
-        if(frameindex % 3 != 0)
-        {
-            av_packet_unref(&packet);
-            av_usleep(5000);
-            continue;
-        }
+//        if(frameindex % 3 != 0)
+//        {
+//            av_packet_unref(&packet);
+//            av_usleep(5000);
+//            continue;
+//        }
 
         packet.pts = packet.dts = 0;
         //frameindex++;
@@ -804,18 +808,24 @@ int CameraThreadH264::caputuer()
 
 void CameraThreadH264::closeContext(AVFrame *frame)
 {
-    av_frame_free(&frame);
-    for (int i = 0; i < ifmt_ctx->nb_streams; i++) {
-        avcodec_free_context(&stream_ctx[i].dec_ctx);
-        if (ofmt_ctx && ofmt_ctx->nb_streams > i && ofmt_ctx->streams[i] && stream_ctx[i].enc_ctx)
-            avcodec_free_context(&stream_ctx[i].enc_ctx);
-        if (filter_ctx && filter_ctx[i].filter_graph)
-            avfilter_graph_free(&filter_ctx[i].filter_graph);
+    if(frame != NULL)
+    {
+        av_frame_free(&frame);
     }
-    av_free(filter_ctx);
-    av_free(stream_ctx);
-    avformat_close_input(&ifmt_ctx);
+    if(ifmt_ctx != NULL)
+    {
+        for (int i = 0; i < ifmt_ctx->nb_streams; i++) {
+            avcodec_free_context(&stream_ctx[i].dec_ctx);
+            if (ofmt_ctx && ofmt_ctx->nb_streams > i && ofmt_ctx->streams[i] && stream_ctx[i].enc_ctx)
+                avcodec_free_context(&stream_ctx[i].enc_ctx);
+            if (filter_ctx && filter_ctx[i].filter_graph)
+                avfilter_graph_free(&filter_ctx[i].filter_graph);
+        }
+    }
+    if(filter_ctx != NULL) av_free(filter_ctx);
+    if(stream_ctx != NULL) av_free(stream_ctx);
+    if(ifmt_ctx != NULL) avformat_close_input(&ifmt_ctx);
     if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
         avio_closep(&ofmt_ctx->pb);
-    avformat_free_context(ofmt_ctx);
+    if(ofmt_ctx != NULL) avformat_free_context(ofmt_ctx);
 }
