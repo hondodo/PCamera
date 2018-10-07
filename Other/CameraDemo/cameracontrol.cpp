@@ -178,7 +178,7 @@ void CameraControl::stop()
 
 void CameraControl::onImage(const QImage &image)
 {
-    lastReceiveImageTime = QDateTime::currentDateTime();
+    lastReceiveImageTime = QDateTime::currentDateTime();return;
     if(image.isNull())
     {
         return;
