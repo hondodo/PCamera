@@ -13,7 +13,7 @@ class CameraControlGL : public QWidget
     Q_OBJECT
 
 public:
-    explicit CameraControlGL(int width, int height, QWidget *parent = 0);
+    explicit CameraControlGL(int videoWidth, int videoHeight, QWidget *parent = 0);
     ~CameraControlGL();
 
 protected:
@@ -21,6 +21,7 @@ protected:
 
 public slots:
     void onFrame(unsigned char *yuvData);
+    void onYUVFrame(const unsigned char* y_data, const unsigned char* u_data, const unsigned char* v_data);
 
 private:
     Gl_widget glWidget;

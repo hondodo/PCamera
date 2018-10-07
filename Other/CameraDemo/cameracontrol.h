@@ -9,6 +9,7 @@
 #include "3rd/videoplayer.h"
 #include "camerathreadmux.h"
 #include "camerathreadh264.h"
+#include "3rd/gl_widget.h"
 
 namespace Ui {
 class CameraControl;
@@ -58,6 +59,7 @@ public:
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
     void timerEvent(QTimerEvent *event);
+    void resizeEvent(QResizeEvent *event);
 
 signals:
     void onRemoveRequest();
@@ -72,13 +74,24 @@ private slots:
     void onMenuClickSaveOnlyMog();
     void onMenuClickRestartPre30Min();
 
+private slots:
+#ifdef USE_OPENGL
+    void onYUVFrame(const unsigned char* y_data, const unsigned char* u_data, const unsigned char* v_data);
+#endif
 
 private:
     Ui::CameraControl *ui;
+#ifdef USE_OPENGL
+    Gl_widget *glWidget;
+#endif
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
     QString cameraName;
+#ifdef USE_H264
+    CameraThreadH264 *player;
+#else
     CameraThreadMUX *player;
+#endif
     int imageWidth, imageHeight;
     bool checkBrighness;
     bool fixBrighnessByTime;

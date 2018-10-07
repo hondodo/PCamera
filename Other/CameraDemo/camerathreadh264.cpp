@@ -506,9 +506,9 @@ int CameraThreadH264::init_filters()
         if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
         {
 #ifdef Q_OS_WIN
-            filter_spec = "null";//"[in]drawtext=fontfile=D////:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]drawtext=fontfile=D////:font.ttf:fontcolor=white:fontsize=30:text='World Facing Right':x=20:y=60:shadowcolor=black:shadowx=2:shadowy=2[out]"; /* passthrough (dummy) filter for video */
+            filter_spec = "drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2"; /* passthrough (dummy) filter for video */
 #else
-            filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=30:text='World Facing Right':x=20:y=60:shadowcolor=black:shadowx=2:shadowy=2[out]"; /* passthrough (dummy) filter for video */
+            filter_spec = "drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2"; /* passthrough (dummy) filter for video */
 #endif
         }
         else
@@ -653,6 +653,23 @@ int CameraThreadH264::caputuer()
         return ret;
     }
 
+#ifdef USE_OPENGL
+    struct SwsContext *img_convert_ctx;
+    AVFrame *pFrameYUV = av_frame_alloc();
+    uint8_t *out_buffer;
+    int numBytes;
+    AVPixelFormat pixpmt = AV_PIX_FMT_YUV420P;
+    img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
+                                     pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
+                                     pixpmt, SWS_BICUBIC, NULL, NULL, NULL);
+
+    numBytes = avpicture_get_size(pixpmt, pCodecCtx->width, pCodecCtx->height);
+
+    out_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
+    avpicture_fill((AVPicture *) pFrameYUV, out_buffer, pixpmt,
+                   pCodecCtx->width, pCodecCtx->height);
+#endif
+
     AVFrame *pFrameRGB = av_frame_alloc();
     struct SwsContext *imgConvertCtcRGB;
     AVPixelFormat rgbFmt = AV_PIX_FMT_BGR24;
@@ -721,6 +738,14 @@ int CameraThreadH264::caputuer()
             if (got_frame) {
                 frame->pts = frame->best_effort_timestamp;
                 ret = filter_encode_write_frame(frame, stream_index);
+#ifdef USE_OPENGL
+                sws_scale(img_convert_ctx,
+                          (uint8_t const * const *) frame->data,
+                          frame->linesize, 0, pCodecCtx->height, pFrameYUV->data,
+                          pFrameYUV->linesize);
+
+                emit onYUVFrame((unsigned char*)(pFrameYUV->data[0]), 0, 0);
+#endif
 
                 sws_scale(imgConvertCtcRGB, (uint8_t const * const *) frame->data,
                           frame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
@@ -795,6 +820,10 @@ int CameraThreadH264::caputuer()
 
     av_write_trailer(ofmt_ctx);
     //end
+#ifdef USE_OPENGL
+    sws_freeContext(img_convert_ctx);
+#endif
+    sws_freeContext(imgConvertCtcRGB);
     av_packet_unref(&packet);
     closeContext(frame);
 

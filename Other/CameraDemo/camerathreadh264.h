@@ -69,6 +69,9 @@ public:
 
 signals:
     void onFrame(const QImage &image);
+#ifdef USE_OPENGL
+    void onYUVFrame(const unsigned char* y_data, const unsigned char* u_data, const unsigned char* v_data);
+#endif
 
 protected:
     void run();

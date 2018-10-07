@@ -4,10 +4,10 @@
 #include <QtGui>
 #include <QtOpenGL>
 
-Gl_widget::Gl_widget(int width, int height, QWidget* parent)
+Gl_widget::Gl_widget(int videowidth, int videoheight, QWidget* parent)
     :QGLWidget(QGLFormat(QGL::SampleBuffers), parent)
-    , video_width(width)
-    , video_height(height)
+    , video_width(videowidth)
+    , video_height(videoheight)
     , y_texture(0)
     , u_texture(0)
     , v_texture(0)
@@ -18,9 +18,9 @@ Gl_widget::Gl_widget(int width, int height, QWidget* parent)
 {
     setFocusPolicy(Qt::StrongFocus);
 
-    y_data = new unsigned char[(width*height*3)>>1];
-    u_data = y_data+(width*height);
-    v_data = u_data+((width*height)>>2);
+    y_data = new unsigned char[(videowidth * videoheight * 3)>>1];
+    u_data = y_data+(videowidth * videoheight);
+    v_data = u_data+((videowidth * videoheight)>>2);
 }
 
 Gl_widget::~Gl_widget()
@@ -143,5 +143,13 @@ void Gl_widget::on_timeout()
 void Gl_widget::onFrame(unsigned char *yuvData)
 {
     y_data = yuvData;
+    updateGL();
+}
+
+void Gl_widget::onYUVFrame(const unsigned char *y_data, const unsigned char *u_data, const unsigned char *v_data)
+{
+    if(y_data) memcpy(this->y_data, y_data, (video_width * video_height * 3)>>1);
+    if(u_data) memcpy(this->u_data, u_data, video_width * video_height);
+    if(v_data) memcpy(this->v_data, v_data, (video_width * video_height)>>2);
     updateGL();
 }

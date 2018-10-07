@@ -202,8 +202,8 @@ void MainWindow::resizeCameraControl()
     {
         if(camBigShowingWidget != Q_NULLPTR)
         {
-            int tabcamwidth = ui->widgetCamBig->width() - 4;
-            int tabcamheight = ui->widgetCamBig->height() - 4;
+            int tabcamwidth = ui->widgetCamBig->videoWidth() - 4;
+            int tabcamheight = ui->widgetCamBig->videoHeight() - 4;
             int mw = maxwidth - 4;
             int mh = maxheight - 4;
             if(tabcamwidth > mw || tabcamheight > mh)
@@ -225,8 +225,8 @@ void MainWindow::resizeCameraControl()
     }
     else if(ui->tabWidget->currentWidget() == ui->tabCam4)
     {
-        int tabcamwidth = ui->tabCam4->width() - 4;
-        int tabcamheight = ui->tabCam4->height() - 4;
+        int tabcamwidth = ui->tabCam4->videoWidth() - 4;
+        int tabcamheight = ui->tabCam4->videoHeight() - 4;
         int mw = maxwidth - 4;
         int mh = maxheight - 4;
         if(tabcamwidth > mw || tabcamheight > mh)

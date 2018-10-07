@@ -37,6 +37,13 @@ CameraControl::CameraControl(QWidget *parent) :
     restartByNoImageElsp = 1000 * 60;
 
     ui->label->installEventFilter(this);
+
+#ifdef USE_OPENGL
+    glWidget = NULL;
+    glWidget = new Gl_widget(1280, 720, this);
+    ui->label->setVisible(false);
+    ui->scrollArea->setVisible(false);
+#endif
 }
 
 void CameraControl::initMenu()
@@ -120,6 +127,13 @@ CameraControl::~CameraControl()
         killTimer(restartTimerId);
     }
     stop();
+#ifdef USE_OPENGL
+    if(glWidget != NULL)
+    {
+        glWidget->deleteLater();
+        glWidget = NULL;
+    }
+#endif
     qDebug() << "Remove camera control";
     delete ui;
 }
@@ -147,7 +161,11 @@ void CameraControl::setCameraType(const CAMERATYPE &value)
 void CameraControl::start()
 {
     stop();
+#ifdef USE_H264
+    player = new CameraThreadH264();
+#else
     player = new CameraThreadMUX();
+#endif
     player->setCameraType(cameraType);
     player->setCameraUrl(cameraUrl);
     player->setCameraName(cameraName);
@@ -159,6 +177,13 @@ void CameraControl::start()
     player->start();
     lastReceiveImageTime = QDateTime::currentDateTime();
     lastRestart = QDateTime::currentDateTime();
+#ifdef USE_OPENGL
+    if(glWidget != NULL)
+    {
+        connect(player, SIGNAL(onYUVFrame(const unsigned char*,const unsigned char*,const unsigned char*)),
+                this, SLOT(onYUVFrame(const unsigned char*,const unsigned char*,const unsigned char*)));
+    }
+#endif
 }
 
 void CameraControl::stop()
@@ -250,6 +275,17 @@ void CameraControl::timerEvent(QTimerEvent *event)
             }
         }
     }
+}
+
+void CameraControl::resizeEvent(QResizeEvent *event)
+{
+    Q_UNUSED(event);
+#ifdef USE_OPENGL
+    if(glWidget != NULL)
+    {
+        glWidget->setGeometry(0, 0, videoWidth(), videoHeight());
+    }
+#endif
 }
 
 bool CameraControl::getCheckBrighness() const
@@ -355,6 +391,17 @@ void CameraControl::onMenuClickRestartPre30Min()
     disConnectMenu();
     restartCameraPre30Min = !restartCameraPre30Min;
 }
+
+#ifdef USE_OPENGL
+void CameraControl::onYUVFrame(const unsigned char *y_data, const unsigned char *u_data, const unsigned char *v_data)
+{
+    if(glWidget != NULL)
+    {
+        glWidget->onYUVFrame(y_data, u_data, v_data);
+    }
+
+}
+#endif
 
 bool CameraControl::getRestartCameraPre30Min() const
 {

@@ -13,7 +13,7 @@ class Gl_widget: public QGLWidget
 {
     Q_OBJECT
 public:
-    Gl_widget(int width, int height, QWidget *parent = 0);
+    Gl_widget(int videowidth, int videoheight, QWidget *parent = 0);
     ~Gl_widget();
 
 protected:
@@ -24,6 +24,7 @@ protected:
 public slots:
     void on_timeout();
     void onFrame(unsigned char *yuvData);
+    void onYUVFrame(const unsigned char* y_data, const unsigned char* u_data, const unsigned char* v_data);
 
 private:
     int video_width;
