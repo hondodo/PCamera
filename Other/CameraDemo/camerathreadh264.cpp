@@ -752,7 +752,7 @@ int CameraThreadH264::caputuer()
             if(frametime > 0)
             {
                 double fps = 1000.0 / (frametime / 100.0);
-                qDebug() << "FPS:" << fps;
+                qDebug() << "FPS:" << fps << "@" << cameraName;
             }
         }
     }
