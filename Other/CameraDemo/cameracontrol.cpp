@@ -147,7 +147,7 @@ void CameraControl::setCameraType(const CAMERATYPE &value)
 void CameraControl::start()
 {
     stop();
-    player = new CameraThreadMUX();
+    player = new CameraThreadH264();
     player->setCameraType(cameraType);
     player->setCameraUrl(cameraUrl);
     player->setCameraName(cameraName);

@@ -2,6 +2,9 @@
 #define CAMERATHREADH264_H
 
 #include <QThread>
+#include <QTime>
+#include <QDebug>
+#include <QImage>
 
 extern "C"
 {
@@ -20,6 +23,7 @@ extern "C"
 
 #include "pathhelper.h"
 #include "cameratype.h"
+#include "mathelper.h"
 
 class CameraThreadH264 : public QThread
 {
@@ -63,6 +67,9 @@ public:
     bool getSaveOnlyMog() const;
     void setSaveOnlyMog(bool value);
 
+signals:
+    void onFrame(const QImage &image);
+
 protected:
     void run();
 
@@ -96,6 +103,8 @@ private:
     int flush_encoder(unsigned int stream_index);
     int caputuer();
     void closeContext(AVFrame *frame);
+
+    AVCodecContext *pCodecCtx;
 };
 
 #endif // CAMERATHREADH264_H
