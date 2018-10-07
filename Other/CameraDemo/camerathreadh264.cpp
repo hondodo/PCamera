@@ -641,7 +641,8 @@ int CameraThreadH264::caputuer()
         closeContext(frame);
         return ret;
     }
-    if ((ret = open_output_file(outputFileNameForTemp.toLocal8Bit().data())) < 0)
+    pathHelper.creatNewFileName();
+    if ((ret = open_output_file(pathHelper.getCurrentFileName().toLocal8Bit().data())) < 0)
     {
         closeContext(frame);
         return ret;
