@@ -679,6 +679,13 @@ int CameraThreadH264::caputuer()
         frameindex++;
         if ((ret = av_read_frame(ifmt_ctx, &packet)) < 0)
             break;
+        if(frameindex % 3 != 0)
+        {
+            av_packet_unref(&packet);
+            av_usleep(5000);
+            continue;
+        }
+
         packet.pts = packet.dts = 0;
         //frameindex++;
         stream_index = packet.stream_index;
