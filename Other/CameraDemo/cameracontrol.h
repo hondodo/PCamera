@@ -78,7 +78,7 @@ private:
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
     QString cameraName;
-    CameraThreadH264 *player;
+    CameraThreadMUX *player;
     int imageWidth, imageHeight;
     bool checkBrighness;
     bool fixBrighnessByTime;
