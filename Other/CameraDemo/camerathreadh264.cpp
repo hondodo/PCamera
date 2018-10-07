@@ -128,7 +128,7 @@ int CameraThreadH264::open_input_file(const char *filename)
     av_dict_set(&avdic, "max_delay", "100", 0);
     av_dict_set(&avdic, "framerate", "30", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
-    av_dict_set(&avdic, "video_size", "1280x720", 0);
+    av_dict_set(&avdic, "video_size", "640x480", 0);
 
     if ((ret = avformat_open_input(&ifmt_ctx, filename, inputFmt, &avdic)) < 0)
     {
