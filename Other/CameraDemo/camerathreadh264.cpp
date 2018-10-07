@@ -778,6 +778,9 @@ int CameraThreadH264::caputuer()
         }
     }
 
+    mRGB.release();
+    temp.release();
+
     av_write_trailer(ofmt_ctx);
     //end
     av_packet_unref(&packet);
