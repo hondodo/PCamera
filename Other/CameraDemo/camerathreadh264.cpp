@@ -130,7 +130,7 @@ int CameraThreadH264::open_input_file(const char *filename)
     inputFmt = av_find_input_format("dshow");
     AVDictionary *avdic = NULL;
     av_dict_set(&avdic, "max_delay", "100", 0);
-    av_dict_set(&avdic, "framerate", "10", 0);
+    av_dict_set(&avdic, "framerate", "30", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
     av_dict_set(&avdic, "video_size", "640x480", 0);
 
