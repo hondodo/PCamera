@@ -34,6 +34,20 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
     pCodecCtx = NULL;
 }
 
+CameraThreadH264::~CameraThreadH264()
+{
+    qDebug() << "Release thread" << cameraName;
+    if(ifmt_ctx) delete ifmt_ctx;
+    if(ofmt_ctx) delete ofmt_ctx;
+    if(filter_ctx) delete filter_ctx;
+    if(stream_ctx) delete[] stream_ctx;
+    ifmt_ctx = NULL;
+    ofmt_ctx = NULL;
+    filter_ctx = NULL;
+    stream_ctx = NULL;
+
+}
+
 void CameraThreadH264::setStop()
 {
     _isRunning = false;
@@ -132,7 +146,11 @@ int CameraThreadH264::open_input_file(const char *filename)
     av_dict_set(&avdic, "max_delay", "100", 0);
     av_dict_set(&avdic, "framerate", "30", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
+#ifdef Q_OS_WIN
     av_dict_set(&avdic, "video_size", "1280x720", 0);//"640x480"
+#else
+    av_dict_set(&avdic, "video_size", "640x480", 0);//"640x480"
+#endif
 
     if ((ret = avformat_open_input(&ifmt_ctx, filename, inputFmt, &avdic)) < 0)
     {

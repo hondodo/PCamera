@@ -295,7 +295,7 @@ void MainWindow::onCameraControlRequestRemove()
         ui->verticalLayoutCams2->removeWidget(control);
         ui->verticalLayoutCams3->removeWidget(control);
         ui->verticalLayoutCams4->removeWidget(control);
-        existsCameraUrls.removeAll(control->getCameraUrl());
+        existsCameraUrls.removeAll(control->getCameraUrl().toLower());
         control->stop();
         control->deleteLater();
         control = Q_NULLPTR;

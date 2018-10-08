@@ -30,6 +30,7 @@ class CameraThreadH264 : public QThread
     Q_OBJECT
 public:
     explicit CameraThreadH264(QObject *parent = nullptr);
+    ~CameraThreadH264();
 
     void setStop();
 
