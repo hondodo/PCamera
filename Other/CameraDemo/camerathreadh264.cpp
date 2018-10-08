@@ -129,7 +129,13 @@ void CameraThreadH264::setSaveOnlyMog(bool value)
 void CameraThreadH264::run()
 {
     _isRunning = true;
-    caputuer();
+
+    while (_isRunning) //LOOP
+    {
+        qDebug() << "Loop record @" << cameraName;
+        caputuer();
+    }
+
     _isRunning = false;
 }
 
@@ -167,33 +173,39 @@ int CameraThreadH264::open_input_file(const char *filename)
     if (!stream_ctx)
         return AVERROR(ENOMEM);
 
-    for (i = 0; i < ifmt_ctx->nb_streams; i++) {
+    for (i = 0; i < ifmt_ctx->nb_streams; i++)
+    {
         AVStream *stream = ifmt_ctx->streams[i];
         AVCodec *dec = avcodec_find_decoder(stream->codecpar->codec_id);
         AVCodecContext *codec_ctx;
-        if (!dec) {
+        if (!dec)
+        {
             av_log(NULL, AV_LOG_ERROR, "Failed to find decoder for stream #%u\n", i);
             return AVERROR_DECODER_NOT_FOUND;
         }
         codec_ctx = avcodec_alloc_context3(dec);
-        if (!codec_ctx) {
+        if (!codec_ctx)
+        {
             av_log(NULL, AV_LOG_ERROR, "Failed to allocate the decoder context for stream #%u\n", i);
             return AVERROR(ENOMEM);
         }
         ret = avcodec_parameters_to_context(codec_ctx, stream->codecpar);
-        if (ret < 0) {
+        if (ret < 0)
+        {
             av_log(NULL, AV_LOG_ERROR, "Failed to copy decoder parameters to input decoder context "
                                        "for stream #%u\n", i);
             return ret;
         }
         /* Reencode video & audio and remux subtitles etc. */
         if (codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO
-                || codec_ctx->codec_type == AVMEDIA_TYPE_AUDIO) {
+                || codec_ctx->codec_type == AVMEDIA_TYPE_AUDIO)
+        {
             if (codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
                 codec_ctx->framerate = av_guess_frame_rate(ifmt_ctx, stream, NULL);
             /* Open decoder */
             ret = avcodec_open2(codec_ctx, dec, NULL);
-            if (ret < 0) {
+            if (ret < 0)
+            {
                 av_log(NULL, AV_LOG_ERROR, "Failed to open decoder for stream #%u\n", i);
                 return ret;
             }
@@ -573,6 +585,7 @@ int CameraThreadH264::encode_write_frame(AVFrame *filt_frame, unsigned int strea
     av_log(NULL, AV_LOG_DEBUG, "Muxing frame\n");
     /* mux encoded frame */
     ret = av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
+    av_packet_unref(&enc_pkt);
     return ret;
 }
 
@@ -656,18 +669,18 @@ int CameraThreadH264::caputuer()
 
     if ((ret = open_input_file(cameraUrl.toLocal8Bit().data())) < 0)
     {
-        closeContext(frame);
+        closeContext(&frame);
         return ret;
     }
     pathHelper.creatNewFileName();
     if ((ret = open_output_file(pathHelper.getCurrentFileName().toLocal8Bit().data())) < 0)
     {
-        closeContext(frame);
+        closeContext(&frame);
         return ret;
     }
     if ((ret = init_filters()) < 0)
     {
-        closeContext(frame);
+        closeContext(&frame);
         return ret;
     }
 
@@ -709,9 +722,18 @@ int CameraThreadH264::caputuer()
     int frametime = 0;
     frameTimer.start();
     int frameindex = 0;
+
+    int maxFrame = 60 * 30 * 60;//60min * 30fp/s * 60s
+    int currentFrame = 0;
     /* read all packets */
     while (_isRunning)
     {
+        if(currentFrame >= maxFrame)
+        {
+            break;
+        }
+        currentFrame++;
+
         if(frameindex > 2000000000)
         {
             frameindex = 0;
@@ -719,12 +741,6 @@ int CameraThreadH264::caputuer()
         frameindex++;
         if ((ret = av_read_frame(ifmt_ctx, &packet)) < 0)
             break;
-//        if(frameindex % 3 != 0)
-//        {
-//            av_packet_unref(&packet);
-//            av_usleep(5000);
-//            continue;
-//        }
 
         packet.pts = packet.dts = 0;
         //frameindex++;
@@ -779,7 +795,7 @@ int CameraThreadH264::caputuer()
                 av_frame_free(&frame);
                 if (ret < 0)
                 {
-                    closeContext(frame);
+                    closeContext(&frame);
                     return ret;
                 }
             } else {
@@ -794,7 +810,7 @@ int CameraThreadH264::caputuer()
             ret = av_interleaved_write_frame(ofmt_ctx, &packet);
             if (ret < 0)
             {
-                closeContext(frame);
+                closeContext(&frame);
                 return ret;
             }
         }
@@ -813,28 +829,33 @@ int CameraThreadH264::caputuer()
     }
 
     /* flush filters and encoders */
-    for (i = 0; i < ifmt_ctx->nb_streams; i++) {
+    for (i = 0; i < ifmt_ctx->nb_streams; i++)
+    {
         /* flush filter */
         if (!filter_ctx[i].filter_graph)
             continue;
         ret = filter_encode_write_frame(NULL, i);
         if (ret < 0) {
             av_log(NULL, AV_LOG_ERROR, "Flushing filter failed\n");
-            closeContext(frame);
+            closeContext(&frame);
             return ret;
         }
 
         /* flush encoder */
         ret = flush_encoder(i);
-        if (ret < 0) {
+        if (ret < 0)
+        {
             av_log(NULL, AV_LOG_ERROR, "Flushing encoder failed\n");
-            closeContext(frame);
+            closeContext(&frame);
             return ret;
         }
     }
 
     mRGB.release();
     temp.release();
+
+    av_free(rgbOutBuffer);
+    av_frame_free(&pFrameRGB);
 
     av_write_trailer(ofmt_ctx);
     //end
@@ -843,7 +864,7 @@ int CameraThreadH264::caputuer()
 #endif
     sws_freeContext(imgConvertCtcRGB);
     av_packet_unref(&packet);
-    closeContext(frame);
+    closeContext(&frame);
 
     if (ret < 0)
     {
@@ -854,20 +875,25 @@ int CameraThreadH264::caputuer()
     return (ret? 1:0);
 }
 
-void CameraThreadH264::closeContext(AVFrame *frame)
+void CameraThreadH264::closeContext(AVFrame **frame)
 {
-    if(frame != NULL)
+    if((*frame) != NULL)
     {
-        av_frame_free(&frame);
+        av_frame_free(frame);
     }
     if(ifmt_ctx != NULL)
     {
-        for (int i = 0; i < ifmt_ctx->nb_streams; i++) {
+        for (int i = 0; i < ifmt_ctx->nb_streams; i++)
+        {
             avcodec_free_context(&stream_ctx[i].dec_ctx);
             if (ofmt_ctx && ofmt_ctx->nb_streams > i && ofmt_ctx->streams[i] && stream_ctx[i].enc_ctx)
+            {
                 avcodec_free_context(&stream_ctx[i].enc_ctx);
+            }
             if (filter_ctx && filter_ctx[i].filter_graph)
+            {
                 avfilter_graph_free(&filter_ctx[i].filter_graph);
+            }
         }
     }
     if(filter_ctx != NULL) av_free(filter_ctx);
