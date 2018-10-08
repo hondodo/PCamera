@@ -37,14 +37,14 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
 CameraThreadH264::~CameraThreadH264()
 {
     qDebug() << "Release thread" << cameraName;
-    if(ifmt_ctx) delete ifmt_ctx;
-    if(ofmt_ctx) delete ofmt_ctx;
-    if(filter_ctx) delete filter_ctx;
-    if(stream_ctx) delete[] stream_ctx;
-    ifmt_ctx = NULL;
-    ofmt_ctx = NULL;
-    filter_ctx = NULL;
-    stream_ctx = NULL;
+    //if(ifmt_ctx) delete ifmt_ctx;
+    //if(ofmt_ctx) delete ofmt_ctx;
+    //if(filter_ctx) delete filter_ctx;
+    //if(stream_ctx) delete[] stream_ctx;
+    //ifmt_ctx = NULL;
+    //ofmt_ctx = NULL;
+    //filter_ctx = NULL;
+    //stream_ctx = NULL;
 
 }
 
@@ -536,10 +536,11 @@ int CameraThreadH264::init_filters()
         if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
         {
 #ifdef Q_OS_WIN
-            filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
+            //filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
+            filter_spec = "drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2";
 #else
             filter_spec = "drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2"; /* passthrough (dummy) filter for video */
-            filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
+            //filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
 #endif
         }
         else
