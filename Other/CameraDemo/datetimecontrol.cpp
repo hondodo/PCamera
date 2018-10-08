@@ -179,8 +179,8 @@ void DateTimeControl::resizeFontSize()
 {
     int wwidth = 5 * timeFontSize;
     int wheight = dateFontSize + timeFontSize + weekFontSize + yearFontSize;
-    int swidth = ui->scrollArea->videoWidth() - 50;
-    int sheight = ui->scrollArea->videoHeight() - 200;
+    int swidth = ui->scrollArea->width() - 50;
+    int sheight = ui->scrollArea->height() - 200;
     while((wwidth < swidth || wheight < sheight) && isCanUp())
     {
         trimFonSize(true);

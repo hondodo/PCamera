@@ -13,7 +13,7 @@ class CameraControlGL : public QWidget
     Q_OBJECT
 
 public:
-    explicit CameraControlGL(int videoWidth, int videoHeight, QWidget *parent = 0);
+    explicit CameraControlGL(int width, int height, QWidget *parent = 0);
     ~CameraControlGL();
 
 protected:

@@ -18,7 +18,7 @@ CameraControlOpenGL::~CameraControlOpenGL()
 void CameraControlOpenGL::resizeEvent(QResizeEvent *event)
 {
     Q_UNUSED(event);
-    glWidget.setGeometry(0, 0, videoWidth(), videoHeight());
+    glWidget.setGeometry(0, 0, width(), height());
 }
 
 void CameraControlOpenGL::onFrame(unsigned char *yuvData)
