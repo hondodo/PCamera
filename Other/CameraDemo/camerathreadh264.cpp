@@ -290,7 +290,7 @@ int CameraThreadH264::open_output_file(const char *filename)
                 enc_ctx->gop_size = 250;
                 enc_ctx->max_b_frames = 10;
                 enc_ctx->qmin = 10;
-                enc_ctx->qmax = 51;
+                enc_ctx->qmax = 51;pCodecCtx = enc_ctx;
             }
             else
             {
@@ -536,9 +536,10 @@ int CameraThreadH264::init_filters()
         if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
         {
 #ifdef Q_OS_WIN
-            filter_spec = "drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2"; /* passthrough (dummy) filter for video */
+            filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
 #else
             filter_spec = "drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2"; /* passthrough (dummy) filter for video */
+            filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
 #endif
         }
         else
@@ -626,6 +627,88 @@ int CameraThreadH264::filter_encode_write_frame(AVFrame *frame, unsigned int str
 
         filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
         ret = encode_write_frame(filt_frame, stream_index, NULL);
+        if (ret < 0)
+            break;
+    }
+
+    return ret;
+}
+
+int CameraThreadH264::encode_write_frame_rewrite_source_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame)
+{
+    int ret;
+    int got_frame_local;
+    AVPacket enc_pkt;
+    int (*enc_func)(AVCodecContext *, AVPacket *, const AVFrame *, int *) =
+            (ifmt_ctx->streams[stream_index]->codecpar->codec_type ==
+             AVMEDIA_TYPE_VIDEO) ? avcodec_encode_video2 : avcodec_encode_audio2;
+
+    if (!got_frame)
+        got_frame = &got_frame_local;
+
+    //av_log(NULL, AV_LOG_INFO, "Encoding frame\n");
+    /* encode filtered frame */
+    enc_pkt.data = NULL;
+    enc_pkt.size = 0;
+    av_init_packet(&enc_pkt);
+    ret = enc_func(stream_ctx[stream_index].enc_ctx, &enc_pkt,
+                   filt_frame, got_frame);
+    //av_frame_free(&filt_frame);
+    if (ret < 0)
+        return ret;
+    if (!(*got_frame))
+        return 0;
+
+    /* prepare packet for muxing */
+    enc_pkt.stream_index = stream_index;
+    av_packet_rescale_ts(&enc_pkt,
+                         stream_ctx[stream_index].enc_ctx->time_base,
+                         ofmt_ctx->streams[stream_index]->time_base);
+
+    av_log(NULL, AV_LOG_DEBUG, "Muxing frame\n");
+    /* mux encoded frame */
+    ret = av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
+    av_packet_unref(&enc_pkt);
+    return ret;
+}
+
+int CameraThreadH264::filter_encode_write_frame_rewrite_source_frame(AVFrame *frame, unsigned int stream_index)
+{
+    int ret;
+    AVFrame *filt_frame = frame;
+
+    //av_log(NULL, AV_LOG_INFO, "Pushing decoded frame to filters\n");
+    /* push the decoded frame into the filtergraph */
+    ret = av_buffersrc_add_frame_flags(filter_ctx[stream_index].buffersrc_ctx,
+                                       frame, 0);
+    if (ret < 0) {
+        av_log(NULL, AV_LOG_ERROR, "Error while feeding the filtergraph\n");
+        return ret;
+    }
+
+    /* pull filtered frames from the filtergraph */
+    while (1) {
+        //filt_frame = av_frame_alloc();
+        if (!filt_frame) {
+            ret = AVERROR(ENOMEM);
+            break;
+        }
+        //av_log(NULL, AV_LOG_INFO, "Pulling filtered frame from filters\n");
+        ret = av_buffersink_get_frame(filter_ctx[stream_index].buffersink_ctx,
+                                      filt_frame);
+        if (ret < 0) {
+            /* if no more frames for output - returns AVERROR(EAGAIN)
+                 * if flushed and no more frames for output - returns AVERROR_EOF
+                 * rewrite retcode to 0 to show it as normal procedure completion
+                 */
+            if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+                ret = 0;
+            //av_frame_free(&filt_frame);
+            break;
+        }
+
+        filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
+        ret = encode_write_frame_rewrite_source_frame(filt_frame, stream_index, NULL);
         if (ret < 0)
             break;
     }
@@ -771,7 +854,7 @@ int CameraThreadH264::caputuer()
 
             if (got_frame) {
                 frame->pts = frame->best_effort_timestamp;
-                ret = filter_encode_write_frame(frame, stream_index);
+                ret = filter_encode_write_frame_rewrite_source_frame(frame, stream_index);
 #ifdef USE_OPENGL
                 sws_scale(img_convert_ctx,
                           (uint8_t const * const *) frame->data,
