@@ -1,7 +1,7 @@
 #include "weatherreportcontrol.h"
 #include "ui_weatherreportcontrol.h"
 
-const QString XinQi[] = {"*", "一", "二", "三", "四", "五", "六", "日"};
+const QString XinQi[] = {"*", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"};
 
 WeatherReportControl::WeatherReportControl(QWidget *parent) :
     QWidget(parent),
@@ -16,7 +16,8 @@ WeatherReportControl::~WeatherReportControl()
 }
 
 void WeatherReportControl::SetWeather(QString date, int weekIndex, QString daytemp, QString dayweather,
-                                      QString nighttemp, QString nightweather, bool isShowingToday)
+                                      QString nighttemp, QString nightweather, bool isShowingToday,
+                                      QString addctionMessage)
 {
     QString week = QString("(") + XinQi[weekIndex] + QString(")");
     ui->labelDate->setText(date);
@@ -30,6 +31,13 @@ void WeatherReportControl::SetWeather(QString date, int weekIndex, QString dayte
     if(isShowingToday)
     {
         ui->labelDate->setText(QString("今天"));
+    }
+    if(addctionMessage.isNull() || addctionMessage.isEmpty())
+    {}
+    else
+    {
+        QString addtext = addctionMessage + "(" + date + ")";
+        ui->labelDate->setText(addtext);
     }
     bool issame = dayweather == nightweather;
     ui->labelTo->setVisible(!issame);

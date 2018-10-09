@@ -173,12 +173,12 @@ void WeatherControl::dealMessage(QByteArray array)
                                                     ui->widgetTodayReport->SetWeather(date, index, daytemp, dayweather, nighttemp,
                                                                                       nightweather, true);
                                                     ui->widgetWeatherDay0->SetWeather(date, index, daytemp, dayweather, nighttemp,
-                                                                                      nightweather, false);
+                                                                                      nightweather, false, tr("今天"));
                                                 }
                                                 else if(i == 1)
                                                 {
                                                     ui->widgetWeatherDay1->SetWeather(date, index, daytemp, dayweather, nighttemp,
-                                                                                      nightweather, false);
+                                                                                      nightweather, false, tr("明天"));
                                                 }
                                                 else if(i == 2)
                                                 {
