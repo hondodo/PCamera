@@ -746,6 +746,18 @@ int CameraThreadH264::caputuer()
 
     int maxFrame = 60 * 30 * 60;//60min * 30fp/s * 60s
     int currentFrame = 0;
+
+#ifdef USE_FIX_30FPS
+    int64_t eachframetime = 33333;
+    int64_t start_time = av_gettime();
+    int64_t lasttime = start_time;
+    int64_t encodewritetime = 0;
+    int64_t sleeptimeus = 5000;
+    int64_t now = start_time;
+    int64_t now_time = 0;
+    int64_t frame_index = 0;
+    int64_t duration = 0;
+#endif
     /* read all packets */
     while (_isRunning)
     {
@@ -763,8 +775,26 @@ int CameraThreadH264::caputuer()
         if ((ret = av_read_frame(ifmt_ctx, &packet)) < 0)
             break;
 
+#ifdef USE_FIX_30FPS
+        now = av_gettime();
+        now_time = now - start_time;
+        frame_index = now_time / eachframetime;
+        duration = now - lasttime;
+        if(duration > 1000)
+        {
+            packet.duration = duration;
+        }
+        else
+        {
+            packet.duration = eachframetime;
+        }
+        lasttime = now;
+        packet.dts = packet.pts = frame_index;
+        qDebug() << frame_index << packet.duration;
+#else
         packet.pts = packet.dts = 0;
-        //frameindex++;
+#endif
+
         stream_index = packet.stream_index;
         type = ifmt_ctx->streams[packet.stream_index]->codecpar->codec_type;
         av_log(NULL, AV_LOG_DEBUG, "Demuxer gave frame of stream_index %u\n",
@@ -777,9 +807,16 @@ int CameraThreadH264::caputuer()
                 ret = AVERROR(ENOMEM);
                 break;
             }
+#ifdef USE_FIX_30FPS
+            //av_packet_rescale_ts(&packet,
+            //                     ifmt_ctx->streams[stream_index]->time_base,
+            //                     stream_ctx[stream_index].dec_ctx->time_base);
+            qDebug() << packet.pts << packet.dts << packet.duration;
+#else
             av_packet_rescale_ts(&packet,
                                  ifmt_ctx->streams[stream_index]->time_base,
                                  stream_ctx[stream_index].dec_ctx->time_base);
+#endif
             dec_func = (type == AVMEDIA_TYPE_VIDEO) ? avcodec_decode_video2 :
                                                       avcodec_decode_audio4;
             ret = dec_func(stream_ctx[stream_index].dec_ctx, frame,
@@ -840,7 +877,20 @@ int CameraThreadH264::caputuer()
             }
         }
         av_packet_unref(&packet);
+#ifdef USE_FIX_30FPS
+        encodewritetime = av_gettime() - now;
+        sleeptimeus = eachframetime - encodewritetime + 5000;
+        if(sleeptimeus > 0 && sleeptimeus < eachframetime)
+        {
+            av_usleep(sleeptimeus);
+        }
+        else
+        {
+            av_usleep(5000);
+        }
+#else
         av_usleep(5000);
+#endif
         if(frameindex % 100 == 0)
         {
             frametime = frameTimer.elapsed();
