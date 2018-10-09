@@ -36,7 +36,7 @@ void WeatherReportControl::SetWeather(QString date, int weekIndex, QString dayte
     {}
     else
     {
-        QString addtext = addctionMessage + "(" + date + ")";
+        QString addtext = addctionMessage;// + "(" + date + ")";
         ui->labelDate->setText(addtext);
     }
     bool issame = dayweather == nightweather;
