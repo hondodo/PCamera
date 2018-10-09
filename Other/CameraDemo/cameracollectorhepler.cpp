@@ -349,6 +349,50 @@ std::vector<Rect> CameraCollectorThread::findMog(int cid, Mat mat)
     return result;
 }
 
+bool CameraCollectorThread::findMogBOOL(int cid, Mat mat)
+{
+    bool result = false;
+    if(!camIdMogObj.contains(cid))
+    {
+        MogDetectObject obj;
+        camIdMogObj[cid] = obj;
+    }
+
+    MogDetectObject *mogobj = (&camIdMogObj[cid]);
+    resize(mat, mogobj->smallMat, Size(200, 150), 0, 0);
+    mogobj->mog->apply(mogobj->smallMat, mogobj->lastMat);
+    findContours(mogobj->lastMat, mogobj->cnts, CV_RETR_EXTERNAL, CV_CHAIN_APPROX_SIMPLE, cv::Point(0, 0) );
+    float area;
+    for (int i = mogobj->cnts.size() - 1; i >= 0; i--)
+    {
+        vector<Point> c = mogobj->cnts[i];
+        area = contourArea(c);
+        if (area < 40)
+        {
+            continue;
+        }
+        else
+        {
+            result = true;
+            break;
+        }
+    }
+    mat.release();
+    camIdMogCache.remove(cid);
+    return result;
+}
+
+void CameraCollectorThread::removeMogRcs(int cid)
+{
+    if(camIdMogObj.contains(cid))
+    {
+        MogDetectObject *mogobj = (&camIdMogObj[cid]);
+        delete mogobj;
+        mogobj = NULL;
+    }
+    camIdMogObj.remove(cid);
+}
+
 void CameraCollectorThread::findMog()
 {
     if(canDetectFace && !camIdMogCache.isEmpty())

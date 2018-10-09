@@ -39,6 +39,7 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
 CameraThreadH264::~CameraThreadH264()
 {
     qDebug() << "Release thread" << cameraName;
+    CameraCollectorThread::Init->removeMogRcs(currentCameraId);
     //if(ifmt_ctx) delete ifmt_ctx;
     //if(ofmt_ctx) delete ofmt_ctx;
     //if(filter_ctx) delete filter_ctx;
@@ -47,7 +48,6 @@ CameraThreadH264::~CameraThreadH264()
     //ofmt_ctx = NULL;
     //filter_ctx = NULL;
     //stream_ctx = NULL;
-
 }
 
 void CameraThreadH264::setStop()
@@ -738,6 +738,7 @@ int CameraThreadH264::caputuer()
                    pOutCodecCtx->width, pOutCodecCtx->height);
 
     mRGB = cv::Mat(cv::Size(pOutCodecCtx->width, pOutCodecCtx->height), CV_8UC3);
+    bool isMoving = true;
 
     QTime frameTimer;
     int frametime = 0;
@@ -847,6 +848,16 @@ int CameraThreadH264::caputuer()
 
                     mRGB.data =(uchar*)pFrameRGB->data[0];
                     cv::cvtColor(mRGB, temp, CV_BGR2RGB);
+
+                    if(checkMog)
+                    {
+                        isMoving = CameraCollectorThread::Init->findMogBOOL(currentCameraId, mRGB);
+                    }
+                    else
+                    {
+                        isMoving = true;
+                    }
+
                     QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
                     QImage image(dest);
                     image.detach();

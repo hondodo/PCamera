@@ -73,6 +73,7 @@ private slots:
     void onMenuClickCheckMog();
     void onMenuClickSaveOnlyMog();
     void onMenuClickRestartPre30Min();
+    void onMenuClickFillScreen();
 
 private slots:
 #ifdef USE_OPENGL
@@ -98,6 +99,7 @@ private:
     bool checkMog;
     bool saveOnlyMog;
     bool restartCameraPre30Min;
+    bool fillScreen;
     QDateTime lastRestart;
     QDateTime lastReceiveImageTime;
     int restartTimerId;
@@ -107,7 +109,7 @@ private:
     void disConnectMenu();
     QMenu *menu;
     QAction *removeAction, *checkBrighnessAction, *fixBrighnessByTimeAction,
-    *checkMogAction, *saveOnlyMogAction, *restartPre30MinAction;
+    *checkMogAction, *saveOnlyMogAction, *restartPre30MinAction, *fillScreenAction;
 };
 
 #endif // CAMERACONTROL_H

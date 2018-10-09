@@ -15,6 +15,7 @@ CameraControl::CameraControl(QWidget *parent) :
     fixBrighnessByTime = false;
     checkMog = true;
     saveOnlyMog = false;
+    fillScreen = false;
     player = Q_NULLPTR;
     QPixmapCache::setCacheLimit(1024 * 10);
     menu = NULL;
@@ -24,6 +25,7 @@ CameraControl::CameraControl(QWidget *parent) :
     checkMogAction = NULL;
     saveOnlyMogAction = NULL;
     restartPre30MinAction = NULL;
+    fillScreenAction = NULL;
     restartCameraPre30Min = false;
     lastRestart = QDateTime::currentDateTime();
     lastReceiveImageTime = QDateTime::currentDateTime();
@@ -83,6 +85,11 @@ void CameraControl::initMenu()
         restartPre30MinAction->deleteLater();
         restartPre30MinAction = NULL;
     }
+    if(fillScreenAction != NULL)
+    {
+        fillScreenAction->deleteLater();
+        fillScreenAction = NULL;
+    }
     menu = new QMenu();
     removeAction = menu->addAction("Remove");
     connect(removeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRemove()));
@@ -111,6 +118,11 @@ void CameraControl::initMenu()
     restartPre30MinAction->setCheckable(true);
     restartPre30MinAction->setChecked(restartCameraPre30Min);
     connect(restartPre30MinAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRestartPre30Min()));
+
+    fillScreenAction = menu->addAction("Fill Screen");
+    fillScreenAction->setCheckable(true);
+    fillScreenAction->setChecked(fillScreen);
+    connect(fillScreenAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFillScreen()));
 }
 
 void CameraControl::disConnectMenu()
@@ -118,6 +130,11 @@ void CameraControl::disConnectMenu()
     disconnect(removeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRemove()));
     disconnect(checkBrighnessAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickCheckBrighness()));
     disconnect(fixBrighnessByTimeAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFixBrighnessbyTime()));
+    //checkMogAction, *saveOnlyMogAction, *restartPre30MinAction, *fillScreenAction;
+    disconnect(checkMogAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickCheckMog()));
+    disconnect(saveOnlyMogAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickSaveOnlyMog()));
+    disconnect(restartPre30MinAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRestartPre30Min()));
+    disconnect(fillScreenAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFillScreen()));
 }
 
 CameraControl::~CameraControl()
@@ -214,7 +231,14 @@ void CameraControl::onImage(const QImage &image)
     }
     if(image.width() > imageWidth || image.height() > imageHeight)
     {
-        ui->label->setPixmap(QPixmap::fromImage(image.scaled(imageWidth, imageHeight, Qt::KeepAspectRatio)));
+        if(!fillScreen)
+        {
+            ui->label->setPixmap(QPixmap::fromImage(image.scaled(imageWidth, imageHeight, Qt::KeepAspectRatio)));
+        }
+        else
+        {
+            ui->label->setPixmap(QPixmap::fromImage(image.scaled(imageWidth, imageHeight, Qt::IgnoreAspectRatio)));
+        }
     }
     else
     {
@@ -390,6 +414,12 @@ void CameraControl::onMenuClickRestartPre30Min()
 {
     disConnectMenu();
     restartCameraPre30Min = !restartCameraPre30Min;
+}
+
+void CameraControl::onMenuClickFillScreen()
+{
+    disConnectMenu();
+    fillScreen = !fillScreen;
 }
 
 #ifdef USE_OPENGL

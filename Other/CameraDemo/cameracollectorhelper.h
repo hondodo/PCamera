@@ -32,6 +32,8 @@ public:
 
     std::vector<cv::Rect> findMog(int cid);
     std::vector<cv::Rect> findMog(int cid, cv::Mat mat);
+    bool findMogBOOL(int cid, cv::Mat mat);
+    void removeMogRcs(int cid);
     std::vector<cv::Rect_<int> > findFace(cv::Mat mat);
     std::vector<cv::Rect_<int> > findFace(int cid);
     void emitOnImage(int cameraId, cv::Mat cap);

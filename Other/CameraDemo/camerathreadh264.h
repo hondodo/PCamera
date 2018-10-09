@@ -24,6 +24,7 @@ extern "C"
 #include "pathhelper.h"
 #include "cameratype.h"
 #include "mathelper.h"
+#include "cameracollectorhelper.h"
 
 class CameraThreadH264 : public QThread
 {
