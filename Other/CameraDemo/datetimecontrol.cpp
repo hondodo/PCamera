@@ -13,9 +13,9 @@ DateTimeControl::DateTimeControl(QWidget *parent) :
     ringThread = Q_NULLPTR;
     nextTipTime = QDateTime::currentDateTime().addMSecs(1000 * 60 * 60).time().hour();
     dateFontSize = 62;
-    timeFontSize = 170;
+    timeFontSize = 150;
     weekFontSize = 62;
-    yearFontSize = 32;
+    yearFontSize = 52;
     setMinimumSize(QSize(10, 10));
     setMaximumSize(QSize(2048, 2048));
 }
