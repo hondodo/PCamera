@@ -109,8 +109,6 @@ private:
     void closeContext(AVFrame **frame);
 
     AVCodecContext *pCodecCtx;
-    int filter_encode_write_frame_rewrite_source_frame(AVFrame *frame, unsigned int stream_index);
-    int encode_write_frame_rewrite_source_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame);
 };
 
 #endif // CAMERATHREADH264_H
