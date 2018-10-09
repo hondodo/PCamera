@@ -744,7 +744,7 @@ int CameraThreadH264::caputuer()
     frameTimer.start();
     int frameindex = 0;
 
-    int maxFrame = 30 * 30;//60 * 30 * 60;//60min * 30fp/s * 60s
+    int maxFrame = 60 * 30 * 60;//60min * 30fp/s * 60s
     int currentFrame = 0;
     /* read all packets */
     while (_isRunning)
