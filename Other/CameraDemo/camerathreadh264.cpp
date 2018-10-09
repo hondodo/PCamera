@@ -790,7 +790,7 @@ int CameraThreadH264::caputuer()
         }
         lasttime = now;
         packet.dts = packet.pts = frame_index;
-        qDebug() << frame_index << packet.duration;
+        //qDebug() << frame_index << packet.duration;
 #else
         packet.pts = packet.dts = 0;
 #endif
@@ -811,7 +811,7 @@ int CameraThreadH264::caputuer()
             //av_packet_rescale_ts(&packet,
             //                     ifmt_ctx->streams[stream_index]->time_base,
             //                     stream_ctx[stream_index].dec_ctx->time_base);
-            qDebug() << packet.pts << packet.dts << packet.duration;
+            //qDebug() << packet.pts << packet.dts << packet.duration;
 #else
             av_packet_rescale_ts(&packet,
                                  ifmt_ctx->streams[stream_index]->time_base,
