@@ -98,12 +98,16 @@ private:
     AVFormatContext *ofmt_ctx;
     FilteringContext *filter_ctx;
     StreamContext *stream_ctx;
+
+    AVFrame *filtedFrame;
+    AVCodecContext *pOutCodecCtx;
+
     int open_input_file(const char *filename);
     int open_output_file(const char *filename);
     int init_filter(FilteringContext *fctx, AVCodecContext *dec_ctx, AVCodecContext *enc_ctx, const char *filter_spec);
     int init_filters();
-    int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame);
-    int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index);
+    int encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame, bool cloneframe = false);
+    int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index, bool cloneframe = false);
     int flush_encoder(unsigned int stream_index);
     int caputuer();
     void closeContext(AVFrame **frame);

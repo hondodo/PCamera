@@ -32,6 +32,8 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
     cameraId++;
 
     pCodecCtx = NULL;
+    filtedFrame = NULL;
+    pOutCodecCtx = NULL;
 }
 
 CameraThreadH264::~CameraThreadH264()
@@ -291,6 +293,7 @@ int CameraThreadH264::open_output_file(const char *filename)
                 enc_ctx->max_b_frames = 10;
                 enc_ctx->qmin = 10;
                 enc_ctx->qmax = 51;
+                pOutCodecCtx = enc_ctx;
             }
             else
             {
@@ -553,7 +556,7 @@ int CameraThreadH264::init_filters()
     return 0;
 }
 
-int CameraThreadH264::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame)
+int CameraThreadH264::encode_write_frame(AVFrame *filt_frame, unsigned int stream_index, int *got_frame, bool cloneframe)
 {
     int ret;
     int got_frame_local;
@@ -572,6 +575,21 @@ int CameraThreadH264::encode_write_frame(AVFrame *filt_frame, unsigned int strea
     av_init_packet(&enc_pkt);
     ret = enc_func(stream_ctx[stream_index].enc_ctx, &enc_pkt,
                    filt_frame, got_frame);
+
+    //-----------
+    if(cloneframe)
+    {
+        if(filtedFrame != NULL)
+        {
+            av_frame_free(&filtedFrame);
+        }
+        if(filt_frame != NULL)
+        {
+            filtedFrame = av_frame_clone(filt_frame);
+        }
+    }
+    //------------
+
     av_frame_free(&filt_frame);
     if (ret < 0)
         return ret;
@@ -591,7 +609,7 @@ int CameraThreadH264::encode_write_frame(AVFrame *filt_frame, unsigned int strea
     return ret;
 }
 
-int CameraThreadH264::filter_encode_write_frame(AVFrame *frame, unsigned int stream_index)
+int CameraThreadH264::filter_encode_write_frame(AVFrame *frame, unsigned int stream_index, bool cloneframe)
 {
     int ret;
     AVFrame *filt_frame;
@@ -608,7 +626,8 @@ int CameraThreadH264::filter_encode_write_frame(AVFrame *frame, unsigned int str
     /* pull filtered frames from the filtergraph */
     while (1) {
         filt_frame = av_frame_alloc();
-        if (!filt_frame) {
+        if (!filt_frame)
+        {
             ret = AVERROR(ENOMEM);
             break;
         }
@@ -627,7 +646,7 @@ int CameraThreadH264::filter_encode_write_frame(AVFrame *frame, unsigned int str
         }
 
         filt_frame->pict_type = AV_PICTURE_TYPE_NONE;
-        ret = encode_write_frame(filt_frame, stream_index, NULL);
+        ret = encode_write_frame(filt_frame, stream_index, NULL, cloneframe);
         if (ret < 0)
             break;
     }
@@ -692,15 +711,15 @@ int CameraThreadH264::caputuer()
     uint8_t *out_buffer;
     int numBytes;
     AVPixelFormat pixpmt = AV_PIX_FMT_YUV420P;
-    img_convert_ctx = sws_getContext(pCodecCtx->width, pCodecCtx->height,
-                                     pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
+    img_convert_ctx = sws_getContext(pOutCodecCtx->width, pOutCodecCtx->height,
+                                     pOutCodecCtx->pix_fmt, pOutCodecCtx->width, pOutCodecCtx->height,
                                      pixpmt, SWS_BICUBIC, NULL, NULL, NULL);
 
-    numBytes = avpicture_get_size(pixpmt, pCodecCtx->width, pCodecCtx->height);
+    numBytes = avpicture_get_size(pixpmt, pOutCodecCtx->width, pOutCodecCtx->height);
 
     out_buffer = (uint8_t *) av_malloc(numBytes * sizeof(uint8_t));
     avpicture_fill((AVPicture *) pFrameYUV, out_buffer, pixpmt,
-                   pCodecCtx->width, pCodecCtx->height);
+                   pOutCodecCtx->width, pOutCodecCtx->height);
 #endif
 
     AVFrame *pFrameRGB = av_frame_alloc();
@@ -710,15 +729,15 @@ int CameraThreadH264::caputuer()
     uint8_t *rgbOutBuffer;
     cv::Mat mRGB, temp;
 
-    imgConvertCtcRGB = sws_getContext(pCodecCtx->width, pCodecCtx->height,
-                                      pCodecCtx->pix_fmt, pCodecCtx->width, pCodecCtx->height,
+    imgConvertCtcRGB = sws_getContext(pOutCodecCtx->width, pOutCodecCtx->height,
+                                      pOutCodecCtx->pix_fmt, pOutCodecCtx->width, pOutCodecCtx->height,
                                       rgbFmt, SWS_BICUBIC, NULL, NULL, NULL);
-    rgbBytes = avpicture_get_size(rgbFmt, pCodecCtx->width, pCodecCtx->height);
+    rgbBytes = avpicture_get_size(rgbFmt, pOutCodecCtx->width, pOutCodecCtx->height);
     rgbOutBuffer = (uint8_t *) av_malloc(rgbBytes * sizeof(uint8_t));
     avpicture_fill((AVPicture *)pFrameRGB, rgbOutBuffer, rgbFmt,
-                   pCodecCtx->width, pCodecCtx->height);
+                   pOutCodecCtx->width, pOutCodecCtx->height);
 
-    mRGB = cv::Mat(cv::Size(pCodecCtx->width, pCodecCtx->height), CV_8UC3);
+    mRGB = cv::Mat(cv::Size(pOutCodecCtx->width, pOutCodecCtx->height), CV_8UC3);
 
     QTime frameTimer;
     int frametime = 0;
@@ -773,26 +792,30 @@ int CameraThreadH264::caputuer()
 
             if (got_frame) {
                 frame->pts = frame->best_effort_timestamp;
-                ret = filter_encode_write_frame(frame, stream_index);
+                ret = filter_encode_write_frame(frame, stream_index, true);
 #ifdef USE_OPENGL
                 sws_scale(img_convert_ctx,
                           (uint8_t const * const *) frame->data,
-                          frame->linesize, 0, pCodecCtx->height, pFrameYUV->data,
+                          frame->linesize, 0, pOutCodecCtx->height, pFrameYUV->data,
                           pFrameYUV->linesize);
 
                 emit onYUVFrame((unsigned char*)(pFrameYUV->data[0]), 0, 0);
 #endif
 
-                sws_scale(imgConvertCtcRGB, (uint8_t const * const *) frame->data,
-                          frame->linesize, 0, pCodecCtx->height, pFrameRGB->data,
-                          pFrameRGB->linesize);
+                if(filtedFrame != NULL)
+                {
+                    sws_scale(imgConvertCtcRGB, (uint8_t const * const *) filtedFrame->data,
+                              filtedFrame->linesize, 0, pOutCodecCtx->height, pFrameRGB->data,
+                              pFrameRGB->linesize);
 
-                mRGB.data =(uchar*)pFrameRGB->data[0];
-                cv::cvtColor(mRGB, temp, CV_BGR2RGB);
-                QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-                QImage image(dest);
-                image.detach();
-                emit onFrame(image.copy());//QIMAGE 内存问题
+                    mRGB.data =(uchar*)pFrameRGB->data[0];
+                    cv::cvtColor(mRGB, temp, CV_BGR2RGB);
+                    QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+                    QImage image(dest);
+                    image.detach();
+                    emit onFrame(image.copy());//QIMAGE 内存问题
+                    av_frame_free(&filtedFrame);
+                }
 
                 av_frame_free(&frame);
                 if (ret < 0)
@@ -867,6 +890,11 @@ int CameraThreadH264::caputuer()
     sws_freeContext(imgConvertCtcRGB);
     av_packet_unref(&packet);
     closeContext(&frame);
+
+    if(filtedFrame != NULL)
+    {
+        av_frame_free(&filtedFrame);
+    }
 
     if (ret < 0)
     {
