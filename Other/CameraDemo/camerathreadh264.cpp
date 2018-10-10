@@ -800,7 +800,7 @@ int CameraThreadH264::caputuer()
     frameTimer.start();
     int frameindex = 0;
 
-    int maxFrame = 30 * 10;//60 * 30 * 60;//60min * 30fp/s * 60s
+    int maxFrame = 30 * 30 * 60;//30min * 30fp/s * 60s
     int currentFrame = 0;
 
 #ifdef USE_FIX_30FPS
@@ -816,7 +816,7 @@ int CameraThreadH264::caputuer()
 #endif
     /* read all packets */
     int loopindex = 0;
-    int maxloop = 5;//5 * 60 min
+    int maxloop = 5;//5 * 30 min
     while (_isRunning && loopindex < maxloop)
     {
         if(currentFrame >= maxFrame)
