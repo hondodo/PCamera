@@ -5,6 +5,11 @@
 #define CANNOT_OPEN_OUTPUT_TEMP -100
 #define CANNOT_OPEN_OUTPUE_SAVE -101
 
+#ifndef PRId64 || PRI_MACROS_BROKEN
+#undef PRId64
+#define PRId64"lld"
+#endif
+
 #include <QThread>
 #include <QTime>
 #include <QDebug>
@@ -124,6 +129,8 @@ private:
     void closeOutPut();
 
     AVCodecContext *pCodecCtx;
+    bool cantainvideo, cantainaudio;
+    int videoindex, audioindex;
 };
 
 #endif // CAMERATHREADH264_H

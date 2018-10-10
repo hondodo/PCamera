@@ -58,6 +58,15 @@ void AddCameraForm::initCameraComboBox()
     {
         QString desc = QCamera::deviceDescription(all.at(i));
         QString url = "video=" + desc;
+
+//        QList<QAudioDeviceInfo> devInfo = QAudioDeviceInfo::availableDevices(QAudio::AudioInput);
+//        for(int i = 0; i < devInfo.count(); i++)
+//        {
+//            QString audioname = devInfo.at(i).deviceName();
+//            qDebug() << audioname;
+//            url = "audio=" + audioname;
+//        }
+
         if(!existsCameraUrls.contains(url.toLower()))
         {
             ui->comboBoxUrl->addItem(desc, url);

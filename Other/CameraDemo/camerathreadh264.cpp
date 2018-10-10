@@ -6,6 +6,10 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
     _isRunning = false;
     checkMog = true;
     saveOnlyMog = false;
+    cantainaudio = false;
+    cantainvideo = false;
+    videoindex = 0;
+    audioindex = 0;
 
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
@@ -142,7 +146,25 @@ void CameraThreadH264::run()
         {
             qDebug() << "[" <<  QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") << "]"
                      << "Open file error: " << ret << "@" << cameraName << "; Retry 1 min later";
-            this->msleep(60 * 1000);
+            for(int i = 0; i < 3000; i++)
+            {
+                this->msleep(20);
+                if(!_isRunning)
+                {
+                    break;
+                }
+            }
+        }
+        else
+        {
+            for(int i = 0; i < 25; i++)
+            {
+                this->msleep(20);
+                if(!_isRunning)
+                {
+                    break;
+                }
+            }
         }
     }
 
@@ -211,7 +233,16 @@ int CameraThreadH264::open_input_file(const char *filename)
                 || codec_ctx->codec_type == AVMEDIA_TYPE_AUDIO)
         {
             if (codec_ctx->codec_type == AVMEDIA_TYPE_VIDEO)
+            {
+                cantainvideo = true;
+                videoindex = i;
                 codec_ctx->framerate = av_guess_frame_rate(ifmt_ctx, stream, NULL);
+            }
+            else if(codec_ctx->codec_type == AVMEDIA_TYPE_AUDIO)
+            {
+                cantainaudio = true;
+                audioindex = i;
+            }
             /* Open decoder */
             ret = avcodec_open2(codec_ctx, dec, NULL);
             if (ret < 0)
@@ -272,7 +303,7 @@ int CameraThreadH264::open_output_file(const char *filename)
             }
             else
             {
-                encoder = avcodec_find_encoder(dec_ctx->codec_id);
+                encoder = avcodec_find_encoder(AV_CODEC_ID_MP3);//dec_ctx->codec_id);
             }
             if (!encoder)
             {
@@ -448,10 +479,11 @@ int CameraThreadH264::init_filter(CameraThreadH264::FilteringContext *fctx, AVCo
             dec_ctx->channel_layout =
                     av_get_default_channel_layout(dec_ctx->channels);
         snprintf(args, sizeof(args),
-                 "time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%PRIx64",
+                 "time_base=%d/%d:sample_rate=%d:sample_fmt=%s:channel_layout=0x%"PRIx64,
                  dec_ctx->time_base.num, dec_ctx->time_base.den, dec_ctx->sample_rate,
                  av_get_sample_fmt_name(dec_ctx->sample_fmt),
                  dec_ctx->channel_layout);
+        qDebug() << args;
         ret = avfilter_graph_create_filter(&buffersrc_ctx, buffersrc, "in",
                                            args, NULL, filter_graph);
         if (ret < 0) {
@@ -700,14 +732,14 @@ int CameraThreadH264::caputuer()
     av_register_all();
     avfilter_register_all();
 
-    if ((ret = open_input_file(cameraUrl.toLocal8Bit().data())) < 0)
+    if ((ret = open_input_file(cameraUrl.toUtf8().data())) < 0)
     {
         closeContext(&frame);
         return CANNOT_OPEN_INPUTFILE;
         return ret;
     }
     pathHelper.creatNewFileName();
-    if ((ret = open_output_file(pathHelper.getCurrentFileName().toLocal8Bit().data())) < 0)
+    if ((ret = open_output_file(pathHelper.getCurrentFileName().toUtf8().data())) < 0)
     {
         closeContext(&frame);
         return CANNOT_OPEN_OUTPUT_TEMP;
@@ -719,9 +751,15 @@ int CameraThreadH264::caputuer()
         return ret;
     }
 
-    int widthOut = pOutCodecCtx->width;
-    int heightOut = pOutCodecCtx->height;
-    AVPixelFormat pixOut = pOutCodecCtx->pix_fmt;
+    int widthOut = 100;
+    int heightOut = 100;
+    AVPixelFormat pixOut = AV_PIX_FMT_YUV420P;
+    if(cantainvideo)
+    {
+        widthOut = pOutCodecCtx->width;
+        heightOut = pOutCodecCtx->height;
+        pixOut = pOutCodecCtx->pix_fmt;
+    }
 #ifdef USE_OPENGL
     struct SwsContext *img_convert_ctx;
     AVFrame *pFrameYUV = av_frame_alloc();
@@ -762,7 +800,7 @@ int CameraThreadH264::caputuer()
     frameTimer.start();
     int frameindex = 0;
 
-    int maxFrame = 60 * 30 * 60;//60min * 30fp/s * 60s
+    int maxFrame = 30 * 10;//60 * 30 * 60;//60min * 30fp/s * 60s
     int currentFrame = 0;
 
 #ifdef USE_FIX_30FPS
@@ -777,10 +815,18 @@ int CameraThreadH264::caputuer()
     int64_t duration = 0;
 #endif
     /* read all packets */
-    while (_isRunning)
+    int loopindex = 0;
+    int maxloop = 5;//5 * 60 min
+    while (_isRunning && loopindex < maxloop)
     {
         if(currentFrame >= maxFrame)
         {
+            if(loopindex > 5)
+            {
+                qDebug() << "close camera to reset @" << cameraName;
+                break;
+            }
+            loopindex++;
             qDebug() << "close output file @" << cameraName;
             //break;
             for (i = 0; i < ifmt_ctx->nb_streams; i++)

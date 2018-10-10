@@ -4,6 +4,7 @@
 #include <QWidget>
 #include <QCamera>
 #include <QFile>
+#include <QAudioDeviceInfo>
 #include "cameratype.h"
 
 namespace Ui {
