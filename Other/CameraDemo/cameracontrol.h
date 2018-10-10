@@ -104,7 +104,7 @@ private:
     QDateTime lastReceiveImageTime;
     int restartTimerId;
     int restartTimeElsp;
-    int restartByNoImageElsp;
+    //int restartByNoImageElsp;
     void initMenu();
     void disConnectMenu();
     QMenu *menu;

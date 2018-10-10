@@ -36,7 +36,7 @@ CameraControl::CameraControl(QWidget *parent) :
 #endif
     initMenu();
 
-    restartByNoImageElsp = 5 * 1000 * 60;
+    //restartByNoImageElsp = 5 * 1000 * 60;
 
     ui->label->installEventFilter(this);
 
@@ -288,16 +288,16 @@ void CameraControl::timerEvent(QTimerEvent *event)
             }
         }
 
-        int imageElsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastReceiveImageTime.toMSecsSinceEpoch();
-        if(imageElsp > restartByNoImageElsp)
-        {
-            if(player != Q_NULLPTR)
-            {
-                qDebug() << "Restart camera (no image):" << player->getCameraName();
-                stop();
-                start();
-            }
-        }
+        //int imageElsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastReceiveImageTime.toMSecsSinceEpoch();
+        //if(imageElsp > restartByNoImageElsp)
+        //{
+        //    if(player != Q_NULLPTR)
+        //    {
+        //        qDebug() << "Restart camera (no image):" << player->getCameraName();
+        //        stop();
+        //        start();
+        //    }
+        //}
     }
 }
 
