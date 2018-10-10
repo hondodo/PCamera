@@ -132,10 +132,17 @@ void CameraThreadH264::run()
 {
     _isRunning = true;
 
+    int ret = 0;
     while (_isRunning) //LOOP
     {
         qDebug() << "Loop record @" << cameraName;
-        caputuer();
+        ret = caputuer();
+        if(ret == CANNOT_OPEN_INPUTFILE || ret == CANNOT_OPEN_OUTPUE_SAVE || ret == CANNOT_OPEN_OUTPUT_TEMP)
+        {
+            qDebug() << "[" <<  QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") << "]"
+                     << "Open file error: " << ret << "@" << cameraName << "; Retry 1 min later";
+            this->msleep(60 * 1000);
+        }
     }
 
     _isRunning = false;
@@ -691,12 +698,14 @@ int CameraThreadH264::caputuer()
     if ((ret = open_input_file(cameraUrl.toLocal8Bit().data())) < 0)
     {
         closeContext(&frame);
+        return CANNOT_OPEN_INPUTFILE;
         return ret;
     }
     pathHelper.creatNewFileName();
     if ((ret = open_output_file(pathHelper.getCurrentFileName().toLocal8Bit().data())) < 0)
     {
         closeContext(&frame);
+        return CANNOT_OPEN_OUTPUT_TEMP;
         return ret;
     }
     if ((ret = init_filters()) < 0)

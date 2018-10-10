@@ -1,6 +1,10 @@
 #ifndef CAMERATHREADH264_H
 #define CAMERATHREADH264_H
 
+#define CANNOT_OPEN_INPUTFILE -99
+#define CANNOT_OPEN_OUTPUT_TEMP -100
+#define CANNOT_OPEN_OUTPUE_SAVE -101
+
 #include <QThread>
 #include <QTime>
 #include <QDebug>
