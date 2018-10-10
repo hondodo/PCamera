@@ -49,8 +49,12 @@ public:
     typedef struct StreamContext
     {
         AVCodecContext *dec_ctx;
-        AVCodecContext *enc_ctx;
     } StreamContext;
+
+    typedef struct StreamContextOutPut
+    {
+        AVCodecContext *enc_ctx;
+    } StreamContextOutPut;
 
     QString getCameraUrl() const;
     void setCameraUrl(const QString &value);
@@ -103,6 +107,7 @@ private:
     AVFormatContext *ofmt_ctx;
     FilteringContext *filter_ctx;
     StreamContext *stream_ctx;
+    StreamContextOutPut *stream_ctx_out;
 
     AVFrame *filtedFrame;
     AVCodecContext *pOutCodecCtx;
@@ -116,6 +121,7 @@ private:
     int flush_encoder(unsigned int stream_index);
     int caputuer();
     void closeContext(AVFrame **frame);
+    void closeOutPut();
 
     AVCodecContext *pCodecCtx;
 };
