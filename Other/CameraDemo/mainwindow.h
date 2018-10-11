@@ -14,6 +14,8 @@
 #include "cameracontrolgl.h"
 #include "datetimecontrol.h"
 #include "weathercontrol.h"
+#include "keyboardthread.h"
+#include "ringthread.h"
 
 namespace Ui {
 class MainWindow;
@@ -41,6 +43,7 @@ private slots:
     void on_checkBoxTimeControl_stateChanged(int arg1);
     void on_checkBoxWeatherControl_stateChanged(int arg1);
     void onCameraControlRequestRemove();
+    void onKey(int key);
 
 private:
     Ui::MainWindow *ui;
@@ -48,6 +51,8 @@ private:
     QList<QString> existsCameraUrls;
     QList<CameraControl *> allCameraControls;
     DateTimeControl *timeControl;
+    RingThread *ringThread;
+    QString ringFileName;
 
     bool showDateTimeControlToCamerasComtrol;
     bool showWeathControl;
@@ -62,6 +67,8 @@ private:
     int camBigIndex;
     CameraControl *camBigShowingWidget;
     WeatherControl *weatherControl;
+    void deleteRingThread();
+    void startNewRingThread(QString filename);
 };
 
 #endif // MAINWINDOW_H

@@ -55,7 +55,8 @@ SOURCES += \
     ringthread.cpp \
     weathercontrol.cpp \
     weatherreportcontrol.cpp \
-    camerathreadh264.cpp
+    camerathreadh264.cpp \
+    keyboardthread.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -90,7 +91,8 @@ HEADERS += \
     ringthread.h \
     weathercontrol.h \
     weatherreportcontrol.h \
-    camerathreadh264.h
+    camerathreadh264.h \
+    keyboardthread.h
 
 FORMS += \
         mainwindow.ui \

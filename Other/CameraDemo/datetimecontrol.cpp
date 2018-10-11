@@ -96,6 +96,7 @@ void DateTimeControl::deleteRingThread()
 
 void DateTimeControl::startNewRingThread(QString filename)
 {
+    deleteRingThread();
     if(QDateTime::currentDateTime().time().hour() > 6 &&
             QDateTime::currentDateTime().time().hour() <= 21)
     {

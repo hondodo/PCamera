@@ -21,17 +21,24 @@ MainWindow::MainWindow(QWidget *parent) :
     VideoFileThread::Init->start();
     timeControl = NULL;
     weatherControl = NULL;
+    ringThread = NULL;
     showDateTimeControlToCamerasComtrol = ui->checkBoxTimeControl->isChecked();
     showWeathControl = ui->checkBoxWeatherControl->isChecked();
+    ringFileName = "";
+#ifdef Q_OS_LINUX
+    ringFileName = "/home/pi/Music/Ring/ring.mp3";
+#endif
 }
 
 MainWindow::~MainWindow()
 {
+    KeyBoardThread::Init->setStop();
     VideoFileThread::Init->setStop();
     for(int i = 0; i < allCameraControls.count(); i++)
     {
         allCameraControls.at(i)->stop();
     }
+    deleteRingThread();
     delete ui;
 }
 
@@ -51,8 +58,30 @@ void MainWindow::showEvent(QShowEvent *event)
         weatherControl->setCanShowReport(true);
         weatherControl->updateWeather();
         weatherControl->switchView();
+        KeyBoardThread::Init->start();
+        connect(KeyBoardThread::Init, SIGNAL(onKey(int)), this, SLOT(onKey(int)));
     }
 }
+
+void MainWindow::deleteRingThread()
+{
+    if(ringThread != Q_NULLPTR)
+    {
+        ringThread->setStop();
+        ringThread->wait(1000);
+        ringThread->terminate();
+        ringThread = Q_NULLPTR;
+    }
+}
+
+void MainWindow::startNewRingThread(QString filename)
+{
+    deleteRingThread();
+    ringThread = new RingThread();
+    ringThread->setFileName(filename);
+    ringThread->start();
+}
+
 
 void MainWindow::resizeEvent(QResizeEvent *event)
 {
@@ -302,4 +331,10 @@ void MainWindow::onCameraControlRequestRemove()
         control = Q_NULLPTR;
         camBigIndex = 0;
     }
+}
+
+void MainWindow::onKey(int key)
+{
+    Q_UNUSED(key);
+    startNewRingThread(ringFileName);
 }
