@@ -13,7 +13,7 @@ CameraControl::CameraControl(QWidget *parent) :
     cameraName = "";
     checkBrighness = false;
     fixBrighnessByTime = false;
-    checkMog = true;
+    checkMog = false;
     saveOnlyMog = false;
     fillScreen = false;
     player = Q_NULLPTR;
