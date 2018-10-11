@@ -56,6 +56,9 @@ public:
     bool getRestartCameraPre30Min() const;
     void setRestartCameraPre30Min(bool value);
 
+    CAMERASIZE getCameraSize() const;
+    void setCameraSize(const CAMERASIZE &value);
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
     void timerEvent(QTimerEvent *event);
@@ -87,6 +90,7 @@ private:
 #endif
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web
+    CAMERASIZE cameraSize;
     QString cameraName;
 #ifdef USE_H264
     CameraThreadH264 *player;

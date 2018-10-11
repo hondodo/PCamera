@@ -18,6 +18,8 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
     stream_ctx_out = NULL;
 
     cameraType = CAMERATYPE_LOCAL;
+    cameraSize = CAMERASIZE_AUTO;
+    currentCameraSize = CAMERASIZE_1920x1080;
 #ifdef Q_OS_WIN
     pathHelper.setRootPath("D:/");
     cameraUrl = "video=";
@@ -171,11 +173,27 @@ void CameraThreadH264::run()
     _isRunning = false;
 }
 
+CAMERASIZE CameraThreadH264::getCurrentCameraSize() const
+{
+    return currentCameraSize;
+}
+
+CAMERASIZE CameraThreadH264::getCameraSize() const
+{
+    return cameraSize;
+}
+
+void CameraThreadH264::setCameraSize(const CAMERASIZE &value)
+{
+    cameraSize = value;
+    currentCameraSize = value;
+}
+
 int CameraThreadH264::open_input_file(const char *filename)
 {
     int ret;
     unsigned int i;
-
+    
     ifmt_ctx = NULL;
     avdevice_register_all();
     AVInputFormat *inputFmt = NULL;
@@ -184,14 +202,48 @@ int CameraThreadH264::open_input_file(const char *filename)
     av_dict_set(&avdic, "max_delay", "100", 0);
     av_dict_set(&avdic, "framerate", "30", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
-#ifdef Q_OS_WIN
-    av_dict_set(&avdic, "video_size", "1280x720", 0);//"640x480"
-#else
-    //av_dict_set(&avdic, "video_size", "640x480", 0);//"640x480"
-    av_dict_set(&avdic, "video_size", "1280x720", 0);//"640x480"
-#endif
 
-    if ((ret = avformat_open_input(&ifmt_ctx, filename, inputFmt, &avdic)) < 0)
+    int csize = (int)currentCameraSize;
+    int minsize = (int)CAMERASIZE_640x480;
+    if(csize < 0 || csize > minsize)
+    {
+        currentCameraSize = CAMERASIZE_AUTO;
+    }
+    if(currentCameraSize == CAMERASIZE_AUTO)
+    {
+        currentCameraSize = CAMERASIZE_1920x1080;
+    }
+    while (csize <= minsize)
+    {
+        if(currentCameraSize == CAMERASIZE_1920x1080)
+        {
+            av_dict_set(&avdic, "video_size", "1920x1080", 0);
+        }
+        else if(currentCameraSize == CAMERASIZE_1280x720)
+        {
+            av_dict_set(&avdic, "video_size", "1280x720", 0);
+        }
+        else if(currentCameraSize == CAMERASIZE_640x480)
+        {
+            av_dict_set(&avdic, "video_size", "640x480", 0);
+        }
+        if ((ret = avformat_open_input(&ifmt_ctx, filename, inputFmt, &avdic)) < 0)
+        {
+            qDebug() << "Cannot open for current size:" << currentCameraSize << cameraName;
+            csize++;
+            if(csize <= minsize)
+            {
+                currentCameraSize = (CAMERASIZE)csize;
+            }
+        }
+        else
+        {
+            qDebug() << "Open for current size:" << currentCameraSize << "success" << cameraName;
+            break;
+        }
+    }
+
+    if (ret < 0)//((ret = avformat_open_input(&ifmt_ctx, filename, inputFmt, &avdic)) < 0)
     {
         av_log(NULL, AV_LOG_ERROR, "Cannot open input file\n");
         return ret;

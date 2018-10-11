@@ -7,6 +7,7 @@ CameraControl::CameraControl(QWidget *parent) :
 {
     ui->setupUi(this);
     cameraType = CAMERATYPE_LOCAL;
+    cameraSize = CAMERASIZE_AUTO;
     cameraUrl = "video=";
     imageWidth = 640;
     imageHeight = 480;
@@ -184,6 +185,7 @@ void CameraControl::start()
     player = new CameraThreadMUX();
 #endif
     player->setCameraType(cameraType);
+    player->setCameraSize(cameraSize);
     player->setCameraUrl(cameraUrl);
     player->setCameraName(cameraName);
     player->setCheckBrighness(checkBrighness);
@@ -420,6 +422,16 @@ void CameraControl::onMenuClickFillScreen()
 {
     disConnectMenu();
     fillScreen = !fillScreen;
+}
+
+CAMERASIZE CameraControl::getCameraSize() const
+{
+    return cameraSize;
+}
+
+void CameraControl::setCameraSize(const CAMERASIZE &value)
+{
+    cameraSize = value;
 }
 
 #ifdef USE_OPENGL

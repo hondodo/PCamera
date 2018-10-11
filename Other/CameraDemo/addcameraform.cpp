@@ -7,6 +7,12 @@ AddCameraForm::AddCameraForm(QWidget *parent) :
 {
     ui->setupUi(this);
     isFirstShow = true;
+    cameraSize = CAMERASIZE_AUTO;
+#ifdef Q_OS_WIN
+    ui->comboBoxSize->setCurrentIndex(2);
+#else
+    ui->comboBoxSize->setCurrentIndex(3);
+#endif
 }
 
 AddCameraForm::~AddCameraForm()
@@ -101,6 +107,11 @@ void AddCameraForm::initCameraName()
     }
 }
 
+CAMERASIZE AddCameraForm::getCameraSize() const
+{
+    return cameraSize;
+}
+
 QString AddCameraForm::getCameraName() const
 {
     return cameraName;
@@ -130,6 +141,24 @@ void AddCameraForm::on_pushButtonOK_clicked()
 {
     state = 0;
     cameraName = ui->lineEditName->text().trimmed();
+
+    if(ui->comboBoxSize->currentIndex() == 0)
+    {
+        cameraSize = CAMERASIZE_AUTO;
+    }
+    else if(ui->comboBoxSize->currentIndex() == 1)
+    {
+        cameraSize = CAMERASIZE_1920x1080;
+    }
+    else if(ui->comboBoxSize->currentIndex() == 2)
+    {
+        cameraSize = CAMERASIZE_1280x720;
+    }
+    else if(ui->comboBoxSize->currentIndex() == 3)
+    {
+        cameraSize = CAMERASIZE_640x480;
+    }
+
     if(ui->comboBoxType->currentIndex() == 0)
     {
         cameraType = CAMERATYPE_LOCAL;

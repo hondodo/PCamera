@@ -26,6 +26,8 @@ public:
 
     QString getCameraName() const;
 
+    CAMERASIZE getCameraSize() const;
+
 protected:
     void showEvent(QShowEvent *event);
 
@@ -45,6 +47,7 @@ private:
     void initCameraName();
     QString cameraUrl;
     CAMERATYPE cameraType;
+    CAMERASIZE cameraSize;
     int state;
     QList<QString> existsCameraUrls;
     QString cameraName;

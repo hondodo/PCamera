@@ -82,6 +82,11 @@ public:
     bool getSaveOnlyMog() const;
     void setSaveOnlyMog(bool value);
 
+    CAMERASIZE getCameraSize() const;
+    void setCameraSize(const CAMERASIZE &value);
+
+    CAMERASIZE getCurrentCameraSize() const;
+
 signals:
     void onFrame(const QImage &image);
 #ifdef USE_OPENGL
@@ -95,6 +100,9 @@ private:
     bool _isRunning;
     static int cameraId;
     int currentCameraId;
+
+    CAMERASIZE cameraSize;
+    CAMERASIZE currentCameraSize;
 
     QString cameraUrl;
     CAMERATYPE cameraType;//0-local 1-web

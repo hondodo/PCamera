@@ -134,6 +134,7 @@ void MainWindow::onAddCameraFormClose(int code)
                     control->setCameraUrl(url);
                     control->setCameraType(form->getCameraType());
                     control->setCameraName(form->getCameraName());
+                    control->setCameraSize(form->getCameraSize());
                     control->start();
                     ui->verticalLayoutHide->removeWidget(camBigShowingWidget);
                     camBigShowingWidget = control;
