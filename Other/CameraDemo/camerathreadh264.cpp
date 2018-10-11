@@ -331,7 +331,7 @@ int CameraThreadH264::open_output_file(const char *filename)
                     enc_ctx->pix_fmt = dec_ctx->pix_fmt;
                 /* video time_base can be set to whatever is handy and supported by encoder */
                 enc_ctx->time_base = av_inv_q(dec_ctx->framerate);
-                enc_ctx->bit_rate = 3000000;
+                enc_ctx->bit_rate = 2000000;
                 enc_ctx->gop_size = 250;
                 enc_ctx->max_b_frames = 10;
                 enc_ctx->qmin = 10;
@@ -1113,7 +1113,7 @@ void CameraThreadH264::closeContext(AVFrame **frame)
 
 void CameraThreadH264::closeOutPut()
 {
-    if(ofmt_ctx && ofmt_ctx->nb_streams)
+    if(ofmt_ctx && ofmt_ctx->nb_streams &&(ofmt_ctx->nb_streams > 0 && ofmt_ctx->nb_streams < 5))
     {
         for(int i = 0; i < ofmt_ctx->nb_streams; i++)
         {
