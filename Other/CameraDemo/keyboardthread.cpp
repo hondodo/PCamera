@@ -29,6 +29,7 @@ void KeyBoardThread::run()
         if(digitalRead(P0) == 0)
         {
             emit onKey(0);
+            this->msleep(1000);
         }
         //qDebug() << digitalRead(P0) << digitalRead(P1) <<
         //            digitalRead(P2) << digitalRead(P3);
