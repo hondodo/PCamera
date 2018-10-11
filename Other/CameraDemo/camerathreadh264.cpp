@@ -187,7 +187,8 @@ int CameraThreadH264::open_input_file(const char *filename)
 #ifdef Q_OS_WIN
     av_dict_set(&avdic, "video_size", "1280x720", 0);//"640x480"
 #else
-    av_dict_set(&avdic, "video_size", "640x480", 0);//"640x480"
+    //av_dict_set(&avdic, "video_size", "640x480", 0);//"640x480"
+    av_dict_set(&avdic, "video_size", "1280x720", 0);//"640x480"
 #endif
 
     if ((ret = avformat_open_input(&ifmt_ctx, filename, inputFmt, &avdic)) < 0)
