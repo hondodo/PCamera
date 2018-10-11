@@ -184,6 +184,7 @@ void CameraControl::start()
 #else
     player = new CameraThreadMUX();
 #endif
+    connect(player, SIGNAL(onMessage(QString)), this, SLOT(onMessage(QString)));
     player->setCameraType(cameraType);
     player->setCameraSize(cameraSize);
     player->setCameraUrl(cameraUrl);
@@ -422,6 +423,21 @@ void CameraControl::onMenuClickFillScreen()
 {
     disConnectMenu();
     fillScreen = !fillScreen;
+}
+
+void CameraControl::onMessage(const QString text)
+{
+    setMessage(text);
+}
+
+QString CameraControl::getMessage() const
+{
+    return message;
+}
+
+void CameraControl::setMessage(const QString &value)
+{
+    message = value;
 }
 
 CAMERASIZE CameraControl::getCameraSize() const

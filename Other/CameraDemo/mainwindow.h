@@ -7,6 +7,7 @@
 #include <QApplication>
 #include <QDesktopWidget>
 #include <QTimerEvent>
+#include <QLabel>
 #include "3rd/videoplayer.h"
 #include "cameracontrol.h"
 #include "rendercontrol.h"
@@ -16,6 +17,8 @@
 #include "weathercontrol.h"
 #include "keyboardthread.h"
 #include "ringthread.h"
+#include "Core/diskhelper.h"
+#include "checkdiskthread.h"
 
 namespace Ui {
 class MainWindow;
@@ -53,6 +56,9 @@ private:
     DateTimeControl *timeControl;
     RingThread *ringThread;
     QString ringFileName;
+    DiskHelper diskHelper;
+    PathHelper pathHelper;
+    QLabel labelDiskInfo, labelCamAInfo, labelCamBInfo, labelCamCInfo, labelCamDInfo;
 
     bool showDateTimeControlToCamerasComtrol;
     bool showWeathControl;

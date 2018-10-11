@@ -22,7 +22,6 @@ public:
     void creatNewFileName();
 
     void setCameraName(const QString &value);
-    void setRootPath(const QString &value);
 
 signals:
 
@@ -30,10 +29,11 @@ public slots:
 
 private:
     QString cameraName;
-    QString rootPath;
+    static QString rootPath;
     QString recPath;
     QString currentFileName;
     QString tempFileName;
+    void setRootPath(const QString &value);
 };
 
 #endif // PATHHELPER_H

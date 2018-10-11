@@ -1,5 +1,6 @@
 #include "pathhelper.h"
 
+QString PathHelper::rootPath = "/";
 PathHelper::PathHelper(QObject *parent) : QObject(parent)
 {
     cameraName = "undefine";
@@ -7,6 +8,12 @@ PathHelper::PathHelper(QObject *parent) : QObject(parent)
     recPath = "/REC/";
     currentFileName = "/REC/undefine.avi";
     tempFileName = "/REC/temp.avi";
+
+#ifdef Q_OS_WIN
+    setRootPath("D:/");
+#else
+    setRootPath("/home/pi/");
+#endif
 }
 
 void PathHelper::init()

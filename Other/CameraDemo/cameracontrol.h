@@ -59,6 +59,9 @@ public:
     CAMERASIZE getCameraSize() const;
     void setCameraSize(const CAMERASIZE &value);
 
+    QString getMessage() const;
+    void setMessage(const QString &value);
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
     void timerEvent(QTimerEvent *event);
@@ -82,6 +85,7 @@ private slots:
 #ifdef USE_OPENGL
     void onYUVFrame(const unsigned char* y_data, const unsigned char* u_data, const unsigned char* v_data);
 #endif
+    void onMessage(const QString text);
 
 private:
     Ui::CameraControl *ui;
@@ -92,6 +96,7 @@ private:
     CAMERATYPE cameraType;//0-local 1-web
     CAMERASIZE cameraSize;
     QString cameraName;
+    QString message;
 #ifdef USE_H264
     CameraThreadH264 *player;
 #else

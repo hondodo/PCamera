@@ -21,12 +21,12 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
     cameraSize = CAMERASIZE_AUTO;
     currentCameraSize = CAMERASIZE_1920x1080;
 #ifdef Q_OS_WIN
-    pathHelper.setRootPath("D:/");
+    //pathHelper.setRootPath("D:/");
     cameraUrl = "video=";
     outputFileNameForTemp = pathHelper.getTempFileName();
     fontFile = "D\\\\:font.ttf";
 #else
-    pathHelper.setRootPath("/home/pi/");
+    //pathHelper.setRootPath("/home/pi/");
     cameraUrl = "/dev/video0";
     outputFileNameForTemp = pathHelper.getTempFileName();
     fontFile = "/home/pi/Font/font.ttf";
@@ -138,16 +138,16 @@ void CameraThreadH264::setSaveOnlyMog(bool value)
 void CameraThreadH264::run()
 {
     _isRunning = true;
-
+    emitMessage("Thread started");
     int ret = 0;
     while (_isRunning) //LOOP
     {
-        qDebug() << "Loop record @" << cameraName;
+        emitMessage("loop record");
         ret = caputuer();
         if(ret == CANNOT_OPEN_INPUTFILE || ret == CANNOT_OPEN_OUTPUE_SAVE || ret == CANNOT_OPEN_OUTPUT_TEMP)
         {
-            qDebug() << "[" <<  QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") << "]"
-                     << "Open file error: " << ret << "@" << cameraName << "; Retry 1 min later";
+            emitMessage("[" +  QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + "]"
+                        + "Open file error: " + ret + ";Retry 1 min later");
             for(int i = 0; i < 3000; i++)
             {
                 this->msleep(20);
@@ -169,7 +169,7 @@ void CameraThreadH264::run()
             }
         }
     }
-
+    emitMessage("Thread stoped");
     _isRunning = false;
 }
 
@@ -785,24 +785,33 @@ int CameraThreadH264::caputuer()
     av_register_all();
     avfilter_register_all();
 
+    emitMessage("opening camera");
     if ((ret = open_input_file(cameraUrl.toUtf8().data())) < 0)
     {
+        emitMessage("open camera failed");
         closeContext(&frame);
         return CANNOT_OPEN_INPUTFILE;
         return ret;
     }
+    emitMessage("open camera success");
     pathHelper.creatNewFileName();
+    emitMessage("open optput file");
     if ((ret = open_output_file(pathHelper.getCurrentFileName().toUtf8().data())) < 0)
     {
+        emitMessage("open output file failed");
         closeContext(&frame);
         return CANNOT_OPEN_OUTPUT_TEMP;
         return ret;
     }
+    emitMessage("open output file sucess");
+    emitMessage("init filters");
     if ((ret = init_filters()) < 0)
     {
+        emitMessage("init filters failed");
         closeContext(&frame);
         return ret;
     }
+    emitMessage("init filters success");
 
     int widthOut = 100;
     int heightOut = 100;
@@ -870,17 +879,18 @@ int CameraThreadH264::caputuer()
     /* read all packets */
     int loopindex = 0;
     int maxloop = 5;//5 * 30 min
+    emitMessage("Recording");
     while (_isRunning && loopindex < maxloop)
     {
         if(currentFrame >= maxFrame)
         {
             if(loopindex > 5)
             {
-                qDebug() << "close camera to reset @" << cameraName;
+                emitMessage("close camera to reset");
                 break;
             }
             loopindex++;
-            qDebug() << "close output file @" << cameraName;
+            emitMessage("close output file");
             //break;
             for (i = 0; i < ifmt_ctx->nb_streams; i++)
             {
@@ -905,19 +915,24 @@ int CameraThreadH264::caputuer()
             }
             av_write_trailer(ofmt_ctx);
             closeOutPut();
-            qDebug() << "open output file @" << cameraName;
+            emitMessage("open optput file");
             pathHelper.creatNewFileName();
             if ((ret = open_output_file(pathHelper.getCurrentFileName().toLocal8Bit().data())) < 0)
             {
+                emitMessage("open optput file failed");
                 closeContext(&frame);
                 return CANNOT_OPEN_OUTPUT_TEMP;
                 return ret;
             }
+            emitMessage("open optput file success");
+            emitMessage("init filters");
             if ((ret = init_filters()) < 0)
             {
+                emitMessage("init filters failed");
                 closeContext(&frame);
                 return ret;
             }
+            emitMessage("init filters success");
             currentFrame = 0;
 
 #ifdef USE_FIX_30FPS
@@ -929,6 +944,7 @@ int CameraThreadH264::caputuer()
             frame_index = 0;
             duration = 0;
 #endif
+            emitMessage("Recording");
         }
         currentFrame++;
 
@@ -1073,7 +1089,8 @@ int CameraThreadH264::caputuer()
             if(frametime > 0)
             {
                 double fps = 1000.0 / (frametime / 100.0);
-                qDebug() << "FPS:" << fps << "@" << cameraName;
+                QString text = "FPS:" + QString::number(fps);
+                emitMessage(text);
             }
         }
     }
@@ -1101,6 +1118,7 @@ int CameraThreadH264::caputuer()
         }
     }
 
+    emitMessage("stop record and free resources");
     mRGB.release();
     temp.release();
 
@@ -1186,4 +1204,9 @@ void CameraThreadH264::closeOutPut()
     if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
         avio_closep(&ofmt_ctx->pb);
     if(ofmt_ctx != NULL) avformat_free_context(ofmt_ctx);
+}
+
+void CameraThreadH264::emitMessage(const QString text)
+{
+    emit onMessage(text + "@" + cameraName);
 }

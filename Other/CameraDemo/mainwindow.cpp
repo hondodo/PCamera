@@ -28,11 +28,22 @@ MainWindow::MainWindow(QWidget *parent) :
 #ifdef Q_OS_LINUX
     ringFileName = "/home/pi/Music/Ring/ring.mp3";
 #endif
+    labelDiskInfo.setText("Free: 0G/Total: 64G");
+    labelCamAInfo.setText("");
+    labelCamBInfo.setText("");
+    labelCamCInfo.setText("");
+    labelCamDInfo.setText("");
+    ui->statusBar->addWidget(&labelDiskInfo);
+    ui->statusBar->addWidget(&labelCamAInfo);
+    ui->statusBar->addWidget(&labelCamBInfo);
+    ui->statusBar->addWidget(&labelCamCInfo);
+    ui->statusBar->addWidget(&labelCamDInfo);
 }
 
 MainWindow::~MainWindow()
 {
     KeyBoardThread::Init->setStop();
+    CheckDiskThread::Init->setStop();
     VideoFileThread::Init->setStop();
     for(int i = 0; i < allCameraControls.count(); i++)
     {
@@ -60,6 +71,8 @@ void MainWindow::showEvent(QShowEvent *event)
         weatherControl->switchView();
         KeyBoardThread::Init->start();
         connect(KeyBoardThread::Init, SIGNAL(onKey(int)), this, SLOT(onKey(int)));
+        diskHelper.setPath(pathHelper.getRootPath());
+        CheckDiskThread::Init->start();
     }
 }
 
@@ -121,6 +134,45 @@ void MainWindow::timerEvent(QTimerEvent *event)
                 }
             }
             camBigIndex++;
+        }
+        if(timerFrames % 10 == 0)
+        {
+            qint64 free = diskHelper.bytesFree();
+            qint64 total = diskHelper.bytesTotal();
+            QString diskinfo = QString("Free: %0 / Total: %1").arg(diskHelper.toSizeInfo(free), diskHelper.toSizeInfo(total));
+            labelDiskInfo.setText(diskinfo);
+
+            for(int i = 0; i < 4; i++)
+            {
+                if(i == 0)
+                {
+                    if(allCameraControls.count() > i)
+                        labelCamAInfo.setText(allCameraControls.at(i)->getMessage());
+                    else
+                        labelCamAInfo.setText("");
+                }
+                if(i == 1)
+                {
+                    if(allCameraControls.count() > i)
+                        labelCamBInfo.setText(allCameraControls.at(i)->getMessage());
+                    else
+                        labelCamBInfo.setText("");
+                }
+                if(i == 2)
+                {
+                    if(allCameraControls.count() > i)
+                        labelCamCInfo.setText(allCameraControls.at(i)->getMessage());
+                    else
+                        labelCamCInfo.setText("");
+                }
+                if(i == 3)
+                {
+                    if(allCameraControls.count() > i)
+                        labelCamDInfo.setText(allCameraControls.at(i)->getMessage());
+                    else
+                        labelCamDInfo.setText("");
+                }
+            }
         }
 
         timerFrames++;

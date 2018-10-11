@@ -92,6 +92,7 @@ signals:
 #ifdef USE_OPENGL
     void onYUVFrame(const unsigned char* y_data, const unsigned char* u_data, const unsigned char* v_data);
 #endif
+    void onMessage(const QString text);
 
 protected:
     void run();
@@ -135,6 +136,7 @@ private:
     int caputuer();
     void closeContext(AVFrame **frame);
     void closeOutPut();
+    void emitMessage(const QString text);
 
     AVCodecContext *pCodecCtx;
     bool cantainvideo, cantainaudio;

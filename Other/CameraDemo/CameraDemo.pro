@@ -56,7 +56,8 @@ SOURCES += \
     weathercontrol.cpp \
     weatherreportcontrol.cpp \
     camerathreadh264.cpp \
-    keyboardthread.cpp
+    keyboardthread.cpp \
+    checkdiskthread.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -92,7 +93,8 @@ HEADERS += \
     weathercontrol.h \
     weatherreportcontrol.h \
     camerathreadh264.h \
-    keyboardthread.h
+    keyboardthread.h \
+    checkdiskthread.h
 
 FORMS += \
         mainwindow.ui \

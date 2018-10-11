@@ -16,12 +16,12 @@ CameraThreadMUX::CameraThreadMUX(QObject *parent) : QThread(parent)
 
     cameraType = CAMERATYPE_LOCAL;
 #ifdef Q_OS_WIN
-    pathHelper.setRootPath("D:/");
+    //pathHelper.setRootPath("D:/");
     cameraUrl = "video=";
     outputFileNameForTemp = pathHelper.getTempFileName();//"D:/Rec/ShowCamera_" + QDateTime::currentDateTime().toString("hhmmss") + ".avi";
     fontFile = "D\\\\:font.ttf";
 #else
-    pathHelper.setRootPath("/home/pi/");
+    //pathHelper.setRootPath("/home/pi/");
     cameraUrl = "/dev/video0";
     outputFileNameForTemp = pathHelper.getTempFileName();
     fontFile = "/home/pi/Font/font.ttf";
