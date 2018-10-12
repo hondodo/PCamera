@@ -5,8 +5,8 @@ RingThread::RingThread(QObject *parent) : QThread(parent)
 {
     fileName = "";
     _isRunning = false;
-    vol = -1;
 #ifdef Q_OS_WIN
+    vol = -1;
     player = Q_NULLPTR;
 #else
     fileName = "/home/pi/Music/dingdong.mp3";
