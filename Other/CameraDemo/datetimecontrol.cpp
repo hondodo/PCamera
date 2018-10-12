@@ -22,6 +22,7 @@ DateTimeControl::DateTimeControl(QWidget *parent) :
 
 DateTimeControl::~DateTimeControl()
 {
+    deleteRingThread();
     if(timeId > 0)
     {
         killTimer(timeId);
@@ -100,10 +101,22 @@ void DateTimeControl::deleteRingThread()
 
 void DateTimeControl::startNewRingThread(QString filename)
 {
-    deleteRingThread();
+    //deleteRingThread();
     if(QDateTime::currentDateTime().time().hour() > 6 &&
             QDateTime::currentDateTime().time().hour() <= 21)
     {
+        if(ringThread != NULL)
+        {
+            if(ringThread->isRunning())
+            {
+                return;
+            }
+            if(ringThread->isFinished())
+            {
+                delete ringThread;
+                ringThread = NULL;
+            }
+        }
         ringThread = new RingThread();
         ringThread->setFileName(filename);
         ringThread->start();
