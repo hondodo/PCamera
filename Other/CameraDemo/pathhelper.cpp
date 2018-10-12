@@ -2,13 +2,14 @@
 
 QString PathHelper::rootPath = "/";
 QString PathHelper::recPath = "/";
+QString PathHelper::fileExtn = "avi";
 PathHelper::PathHelper(QObject *parent) : QObject(parent)
 {
     cameraName = "undefine";
     rootPath = "/";
     recPath = "/REC/";
-    currentFileName = "/REC/undefine.avi";
-    tempFileName = "/REC/temp.avi";
+    currentFileName = "/REC/undefine." + fileExtn;
+    tempFileName = "/REC/temp." + fileExtn;
 
 #ifdef Q_OS_WIN
     setRootPath("D:/");
@@ -30,7 +31,7 @@ void PathHelper::init()
     {
         dir.mkdir(recPath);
     }
-    tempFileName = recPath + getCameraNameForFileName() + "_Temp.avi";
+    tempFileName = recPath + getCameraNameForFileName() + "_Temp." + fileExtn;
     creatNewFileName();
 }
 
@@ -93,12 +94,17 @@ void PathHelper::creatNewFileName()
         dir.mkdir(path);
     }
     currentFileName = path + getCameraNameForFileName() + "_" +
-            QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + ".avi";
+            QDateTime::currentDateTime().toString("yyyyMMddhhmmss") + "." + fileExtn;
 }
 
 void PathHelper::setCameraName(const QString &value)
 {
     cameraName = value;
+}
+
+QString PathHelper::getFileExtn() const
+{
+    return fileExtn;
 }
 
 void PathHelper::setRootPath(const QString &value)

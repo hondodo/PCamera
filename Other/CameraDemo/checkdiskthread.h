@@ -27,7 +27,7 @@ public slots:
 
 private:
     bool _isRunning;
-    QFileInfoList getAllFiles(QString path);
+    QFileInfoList getAllFiles(QString path, QStringList filters);
 };
 
 #endif // CHECKDISKTHREAD_H

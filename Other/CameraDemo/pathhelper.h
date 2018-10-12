@@ -23,16 +23,20 @@ public:
 
     void setCameraName(const QString &value);
 
+    QString getFileExtn() const;
+
 signals:
 
 public slots:
 
 private:
     QString cameraName;
+    static QString fileExtn;
     static QString rootPath;
     static QString recPath;
     QString currentFileName;
     QString tempFileName;
+
     void setRootPath(const QString &value);
 };
 

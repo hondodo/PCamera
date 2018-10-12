@@ -146,8 +146,8 @@ void CameraThreadH264::run()
     {
         if(delayOpenCamera)
         {
-            emitMessage("delay 10s open camera");
-            for(int i = 0; i < 500; i++)
+            emitMessage("delay 30s open camera");
+            for(int i = 0; i < 1500; i++)
             {
                 if(!_isRunning)
                 {
@@ -1192,7 +1192,10 @@ end:
 #endif
     if(imgConvertCtcRGB != NULL)
         sws_freeContext(imgConvertCtcRGB);
-    av_packet_unref(&packet);
+    if(packet.data)
+    {
+        av_packet_unref(&packet);
+    }
     //closeContext(&frame);
 
     if((frame) != NULL)

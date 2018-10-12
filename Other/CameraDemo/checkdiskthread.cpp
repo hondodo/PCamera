@@ -23,6 +23,8 @@ void CheckDiskThread::run()
     qint64 mbSize = kbSize * 1024;
     qint64 gbSize = mbSize * 1024;
     qint64 keepBytes = 2 * gbSize;
+    QStringList filters;
+    filters << "*." + pathhelper.getFileExtn();
     while (_isRunning)
     {
         qint64 free = diskhelper.bytesFree();
@@ -41,13 +43,13 @@ void CheckDiskThread::run()
     }
 }
 
-QFileInfoList CheckDiskThread::getAllFiles(QString path)
+QFileInfoList CheckDiskThread::getAllFiles(QString path, QStringList filters)
 {
     QDir dir(path);
     if(dir.exists())
     {
-        QFileInfoList allfiles = dir.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
-        QFileInfoList alldirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot);
+        QFileInfoList allfiles = dir.entryInfoList(filters, QDir::Files | QDir::Hidden | QDir::NoSymLinks, QDir::Time);
+        QFileInfoList alldirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time);
         if(alldirs.isEmpty() || alldirs.count() <= 0)
         {}
         else
@@ -56,7 +58,7 @@ QFileInfoList CheckDiskThread::getAllFiles(QString path)
             for(int i = 0; i < count; i++)
             {
                 QString dirpath = alldirs.at(i).absoluteFilePath();
-                QFileInfoList childfiles = getAllFiles(dirpath);
+                QFileInfoList childfiles = getAllFiles(dirpath, filters);
                 if(childfiles.isEmpty() || childfiles.count() <= 0)
                 {}
                 else
