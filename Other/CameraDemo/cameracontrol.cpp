@@ -211,12 +211,20 @@ void CameraControl::stop()
 {
     if(player != Q_NULLPTR)
     {
+        qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")
+                 << "stop thread:" << cameraName;
         player->setStop();
         if(player->isRunning())
         {
+            qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")
+                     << "thread is running:" << cameraName;
             player->wait(10000);
+            qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")
+                     << "terminate thread:" << cameraName;
             player->terminate();
         }
+         qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")
+                  << "thread delete later:" << cameraName;
         player->deleteLater();
         player = Q_NULLPTR;
     }
