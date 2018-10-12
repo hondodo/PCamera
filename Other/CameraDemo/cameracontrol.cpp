@@ -302,6 +302,7 @@ void CameraControl::timerEvent(QTimerEvent *event)
                 stop();
                 start(true);
             }
+            lastReceiveImageTime = QDateTime::currentDateTime();
         }
     }
 }
