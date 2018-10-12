@@ -828,7 +828,7 @@ int CameraThreadH264::caputuer()
 
     //int maxFrame = 30 * 30;//30 * 30 * 60;//30min * 30fp/s * 60s
     int currentFrame = 0;
-    int maxDuraMS = 30 * 1000 * 60;//
+    int maxDuraMS = 60 * 1000 * 60;//
 
     bool hadwriteheader = false;
 
