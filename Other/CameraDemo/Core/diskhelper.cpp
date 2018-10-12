@@ -31,16 +31,19 @@ void DiskHelper::setPath(const QString &value)
 
 qint64 DiskHelper::bytesTotal()
 {
+    storageInfo->refresh();
     return storageInfo->bytesTotal();;
 }
 
 qint64 DiskHelper::bytesFree()
 {
+    storageInfo->refresh();
     return storageInfo->bytesFree();
 }
 
 qint64 DiskHelper::bytesAvailable()
 {
+    storageInfo->refresh();
     return storageInfo->bytesAvailable();
 }
 
