@@ -94,14 +94,17 @@ void MainWindow::deleteRingThread()
 void MainWindow::startNewRingThread(QString filename)
 {
     //deleteRingThread();
-    if(ringThread->isRunning())
+    if(ringThread != NULL)
     {
-        return;
-    }
-    if(ringThread->isFinished())
-    {
-        delete ringThread;
-        ringThread = NULL;
+        if(ringThread->isRunning())
+        {
+            return;
+        }
+        if(ringThread->isFinished())
+        {
+            delete ringThread;
+            ringThread = NULL;
+        }
     }
     ringThread = new RingThread();
     ringThread->setFileName(filename);
