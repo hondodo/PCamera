@@ -882,9 +882,10 @@ int CameraThreadH264::caputuer()
     int maxloop = 5;//5 * 30 min
     emitMessage("Recording");
     QDateTime lastRecTime = QDateTime::currentDateTime();
+    qint64 recdura = 0;
     while (_isRunning && loopindex < maxloop)
     {
-        qint64 recdura = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastRecTime.toMSecsSinceEpoch();
+        recdura = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastRecTime.toMSecsSinceEpoch();
         if(recdura < 0 || recdura > maxDuraMS)
         //if(currentFrame >= maxFrame)
         {
@@ -1149,6 +1150,10 @@ int CameraThreadH264::caputuer()
         av_log(NULL, AV_LOG_ERROR, "Erroro ccurred\n");
     }
 
+    if(recdura < 5000)
+    {
+        return CANNOT_OPEN_OUTPUT_TEMP;
+    }
     return (ret? 1:0);
 }
 
