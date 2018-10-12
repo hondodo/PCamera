@@ -10,6 +10,7 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
     cantainvideo = false;
     videoindex = 0;
     audioindex = 0;
+    recdura = 0;
 
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
@@ -144,7 +145,8 @@ void CameraThreadH264::run()
     {
         emitMessage("loop record");
         ret = caputuer();
-        if(ret == CANNOT_OPEN_INPUTFILE || ret == CANNOT_OPEN_OUTPUE_SAVE || ret == CANNOT_OPEN_OUTPUT_TEMP)
+        if(recdura < 5000 || ret == CANNOT_OPEN_INPUTFILE || ret == CANNOT_OPEN_OUTPUE_SAVE
+                || ret == CANNOT_OPEN_OUTPUT_TEMP || ret == CANNOT_REC_UNKNOWN_ERROR)
         {
             emitMessage("[" +  QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") + "]"
                         + "Open file error: " + ret + ";Retry 1 min later");
@@ -782,6 +784,45 @@ int CameraThreadH264::caputuer()
     int got_frame;
     int (*dec_func)(AVCodecContext *, AVFrame *, int *, const AVPacket *);
 
+    int widthOut = 100;
+    int heightOut = 100;
+    AVPixelFormat pixOut = AV_PIX_FMT_YUV420P;
+
+    AVFrame *pFrameRGB = NULL;
+    struct SwsContext *imgConvertCtcRGB = NULL;
+    AVPixelFormat rgbFmt = AV_PIX_FMT_BGR24;
+    int rgbBytes = 0;
+    uint8_t *rgbOutBuffer = NULL;
+    cv::Mat mRGB, temp;
+
+    bool isMoving = true;
+
+    QTime frameTimer;
+    int frametime = 0;
+    frameTimer.start();
+    int frameindex = 0;
+
+    //int maxFrame = 30 * 30;//30 * 30 * 60;//30min * 30fp/s * 60s
+    int currentFrame = 0;
+    int maxDuraMS = 1000 * 30;//
+
+    bool hadwriteheader = false;
+
+#ifdef USE_FIX_30FPS
+    int64_t eachframetime = 33333;
+    int64_t start_time = av_gettime();
+    int64_t lasttime = start_time;
+    int64_t encodewritetime = 0;
+    int64_t sleeptimeus = 5000;
+    int64_t now = start_time;
+    int64_t now_time = 0;
+    int64_t frame_index = 0;
+    int64_t duration = 0;
+#endif
+    int loopindex = 0;
+    int maxloop = 2;//5;//5 * 30 min
+    QDateTime lastRecTime = QDateTime::currentDateTime();
+
     av_register_all();
     avfilter_register_all();
 
@@ -789,33 +830,35 @@ int CameraThreadH264::caputuer()
     if ((ret = open_input_file(cameraUrl.toUtf8().data())) < 0)
     {
         emitMessage("open camera failed");
-        closeContext(&frame);
-        return CANNOT_OPEN_INPUTFILE;
-        return ret;
+        //closeContext(&frame);
+        ret = CANNOT_OPEN_INPUTFILE;
+        //return ret;
+        goto end;
     }
     emitMessage("open camera success");
     pathHelper.creatNewFileName();
     emitMessage("open optput file");
+    hadwriteheader = false;
     if ((ret = open_output_file(pathHelper.getCurrentFileName().toUtf8().data())) < 0)
     {
         emitMessage("open output file failed");
-        closeContext(&frame);
-        return CANNOT_OPEN_OUTPUT_TEMP;
-        return ret;
+        //closeContext(&frame);
+        ret = CANNOT_OPEN_OUTPUT_TEMP;
+        //return ret;
+        goto end;
     }
+    hadwriteheader = true;
     emitMessage("open output file sucess");
     emitMessage("init filters");
     if ((ret = init_filters()) < 0)
     {
         emitMessage("init filters failed");
-        closeContext(&frame);
-        return ret;
+        //closeContext(&frame);
+        //return ret;
+        goto end;
     }
     emitMessage("init filters success");
 
-    int widthOut = 100;
-    int heightOut = 100;
-    AVPixelFormat pixOut = AV_PIX_FMT_YUV420P;
     if(cantainvideo)
     {
         widthOut = pOutCodecCtx->width;
@@ -839,13 +882,7 @@ int CameraThreadH264::caputuer()
                    widthOut, heightOut);
 #endif
 
-    AVFrame *pFrameRGB = av_frame_alloc();
-    struct SwsContext *imgConvertCtcRGB;
-    AVPixelFormat rgbFmt = AV_PIX_FMT_BGR24;
-    int rgbBytes;
-    uint8_t *rgbOutBuffer;
-    cv::Mat mRGB, temp;
-
+    pFrameRGB = av_frame_alloc();
     imgConvertCtcRGB = sws_getContext(widthOut, heightOut,
                                       pixOut, widthOut, heightOut,
                                       rgbFmt, SWS_BICUBIC, NULL, NULL, NULL);
@@ -855,41 +892,18 @@ int CameraThreadH264::caputuer()
                    widthOut, heightOut);
 
     mRGB = cv::Mat(cv::Size(widthOut, heightOut), CV_8UC3);
-    bool isMoving = true;
 
-    QTime frameTimer;
-    int frametime = 0;
-    frameTimer.start();
-    int frameindex = 0;
-
-    int maxFrame = 30 * 30;//30 * 30 * 60;//30min * 30fp/s * 60s
-    int currentFrame = 0;
-    int maxDuraMS = 1000 * 60;//
-
-#ifdef USE_FIX_30FPS
-    int64_t eachframetime = 33333;
-    int64_t start_time = av_gettime();
-    int64_t lasttime = start_time;
-    int64_t encodewritetime = 0;
-    int64_t sleeptimeus = 5000;
-    int64_t now = start_time;
-    int64_t now_time = 0;
-    int64_t frame_index = 0;
-    int64_t duration = 0;
-#endif
-    /* read all packets */
-    int loopindex = 0;
-    int maxloop = 5;//5 * 30 min
     emitMessage("Recording");
-    QDateTime lastRecTime = QDateTime::currentDateTime();
-    qint64 recdura = 0;
-    while (_isRunning && loopindex < maxloop)
+    /* read all packets */
+    recdura = 0;
+    while (_isRunning && (recdura >= 0 && recdura < maxDuraMS))//loopindex < maxloop)
     {
-        recdura = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastRecTime.toMSecsSinceEpoch();
+        //recdura = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastRecTime.toMSecsSinceEpoch();
         if(recdura < 0 || recdura > maxDuraMS)
         //if(currentFrame >= maxFrame)
         {
-            if(loopindex > 5)
+            lastRecTime = QDateTime::currentDateTime();
+            if(loopindex > maxloop)
             {
                 emitMessage("close camera to reset");
                 break;
@@ -905,8 +919,9 @@ int CameraThreadH264::caputuer()
                 ret = filter_encode_write_frame(NULL, i);
                 if (ret < 0) {
                     av_log(NULL, AV_LOG_ERROR, "Flushing filter failed\n");
-                    closeContext(&frame);
-                    return ret;
+                    //closeContext(&frame);
+                    //return ret;
+                    goto end;
                 }
 
                 /* flush encoder */
@@ -914,28 +929,33 @@ int CameraThreadH264::caputuer()
                 if (ret < 0)
                 {
                     av_log(NULL, AV_LOG_ERROR, "Flushing encoder failed\n");
-                    closeContext(&frame);
-                    return ret;
+                    //closeContext(&frame);
+                    //return ret;
+                    goto end;
                 }
             }
             av_write_trailer(ofmt_ctx);
             closeOutPut();
             emitMessage("open optput file");
             pathHelper.creatNewFileName();
+            hadwriteheader = false;
             if ((ret = open_output_file(pathHelper.getCurrentFileName().toLocal8Bit().data())) < 0)
             {
                 emitMessage("open optput file failed");
-                closeContext(&frame);
-                return CANNOT_OPEN_OUTPUT_TEMP;
-                return ret;
+                //closeContext(&frame);
+                ret = CANNOT_OPEN_OUTPUT_TEMP;
+                //return ret;
+                goto end;
             }
+            hadwriteheader = true;
             emitMessage("open optput file success");
             emitMessage("init filters");
             if ((ret = init_filters()) < 0)
             {
                 emitMessage("init filters failed");
-                closeContext(&frame);
-                return ret;
+                //closeContext(&frame);
+                //return ret;
+                goto end;
             }
             emitMessage("init filters success");
             currentFrame = 0;
@@ -1053,8 +1073,9 @@ int CameraThreadH264::caputuer()
                 av_frame_free(&frame);
                 if (ret < 0)
                 {
-                    closeContext(&frame);
-                    return ret;
+                    //closeContext(&frame);
+                    //return ret;
+                    goto end;
                 }
             } else {
                 av_frame_free(&frame);
@@ -1068,11 +1089,13 @@ int CameraThreadH264::caputuer()
             ret = av_interleaved_write_frame(ofmt_ctx, &packet);
             if (ret < 0)
             {
-                closeContext(&frame);
-                return ret;
+                //closeContext(&frame);
+                //return ret;
+                goto end;
             }
         }
         av_packet_unref(&packet);
+        recdura = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastRecTime.toMSecsSinceEpoch();
 #ifdef USE_FIX_30FPS
         encodewritetime = av_gettime() - now;
         sleeptimeus = eachframetime - encodewritetime + 5000;
@@ -1109,8 +1132,9 @@ int CameraThreadH264::caputuer()
         ret = filter_encode_write_frame(NULL, i);
         if (ret < 0) {
             av_log(NULL, AV_LOG_ERROR, "Flushing filter failed\n");
-            closeContext(&frame);
-            return ret;
+            //closeContext(&frame);
+            //return ret;
+            goto end;
         }
 
         /* flush encoder */
@@ -1118,50 +1142,38 @@ int CameraThreadH264::caputuer()
         if (ret < 0)
         {
             av_log(NULL, AV_LOG_ERROR, "Flushing encoder failed\n");
-            closeContext(&frame);
-            return ret;
+            //closeContext(&frame);
+            //return ret;
+            goto end;
         }
     }
 
+end:
     emitMessage("stop record and free resources");
-    mRGB.release();
-    temp.release();
+    if(!mRGB.empty())
+        mRGB.release();
+    if(!temp.empty())
+        temp.release();
 
-    av_free(rgbOutBuffer);
-    av_frame_free(&pFrameRGB);
+    if(rgbOutBuffer != NULL)
+        av_free(rgbOutBuffer);
+    if(pFrameRGB != NULL)
+        av_frame_free(&pFrameRGB);
 
-    av_write_trailer(ofmt_ctx);
+    if(hadwriteheader)
+        av_write_trailer(ofmt_ctx);
     //end
 #ifdef USE_OPENGL
     sws_freeContext(img_convert_ctx);
 #endif
-    sws_freeContext(imgConvertCtcRGB);
+    if(imgConvertCtcRGB != NULL)
+        sws_freeContext(imgConvertCtcRGB);
     av_packet_unref(&packet);
-    closeContext(&frame);
+    //closeContext(&frame);
 
-    if(filtedFrame != NULL)
+    if((frame) != NULL)
     {
-        av_frame_free(&filtedFrame);
-    }
-
-    if (ret < 0)
-    {
-        //av_log(NULL, AV_LOG_ERROR, "Error occurred: %s\n", av_err2str(ret));
-        av_log(NULL, AV_LOG_ERROR, "Erroro ccurred\n");
-    }
-
-    if(recdura < 5000)
-    {
-        return CANNOT_OPEN_OUTPUT_TEMP;
-    }
-    return (ret? 1:0);
-}
-
-void CameraThreadH264::closeContext(AVFrame **frame)
-{
-    if((*frame) != NULL)
-    {
-        av_frame_free(frame);
+        av_frame_free(&frame);
     }
 
     closeOutPut();
@@ -1171,25 +1183,61 @@ void CameraThreadH264::closeContext(AVFrame **frame)
         for (int i = 0; i < ifmt_ctx->nb_streams; i++)
         {
             avcodec_free_context(&stream_ctx[i].dec_ctx);
-            //if (ofmt_ctx && ofmt_ctx->nb_streams > i && ofmt_ctx->streams[i])
-            //{
-            //    if(stream_ctx_out != NULL &&  stream_ctx_out[i].enc_ctx)
-            //    avcodec_free_context(&stream_ctx_out[i].enc_ctx);
-            //}
-            //if (filter_ctx && filter_ctx[i].filter_graph)
-            //{
-            //    avfilter_graph_free(&filter_ctx[i].filter_graph);
-            //}
         }
     }
-    //if(filter_ctx != NULL) av_free(filter_ctx);
     if(stream_ctx != NULL) av_free(stream_ctx);
-    //if(stream_ctx_out != NULL) av_free(stream_ctx_out);
     if(ifmt_ctx != NULL) avformat_close_input(&ifmt_ctx);
-    //if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
-    //    avio_closep(&ofmt_ctx->pb);
-    //if(ofmt_ctx != NULL) avformat_free_context(ofmt_ctx);
+
+    if(filtedFrame != NULL)
+    {
+        av_frame_free(&filtedFrame);
+    }
+
+    //if (ret < 0)
+    //{
+    //    av_log(NULL, AV_LOG_ERROR, "Erroro ccurred\n");
+    //}
+
+    if(recdura < 5000)
+    {
+        return CANNOT_REC_UNKNOWN_ERROR;
+    }
+    return (ret? 1:0);
 }
+
+//void CameraThreadH264::closeContext(AVFrame **frame)
+//{
+//    if((*frame) != NULL)
+//    {
+//        av_frame_free(frame);
+//    }
+
+//    closeOutPut();
+
+//    if(ifmt_ctx != NULL)
+//    {
+//        for (int i = 0; i < ifmt_ctx->nb_streams; i++)
+//        {
+//            avcodec_free_context(&stream_ctx[i].dec_ctx);
+//            //if (ofmt_ctx && ofmt_ctx->nb_streams > i && ofmt_ctx->streams[i])
+//            //{
+//            //    if(stream_ctx_out != NULL &&  stream_ctx_out[i].enc_ctx)
+//            //    avcodec_free_context(&stream_ctx_out[i].enc_ctx);
+//            //}
+//            //if (filter_ctx && filter_ctx[i].filter_graph)
+//            //{
+//            //    avfilter_graph_free(&filter_ctx[i].filter_graph);
+//            //}
+//        }
+//    }
+//    //if(filter_ctx != NULL) av_free(filter_ctx);
+//    if(stream_ctx != NULL) av_free(stream_ctx);
+//    //if(stream_ctx_out != NULL) av_free(stream_ctx_out);
+//    if(ifmt_ctx != NULL) avformat_close_input(&ifmt_ctx);
+//    //if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
+//    //    avio_closep(&ofmt_ctx->pb);
+//    //if(ofmt_ctx != NULL) avformat_free_context(ofmt_ctx);
+//}
 
 void CameraThreadH264::closeOutPut()
 {

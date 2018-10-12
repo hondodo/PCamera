@@ -4,6 +4,7 @@
 #define CANNOT_OPEN_INPUTFILE -99
 #define CANNOT_OPEN_OUTPUT_TEMP -100
 #define CANNOT_OPEN_OUTPUE_SAVE -101
+#define CANNOT_REC_UNKNOWN_ERROR -102
 
 #ifndef PRId64 || PRI_MACROS_BROKEN
 #undef PRId64
@@ -134,13 +135,14 @@ private:
     int filter_encode_write_frame(AVFrame *frame, unsigned int stream_index, bool cloneframe = false);
     int flush_encoder(unsigned int stream_index);
     int caputuer();
-    void closeContext(AVFrame **frame);
+    //void closeContext(AVFrame **frame);
     void closeOutPut();
     void emitMessage(const QString text);
 
     AVCodecContext *pCodecCtx;
     bool cantainvideo, cantainaudio;
     int videoindex, audioindex;
+    qint64 recdura;
 };
 
 #endif // CAMERATHREADH264_H
