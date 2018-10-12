@@ -1268,5 +1268,6 @@ void CameraThreadH264::closeOutPut()
 
 void CameraThreadH264::emitMessage(const QString text)
 {
+    qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss") << text + "@" + cameraName;
     emit onMessage(text + "@" + cameraName);
 }
