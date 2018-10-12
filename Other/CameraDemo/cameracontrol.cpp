@@ -295,6 +295,7 @@ void CameraControl::timerEvent(QTimerEvent *event)
         int imageElsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastReceiveImageTime.toMSecsSinceEpoch();
         if(imageElsp > restartByNoImageElsp)
         {
+            lastReceiveImageTime = QDateTime::currentDateTime();
             if(player != Q_NULLPTR)
             {
                 qDebug() << "Restart camera (no image):" << player->getCameraName();
@@ -302,7 +303,6 @@ void CameraControl::timerEvent(QTimerEvent *event)
                 stop();
                 start(true);
             }
-            lastReceiveImageTime = QDateTime::currentDateTime();
         }
     }
 }
