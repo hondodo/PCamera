@@ -37,7 +37,7 @@ CameraControl::CameraControl(QWidget *parent) :
 #endif
     initMenu();
 
-    //restartByNoImageElsp = 5 * 1000 * 60;
+    restartByNoImageElsp = 2 * 1000 * 60;
 
     ui->label->installEventFilter(this);
 
@@ -176,7 +176,7 @@ void CameraControl::setCameraType(const CAMERATYPE &value)
     cameraType = value;
 }
 
-void CameraControl::start()
+void CameraControl::start(bool delayOpenCamera)
 {
     stop();
 #ifdef USE_H264
@@ -184,6 +184,7 @@ void CameraControl::start()
 #else
     player = new CameraThreadMUX();
 #endif
+    player->setDelayOpenCamera(delayOpenCamera);
     connect(player, SIGNAL(onMessage(QString)), this, SLOT(onMessage(QString)));
     player->setCameraType(cameraType);
     player->setCameraSize(cameraSize);
@@ -286,21 +287,22 @@ void CameraControl::timerEvent(QTimerEvent *event)
                 {
                     qDebug() << "Restart camera (timerly):" << player->getCameraName();
                     stop();
-                    start();
+                    start(true);
                 }
             }
         }
 
-        //int imageElsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastReceiveImageTime.toMSecsSinceEpoch();
-        //if(imageElsp > restartByNoImageElsp)
-        //{
-        //    if(player != Q_NULLPTR)
-        //    {
-        //        qDebug() << "Restart camera (no image):" << player->getCameraName();
-        //        stop();
-        //        start();
-        //    }
-        //}
+        int imageElsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastReceiveImageTime.toMSecsSinceEpoch();
+        if(imageElsp > restartByNoImageElsp)
+        {
+            if(player != Q_NULLPTR)
+            {
+                qDebug() << "Restart camera (no image):" << player->getCameraName();
+                onMessage("Restart camera (no image) @" + player->getCameraName());
+                stop();
+                start(true);
+            }
+        }
     }
 }
 

@@ -88,6 +88,9 @@ public:
 
     CAMERASIZE getCurrentCameraSize() const;
 
+    bool getDelayOpenCamera() const;
+    void setDelayOpenCamera(bool value);
+
 signals:
     void onFrame(const QImage &image);
 #ifdef USE_OPENGL
@@ -102,6 +105,7 @@ private:
     bool _isRunning;
     static int cameraId;
     int currentCameraId;
+    bool delayOpenCamera;
 
     CAMERASIZE cameraSize;
     CAMERASIZE currentCameraSize;

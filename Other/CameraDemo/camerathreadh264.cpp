@@ -11,6 +11,7 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
     videoindex = 0;
     audioindex = 0;
     recdura = 0;
+    delayOpenCamera = false;
 
     ifmt_ctx = NULL;
     ofmt_ctx = NULL;
@@ -143,6 +144,19 @@ void CameraThreadH264::run()
     int ret = 0;
     while (_isRunning) //LOOP
     {
+        if(delayOpenCamera)
+        {
+            emitMessage("delay 10s open camera");
+            for(int i = 0; i < 500; i++)
+            {
+                if(!_isRunning)
+                {
+                    return;
+                }
+                this->msleep(20);
+            }
+        }
+        delayOpenCamera = false;
         emitMessage("loop record");
         ret = caputuer();
         if(recdura < 5000 || ret == CANNOT_OPEN_INPUTFILE || ret == CANNOT_OPEN_OUTPUE_SAVE
@@ -173,6 +187,16 @@ void CameraThreadH264::run()
     }
     emitMessage("Thread stoped");
     _isRunning = false;
+}
+
+bool CameraThreadH264::getDelayOpenCamera() const
+{
+    return delayOpenCamera;
+}
+
+void CameraThreadH264::setDelayOpenCamera(bool value)
+{
+    delayOpenCamera = value;
 }
 
 CAMERASIZE CameraThreadH264::getCurrentCameraSize() const

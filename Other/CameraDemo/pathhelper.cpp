@@ -1,6 +1,7 @@
 #include "pathhelper.h"
 
 QString PathHelper::rootPath = "/";
+QString PathHelper::recPath = "/";
 PathHelper::PathHelper(QObject *parent) : QObject(parent)
 {
     cameraName = "undefine";
@@ -14,6 +15,7 @@ PathHelper::PathHelper(QObject *parent) : QObject(parent)
 #else
     setRootPath("/home/pi/");
 #endif
+    recPath = rootPath + "REC/";
 }
 
 void PathHelper::init()
@@ -22,7 +24,7 @@ void PathHelper::init()
     {
         rootPath += "/";
     }
-    recPath = rootPath + "REC/";
+    //recPath = rootPath + "REC/";
     QDir dir(recPath);
     if(!dir.exists())
     {

@@ -29,7 +29,7 @@ public:
     CAMERATYPE getCameraType() const;
     void setCameraType(const CAMERATYPE &value);
 
-    void start();
+    void start(bool delayOpenCamera = false);
     void stop();
 
     QString getCameraName() const;
@@ -113,7 +113,7 @@ private:
     QDateTime lastReceiveImageTime;
     int restartTimerId;
     int restartTimeElsp;
-    //int restartByNoImageElsp;
+    int restartByNoImageElsp;
     void initMenu();
     void disConnectMenu();
     QMenu *menu;

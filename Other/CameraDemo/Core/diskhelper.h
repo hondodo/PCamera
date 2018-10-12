@@ -21,9 +21,6 @@ public:
 
     QStorageInfo *getStorageInfo() const;
 
-    QString getDir() const;
-    void setDir(const QString &value);
-
 signals:
 
 public slots:

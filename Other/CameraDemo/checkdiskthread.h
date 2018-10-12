@@ -2,6 +2,12 @@
 #define CHECKDISKTHREAD_H
 
 #include <QThread>
+#include <QDir>
+#include <QFileInfo>
+#include <QFileInfoList>
+#include <QDebug>
+#include "pathhelper.h"
+#include "Core/diskhelper.h"
 
 class CheckDiskThread : public QThread
 {
@@ -21,6 +27,7 @@ public slots:
 
 private:
     bool _isRunning;
+    QFileInfoList getAllFiles(QString path);
 };
 
 #endif // CHECKDISKTHREAD_H

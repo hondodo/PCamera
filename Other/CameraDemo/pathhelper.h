@@ -30,7 +30,7 @@ public slots:
 private:
     QString cameraName;
     static QString rootPath;
-    QString recPath;
+    static QString recPath;
     QString currentFileName;
     QString tempFileName;
     void setRootPath(const QString &value);
