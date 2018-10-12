@@ -153,7 +153,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
         }
         if(timerFrames % 10 == 0)
         {
-            qint64 free = diskHelper.bytesFree();
+            qint64 free = diskHelper.bytesAvailable();//.bytesFree();
             qint64 total = diskHelper.bytesTotal();
             QString diskinfo = QString("Free: %0 / Total: %1").arg(diskHelper.toSizeInfo(free), diskHelper.toSizeInfo(total));
             labelDiskInfo.setText(diskinfo);

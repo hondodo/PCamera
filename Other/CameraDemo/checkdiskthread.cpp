@@ -37,7 +37,7 @@ void CheckDiskThread::run()
     qDebug() << "starting check disk thread";
     while (_isRunning)
     {
-        qint64 free = diskhelper.bytesFree();
+        qint64 free = diskhelper.bytesAvailable();//.bytesFree();
         if(free < keepBytes)
         {
             qDebug() << "no more free space, free space for store: free bytes:" << free;
@@ -66,7 +66,7 @@ void CheckDiskThread::run()
                     }
                 }
                 files.removeAt(index);
-                free = diskhelper.bytesFree();
+                free = diskhelper.bytesAvailable();//.bytesFree();
                 qDebug() << "now free bytes:" << free;
             }
         }
