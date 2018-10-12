@@ -5,6 +5,7 @@ RingThread::RingThread(QObject *parent) : QThread(parent)
 {
     fileName = "";
     _isRunning = false;
+    vol = -1;
 #ifdef Q_OS_WIN
     player = Q_NULLPTR;
 #else
@@ -15,6 +16,7 @@ RingThread::RingThread(QObject *parent) : QThread(parent)
 
 RingThread::~RingThread()
 {
+    qDebug() << "~RingThread()";
     setStop();
 }
 
@@ -24,6 +26,10 @@ void RingThread::setStop()
 #ifdef Q_OS_WIN
     if(player != Q_NULLPTR)
     {
+        if(vol >= 0 && vol < 100)
+        {
+            player->setVolume(vol);
+        }
         player->stop();
         player->deleteLater();
         player = Q_NULLPTR;
@@ -37,6 +43,7 @@ void RingThread::run()
 #ifdef Q_OS_WIN
     player = new QMediaPlayer();
     player->setMedia(QUrl(fileName));
+    vol = player->volume();
     player->setVolume(80);
     player->play();
 #else

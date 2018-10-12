@@ -82,7 +82,8 @@ void MainWindow::deleteRingThread()
     {
         ringThread->setStop();
         ringThread->wait(1000);
-        ringThread->terminate();
+        //ringThread->terminate();
+        ringThread->deleteLater();
         ringThread = Q_NULLPTR;
     }
 }

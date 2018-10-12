@@ -2,6 +2,7 @@
 #define RINGTHREAD_H
 
 #include <QThread>
+#include <QDebug>
 #ifdef Q_OS_WIN
 #include <QMultimedia>
 #include <QMediaPlayer>
@@ -31,6 +32,7 @@ private:
 
 #ifdef Q_OS_WIN
     QMediaPlayer *player;
+    int vol;
 #endif
 
     QString fileName;

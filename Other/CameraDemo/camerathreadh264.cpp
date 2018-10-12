@@ -862,7 +862,7 @@ int CameraThreadH264::caputuer()
     frameTimer.start();
     int frameindex = 0;
 
-    int maxFrame = 30 * 30 * 60;//30min * 30fp/s * 60s
+    int maxFrame = 30 * 30;//30 * 30 * 60;//30min * 30fp/s * 60s
     int currentFrame = 0;
 
 #ifdef USE_FIX_30FPS
@@ -1184,7 +1184,7 @@ void CameraThreadH264::closeContext(AVFrame **frame)
 
 void CameraThreadH264::closeOutPut()
 {
-    if(ofmt_ctx && ofmt_ctx->nb_streams &&(ofmt_ctx->nb_streams > 0 && ofmt_ctx->nb_streams < 5))
+    if(ofmt_ctx && ofmt_ctx->nb_streams)
     {
         for(int i = 0; i < ofmt_ctx->nb_streams; i++)
         {
@@ -1204,6 +1204,9 @@ void CameraThreadH264::closeOutPut()
     if (ofmt_ctx && !(ofmt_ctx->oformat->flags & AVFMT_NOFILE))
         avio_closep(&ofmt_ctx->pb);
     if(ofmt_ctx != NULL) avformat_free_context(ofmt_ctx);
+    filter_ctx = NULL;
+    stream_ctx_out = NULL;
+    ofmt_ctx = NULL;
 }
 
 void CameraThreadH264::emitMessage(const QString text)
