@@ -804,7 +804,7 @@ int CameraThreadH264::caputuer()
 
     //int maxFrame = 30 * 30;//30 * 30 * 60;//30min * 30fp/s * 60s
     int currentFrame = 0;
-    int maxDuraMS = 1000 * 30;//
+    int maxDuraMS = 30 * 1000 * 60;//
 
     bool hadwriteheader = false;
 
@@ -820,7 +820,7 @@ int CameraThreadH264::caputuer()
     int64_t duration = 0;
 #endif
     int loopindex = 0;
-    int maxloop = 2;//5;//5 * 30 min
+    int maxloop = 5;//5;//5 * 30 min
     QDateTime lastRecTime = QDateTime::currentDateTime();
 
     av_register_all();
