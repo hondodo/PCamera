@@ -89,7 +89,10 @@ void DateTimeControl::deleteRingThread()
     {
         ringThread->setStop();
         ringThread->wait(1000);
-        //ringThread->terminate();
+        if(ringThread->isRunning())
+        {
+            ringThread->terminate();
+        }
         ringThread->deleteLater();
         ringThread = Q_NULLPTR;
     }

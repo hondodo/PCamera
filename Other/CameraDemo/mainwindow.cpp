@@ -82,7 +82,10 @@ void MainWindow::deleteRingThread()
     {
         ringThread->setStop();
         ringThread->wait(1000);
-        //ringThread->terminate();
+        if(ringThread->isRunning())
+        {
+            ringThread->terminate();
+        }
         ringThread->deleteLater();
         ringThread = Q_NULLPTR;
     }
@@ -93,7 +96,7 @@ void MainWindow::startNewRingThread(QString filename)
     deleteRingThread();
     ringThread = new RingThread();
     ringThread->setFileName(filename);
-    ringThread->start();
+    ringThread->start(QThread::HighPriority);
 }
 
 
