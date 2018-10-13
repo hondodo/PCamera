@@ -411,6 +411,12 @@ int CameraThreadH264::open_output_file(const char *filename)
                 /* video time_base can be set to whatever is handy and supported by encoder */
                 enc_ctx->time_base = av_inv_q(dec_ctx->framerate);
                 enc_ctx->bit_rate = 2000000;
+                if(currentCameraSize == CAMERASIZE_640x480)
+                    enc_ctx->bit_rate = 2000000;
+                else if(currentCameraSize == CAMERASIZE_1280x720)
+                    enc_ctx->bit_rate = 4000000;
+                else if(currentCameraSize == CAMERASIZE_1920x1080)
+                    enc_ctx->bit_rate = 6000000;
                 enc_ctx->gop_size = 250;
                 enc_ctx->max_b_frames = 10;
                 enc_ctx->qmin = 10;
@@ -920,6 +926,18 @@ int CameraThreadH264::caputuer()
     emitMessage("Recording");
     /* read all packets */
     recdura = 0;
+#ifdef USE_FIX_30FPS
+    eachframetime = 33333;
+    start_time = av_gettime();
+    lasttime = start_time;
+    encodewritetime = 0;
+    sleeptimeus = 5000;
+    now = start_time;
+    now_time = 0;
+    frame_index = 0;
+    duration = 0;
+#endif
+    frameTimer.restart();
     while (_isRunning && (recdura >= 0 && recdura < maxDuraMS))//loopindex < maxloop)
     {
         //recdura = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastRecTime.toMSecsSinceEpoch();
