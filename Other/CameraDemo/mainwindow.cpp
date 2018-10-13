@@ -33,11 +33,13 @@ MainWindow::MainWindow(QWidget *parent) :
     labelCamBInfo.setText("");
     labelCamCInfo.setText("");
     labelCamDInfo.setText("");
+    labelRingInfo.setText("");
     ui->statusBar->addWidget(&labelDiskInfo);
     ui->statusBar->addWidget(&labelCamAInfo);
     ui->statusBar->addWidget(&labelCamBInfo);
     ui->statusBar->addWidget(&labelCamCInfo);
     ui->statusBar->addWidget(&labelCamDInfo);
+    ui->statusBar->addWidget(&labelRingInfo);
 }
 
 MainWindow::~MainWindow()
@@ -404,5 +406,34 @@ void MainWindow::onCameraControlRequestRemove()
 void MainWindow::onKey(int key)
 {
     Q_UNUSED(key);
-    startNewRingThread(ringFileName);
+    labelRingInfo.setText("");
+    PathHelper pathhelper;
+    QStringList filters;
+    filters << "*.mp3" << "*.wav";
+    QFileInfoList files = PathHelper::getAllFiles(pathhelper.getRingPath(), filters, false);
+    if(!files.isEmpty() && files.count() > 0)
+    {
+        int index = qrand() % files.count();
+        if(index < files.count())
+        {
+            ringFileName = files.at(index).absoluteFilePath();
+            labelRingInfo.setText("ring file: " + ringFileName);
+            startNewRingThread(ringFileName);
+        }
+        else
+        {
+            labelRingInfo.setText("error ring index");
+        }
+    }
+    else
+    {
+        labelRingInfo.setText("no ring files");
+    }
+}
+
+void MainWindow::onRingThreadFinish()
+{
+    labelRingInfo.setText("");
+    ringThread->deleteLater();
+    ringThread = NULL;
 }

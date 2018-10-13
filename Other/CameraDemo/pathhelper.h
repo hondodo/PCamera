@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QDir>
+#include <QFileInfo>
+#include <QFileInfoList>
 #include <QDateTime>
 
 class PathHelper : public QObject
@@ -25,6 +27,11 @@ public:
 
     QString getFileExtn() const;
 
+    static QFileInfoList getAllFiles(QString path, QStringList filters, bool childDir = true);
+    static int getEarliestFile(const QFileInfoList *files);
+
+    static QString getRingPath();
+
 signals:
 
 public slots:
@@ -34,6 +41,7 @@ private:
     static QString fileExtn;
     static QString rootPath;
     static QString recPath;
+    static QString ringPath;
     QString currentFileName;
     QString tempFileName;
 

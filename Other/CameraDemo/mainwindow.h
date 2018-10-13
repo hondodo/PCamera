@@ -47,6 +47,7 @@ private slots:
     void on_checkBoxWeatherControl_stateChanged(int arg1);
     void onCameraControlRequestRemove();
     void onKey(int key);
+    void onRingThreadFinish();
 
 private:
     Ui::MainWindow *ui;
@@ -58,7 +59,7 @@ private:
     QString ringFileName;
     DiskHelper diskHelper;
     PathHelper pathHelper;
-    QLabel labelDiskInfo, labelCamAInfo, labelCamBInfo, labelCamCInfo, labelCamDInfo;
+    QLabel labelDiskInfo, labelCamAInfo, labelCamBInfo, labelCamCInfo, labelCamDInfo, labelRingInfo;
 
     bool showDateTimeControlToCamerasComtrol;
     bool showWeathControl;

@@ -42,11 +42,11 @@ void CheckDiskThread::run()
         {
             qDebug() << "no more free space, free space for store: free bytes:" << free;
             int times = 0;
-            QFileInfoList files = getAllFiles(pathhelper.getRecPath(), filters);
+            QFileInfoList files = PathHelper::getAllFiles(pathhelper.getRecPath(), filters);
             while ((!files.isEmpty() && files.count() > 0) && free < keepBytes && times < 100)
             {
                 times++;
-                int index = getEarliestFile(&files);
+                int index = PathHelper::getEarliestFile(&files);
                 if(index < files.count())
                 {
                     QFileInfo fileinfo = files.at(index);
@@ -79,52 +79,4 @@ void CheckDiskThread::run()
             this->msleep(20);
         }
     }
-}
-
-QFileInfoList CheckDiskThread::getAllFiles(QString path, QStringList filters)
-{
-    QDir dir(path);
-    if(dir.exists())
-    {
-        QFileInfoList allfiles = dir.entryInfoList(filters, QDir::Files | QDir::Hidden | QDir::NoSymLinks, QDir::Time);
-        QFileInfoList alldirs = dir.entryInfoList(QDir::Dirs | QDir::NoDotAndDotDot, QDir::Time);
-        if(alldirs.isEmpty() || alldirs.count() <= 0)
-        {}
-        else
-        {
-            int count = alldirs.count();
-            for(int i = 0; i < count; i++)
-            {
-                QString dirpath = alldirs.at(i).absoluteFilePath();
-                QFileInfoList childfiles = getAllFiles(dirpath, filters);
-                if(childfiles.isEmpty() || childfiles.count() <= 0)
-                {}
-                else
-                {
-                    allfiles.append(childfiles);
-                }
-            }
-        }
-        return allfiles;
-    }
-}
-
-int CheckDiskThread::getEarliestFile(const QFileInfoList *files)
-{
-    int index = 0;
-    if(files != NULL && !files->isEmpty() && files->count() > 0)
-    {
-        int count = files->count();
-        qint64 earliestmodify = files->at(0).lastModified().toMSecsSinceEpoch();
-        for(int i = 1; i < count; i++)
-        {
-            qint64 modify = files->at(i).lastModified().toMSecsSinceEpoch();
-            if(modify < earliestmodify)
-            {
-                earliestmodify = modify;
-                index = i;
-            }
-        }
-    }
-    return index;
 }
