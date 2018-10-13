@@ -107,10 +107,7 @@ void MainWindow::startNewRingThread(QString filename)
             delete ringThread;
             ringThread = NULL;
         }
-        else
-        {
-            return;
-        }
+        ringThread = NULL;
     }
 
     labelRingInfo.setText("");
@@ -436,30 +433,7 @@ void MainWindow::onCameraControlRequestRemove()
 void MainWindow::onKey(int key)
 {
     Q_UNUSED(key);
-    labelRingInfo.setText("");
-    PathHelper pathhelper;
-    QStringList filters;
-    filters << "*.mp3" << "*.wav";
-    QFileInfoList files = PathHelper::getAllFiles(pathhelper.getRingPath(), filters, false);
-    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
-    if(!files.isEmpty() && files.count() > 0)
-    {
-        int index = qrand() % files.count();
-        if(index < files.count())
-        {
-            ringFileName = files.at(index).absoluteFilePath();
-            labelRingInfo.setText("ring file: " + ringFileName);
-            startNewRingThread(ringFileName);
-        }
-        else
-        {
-            labelRingInfo.setText("error ring index");
-        }
-    }
-    else
-    {
-        labelRingInfo.setText("no ring files");
-    }
+    startNewRingThread(ringFileName);
 }
 
 void MainWindow::onRingThreadFinish()
