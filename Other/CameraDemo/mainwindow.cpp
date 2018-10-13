@@ -412,6 +412,7 @@ void MainWindow::onKey(int key)
     QStringList filters;
     filters << "*.mp3" << "*.wav";
     QFileInfoList files = PathHelper::getAllFiles(pathhelper.getRingPath(), filters, false);
+    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
     if(!files.isEmpty() && files.count() > 0)
     {
         int index = qrand() % files.count();
