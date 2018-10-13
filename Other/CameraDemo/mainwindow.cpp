@@ -108,10 +108,35 @@ void MainWindow::startNewRingThread(QString filename)
             ringThread = NULL;
         }
     }
-    ringThread = new RingThread();
-    connect(ringThread, SIGNAL(finished()), this, SLOT(onRingThreadFinish()));
-    ringThread->setFileName(filename);
-    ringThread->start();
+
+    labelRingInfo.setText("");
+    PathHelper pathhelper;
+    QStringList filters;
+    filters << "*.mp3" << "*.wav";
+    QFileInfoList files = PathHelper::getAllFiles(pathhelper.getRingPath(), filters, false);
+    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+    if(!files.isEmpty() && files.count() > 0)
+    {
+        int index = qrand() % files.count();
+        if(index < files.count())
+        {
+            ringFileName = files.at(index).absoluteFilePath();
+            labelRingInfo.setText("ring file: " + ringFileName);
+
+            ringThread = new RingThread();
+            connect(ringThread, SIGNAL(finished()), this, SLOT(onRingThreadFinish()));
+            ringThread->setFileName(filename);
+            ringThread->start();
+        }
+        else
+        {
+            labelRingInfo.setText("error ring index");
+        }
+    }
+    else
+    {
+        labelRingInfo.setText("no ring files");
+    }
 }
 
 
