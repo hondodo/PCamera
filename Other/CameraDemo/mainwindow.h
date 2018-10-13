@@ -75,7 +75,7 @@ private:
     CameraControl *camBigShowingWidget;
     WeatherControl *weatherControl;
     void deleteRingThread();
-    void startNewRingThread(QString filename);
+    void startNewRingThread();
 };
 
 #endif // MAINWINDOW_H

@@ -93,7 +93,7 @@ void MainWindow::deleteRingThread()
     }
 }
 
-void MainWindow::startNewRingThread(QString filename)
+void MainWindow::startNewRingThread()
 {
     //deleteRingThread();
     if(ringThread != NULL)
@@ -126,7 +126,7 @@ void MainWindow::startNewRingThread(QString filename)
 
             ringThread = new RingThread();
             connect(ringThread, SIGNAL(finished()), this, SLOT(onRingThreadFinish()));
-            ringThread->setFileName(filename);
+            ringThread->setFileName(ringFileName);
             ringThread->start();
         }
         else
@@ -433,7 +433,7 @@ void MainWindow::onCameraControlRequestRemove()
 void MainWindow::onKey(int key)
 {
     Q_UNUSED(key);
-    startNewRingThread(ringFileName);
+    startNewRingThread();
 }
 
 void MainWindow::onRingThreadFinish()
