@@ -18,7 +18,18 @@ PathHelper::PathHelper(QObject *parent) : QObject(parent)
     setRootPath("/home/pi/");
 #endif
     recPath = rootPath + "REC/";
-    ringPath = rootPath + "Ring/";
+    ringPath = rootPath + "Music/";
+    QDir dir(ringPath);
+    if(!dir.exists())
+    {
+        dir.mkdir(ringPath);
+    }
+    ringPath = ringPath + "Ring/";
+    dir.setPath(ringPath);
+    if(!dir.exists())
+    {
+        dir.mkdir(ringPath);
+    }
 }
 
 void PathHelper::init()
