@@ -40,6 +40,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(&labelCamCInfo);
     ui->statusBar->addWidget(&labelCamDInfo);
     ui->statusBar->addWidget(&labelRingInfo);
+    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
 }
 
 MainWindow::~MainWindow()
@@ -115,7 +116,6 @@ void MainWindow::startNewRingThread()
     QStringList filters;
     filters << "*.mp3" << "*.wav";
     QFileInfoList files = PathHelper::getAllFiles(pathhelper.getRingPath(), filters, false);
-    qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
     if(!files.isEmpty() && files.count() > 0)
     {
         int index = qrand() % files.count();
