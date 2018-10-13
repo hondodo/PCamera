@@ -109,6 +109,7 @@ void MainWindow::startNewRingThread(QString filename)
         }
     }
     ringThread = new RingThread();
+    connect(ringThread, SIGNAL(finished()), this, SLOT(onRingThreadFinish()));
     ringThread->setFileName(filename);
     ringThread->start();
 }
@@ -434,6 +435,10 @@ void MainWindow::onKey(int key)
 void MainWindow::onRingThreadFinish()
 {
     labelRingInfo.setText("");
-    ringThread->deleteLater();
-    ringThread = NULL;
+    if(ringThread != NULL)
+    {
+        disconnect(ringThread, SIGNAL(finished()), this, SLOT(onRingThreadFinish()));
+        ringThread->deleteLater();
+        ringThread = NULL;
+    }
 }
