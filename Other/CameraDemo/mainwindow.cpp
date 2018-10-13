@@ -107,6 +107,10 @@ void MainWindow::startNewRingThread(QString filename)
             delete ringThread;
             ringThread = NULL;
         }
+        else
+        {
+            return;
+        }
     }
 
     labelRingInfo.setText("");
