@@ -414,9 +414,9 @@ int CameraThreadH264::open_output_file(const char *filename)
                 if(currentCameraSize == CAMERASIZE_640x480)
                     enc_ctx->bit_rate = 2000000;
                 else if(currentCameraSize == CAMERASIZE_1280x720)
-                    enc_ctx->bit_rate = 4000000;
+                    enc_ctx->bit_rate = 3000000;
                 else if(currentCameraSize == CAMERASIZE_1920x1080)
-                    enc_ctx->bit_rate = 6000000;
+                    enc_ctx->bit_rate = 4000000;
                 enc_ctx->gop_size = 250;
                 enc_ctx->max_b_frames = 10;
                 enc_ctx->qmin = 10;
