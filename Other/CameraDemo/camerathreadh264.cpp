@@ -185,6 +185,13 @@ void CameraThreadH264::run()
             }
         }
     }
+    emit onStopRecoding();
+    //delay 2s for ui show image
+    for(int i = 0; i < 100; i++)
+    {
+        this->msleep(20);
+    }
+    releaseFiltedFrame();
     emitMessage("Thread stoped");
     _isRunning = false;
 }
@@ -197,6 +204,22 @@ bool CameraThreadH264::getDelayOpenCamera() const
 void CameraThreadH264::setDelayOpenCamera(bool value)
 {
     delayOpenCamera = value;
+}
+
+AVFrame **CameraThreadH264::getFiltedFrame()
+{
+    if(filtedFrame != NULL)
+    {
+        return &filtedFrame;
+    }
+}
+
+void CameraThreadH264::releaseFiltedFrame()
+{
+    if(filtedFrame != NULL)
+    {
+        av_frame_free(&filtedFrame);
+    }
 }
 
 CAMERASIZE CameraThreadH264::getCurrentCameraSize() const
@@ -708,11 +731,12 @@ int CameraThreadH264::encode_write_frame(AVFrame *filt_frame, unsigned int strea
     //-----------
     if(cloneframe)
     {
-        if(filtedFrame != NULL)
-        {
-            av_frame_free(&filtedFrame);
-        }
-        if(filt_frame != NULL)
+        //if(filtedFrame != NULL)
+        //{
+        //    av_frame_free(&filtedFrame);
+        //}
+        //if(filt_frame != NULL) //2018/10/14
+        if(filtedFrame == NULL && filt_frame != NULL)
         {
             filtedFrame = av_frame_clone(filt_frame);
         }
@@ -814,16 +838,16 @@ int CameraThreadH264::caputuer()
     int got_frame;
     int (*dec_func)(AVCodecContext *, AVFrame *, int *, const AVPacket *);
 
-    int widthOut = 100;
-    int heightOut = 100;
-    AVPixelFormat pixOut = AV_PIX_FMT_YUV420P;
+//    int widthOut = 100;
+//    int heightOut = 100;
+//    AVPixelFormat pixOut = AV_PIX_FMT_YUV420P;
 
-    AVFrame *pFrameRGB = NULL;
-    struct SwsContext *imgConvertCtcRGB = NULL;
-    AVPixelFormat rgbFmt = AV_PIX_FMT_BGR24;
-    int rgbBytes = 0;
-    uint8_t *rgbOutBuffer = NULL;
-    cv::Mat mRGB, temp;
+//    AVFrame *pFrameRGB = NULL;
+//    struct SwsContext *imgConvertCtcRGB = NULL;
+//    AVPixelFormat rgbFmt = AV_PIX_FMT_BGR24;
+//    int rgbBytes = 0;
+//    uint8_t *rgbOutBuffer = NULL;
+//    cv::Mat mRGB, temp;
 
     bool isMoving = true;
 
@@ -837,6 +861,8 @@ int CameraThreadH264::caputuer()
     int maxDuraMS = 60 * 1000 * 60;//
 
     bool hadwriteheader = false;
+
+    int ignoreEncodingFrameTime = 0;
 
 #ifdef USE_FIX_30FPS
     int64_t eachframetime = 33333;
@@ -891,9 +917,10 @@ int CameraThreadH264::caputuer()
 
     if(cantainvideo)
     {
-        widthOut = pOutCodecCtx->width;
-        heightOut = pOutCodecCtx->height;
-        pixOut = pOutCodecCtx->pix_fmt;
+        //widthOut = pOutCodecCtx->width;
+        //heightOut = pOutCodecCtx->height;
+        //pixOut = pOutCodecCtx->pix_fmt;
+        emit onStartRecoing(pOutCodecCtx->width, pOutCodecCtx->height, (int)pOutCodecCtx->pix_fmt);
     }
 #ifdef USE_OPENGL
     struct SwsContext *img_convert_ctx;
@@ -912,16 +939,16 @@ int CameraThreadH264::caputuer()
                    widthOut, heightOut);
 #endif
 
-    pFrameRGB = av_frame_alloc();
-    imgConvertCtcRGB = sws_getContext(widthOut, heightOut,
-                                      pixOut, widthOut, heightOut,
-                                      rgbFmt, SWS_FAST_BILINEAR, NULL, NULL, NULL);
-    rgbBytes = avpicture_get_size(rgbFmt, widthOut, heightOut);
-    rgbOutBuffer = (uint8_t *) av_malloc(rgbBytes * sizeof(uint8_t));
-    avpicture_fill((AVPicture *)pFrameRGB, rgbOutBuffer, rgbFmt,
-                   widthOut, heightOut);
+//    pFrameRGB = av_frame_alloc();
+//    imgConvertCtcRGB = sws_getContext(widthOut, heightOut,
+//                                      pixOut, widthOut, heightOut,
+//                                      rgbFmt, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+//    rgbBytes = avpicture_get_size(rgbFmt, widthOut, heightOut);
+//    rgbOutBuffer = (uint8_t *) av_malloc(rgbBytes * sizeof(uint8_t));
+//    avpicture_fill((AVPicture *)pFrameRGB, rgbOutBuffer, rgbFmt,
+//                   widthOut, heightOut);
 
-    mRGB = cv::Mat(cv::Size(widthOut, heightOut), CV_8UC3);
+//    mRGB = cv::Mat(cv::Size(widthOut, heightOut), CV_8UC3);
 
     emitMessage("Recording");
     /* read all packets */
@@ -1078,6 +1105,22 @@ int CameraThreadH264::caputuer()
             if (got_frame) {
                 frame->pts = frame->best_effort_timestamp;
                 ret = filter_encode_write_frame(frame, stream_index, true);
+                if(ret < 0)
+                {
+                    if(ignoreEncodingFrameTime < 2)
+                    {
+                        emitMessage("Waring: encoding frame error, retry now");
+                        ignoreEncodingFrameTime++;
+                        av_frame_free(&frame);
+                        av_packet_unref(&packet);
+                        ret = 0;
+                    }
+                    else
+                    {
+                        emitMessage("Error: cannot encoding frame or write");
+                    }
+                }
+
 #ifdef USE_OPENGL
                 sws_scale(img_convert_ctx,
                           (uint8_t const * const *) frame->data,
@@ -1087,37 +1130,37 @@ int CameraThreadH264::caputuer()
                 emit onYUVFrame((unsigned char*)(pFrameYUV->data[0]), 0, 0);
 #endif
 
-                if(filtedFrame != NULL)
-                {
-#ifdef Q_OS_WIN
-#else
-                    if(frameindex % 3 == 0)
-#endif
-                    {
-                        sws_scale(imgConvertCtcRGB, (uint8_t const * const *) filtedFrame->data,
-                                  filtedFrame->linesize, 0, heightOut, pFrameRGB->data,
-                                  pFrameRGB->linesize);
+//                if(filtedFrame != NULL)
+//                {
+//#ifdef Q_OS_WIN
+//#else
+//                    if(frameindex % 3 == 0)
+//#endif
+//                    {
+//                        sws_scale(imgConvertCtcRGB, (uint8_t const * const *) filtedFrame->data,
+//                                  filtedFrame->linesize, 0, heightOut, pFrameRGB->data,
+//                                  pFrameRGB->linesize);
 
-                        mRGB.data =(uchar*)pFrameRGB->data[0];
-                        cv::cvtColor(mRGB, temp, CV_BGR2RGB);
+//                        mRGB.data =(uchar*)pFrameRGB->data[0];
+//                        cv::cvtColor(mRGB, temp, CV_BGR2RGB);
 
-                        if(checkMog)
-                        {
-                            isMoving = CameraCollectorThread::Init->findMogBOOL(currentCameraId, mRGB);
-                        }
-                        else
-                        {
-                            isMoving = true;
-                        }
+//                        if(checkMog)
+//                        {
+//                            isMoving = CameraCollectorThread::Init->findMogBOOL(currentCameraId, mRGB);
+//                        }
+//                        else
+//                        {
+//                            isMoving = true;
+//                        }
 
-                        QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-                        QImage image(dest);
-                        image.detach();
-                        emit onFrame(image.copy());//QIMAGE 内存问题
-                    }
-                    av_frame_free(&filtedFrame);
-                }
-
+//                        QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+//                        QImage image(dest);
+//                        image.detach();
+//                        emit onFrame(image.copy());//QIMAGE 内存问题
+//                    }
+//                    av_frame_free(&filtedFrame);
+//                }
+                emit onFrame();
                 av_frame_free(&frame);
                 if (ret < 0)
                 {
@@ -1198,15 +1241,15 @@ int CameraThreadH264::caputuer()
 
 end:
     emitMessage("stop record and free resources");
-    if(!mRGB.empty())
-        mRGB.release();
-    if(!temp.empty())
-        temp.release();
-
-    if(rgbOutBuffer != NULL)
-        av_free(rgbOutBuffer);
-    if(pFrameRGB != NULL)
-        av_frame_free(&pFrameRGB);
+    //if(!mRGB.empty())
+    //    mRGB.release();
+    //if(!temp.empty())
+    //    temp.release();
+    //
+    //if(rgbOutBuffer != NULL)
+    //    av_free(rgbOutBuffer);
+    //if(pFrameRGB != NULL)
+    //    av_frame_free(&pFrameRGB);
 
     if(hadwriteheader)
         av_write_trailer(ofmt_ctx);
@@ -1214,8 +1257,8 @@ end:
 #ifdef USE_OPENGL
     sws_freeContext(img_convert_ctx);
 #endif
-    if(imgConvertCtcRGB != NULL)
-        sws_freeContext(imgConvertCtcRGB);
+    //if(imgConvertCtcRGB != NULL)
+    //    sws_freeContext(imgConvertCtcRGB);
     if(packet.data)
     {
         av_packet_unref(&packet);
@@ -1238,11 +1281,6 @@ end:
     }
     if(stream_ctx != NULL) av_free(stream_ctx);
     if(ifmt_ctx != NULL) avformat_close_input(&ifmt_ctx);
-
-    if(filtedFrame != NULL)
-    {
-        av_frame_free(&filtedFrame);
-    }
 
     //if (ret < 0)
     //{

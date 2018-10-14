@@ -91,12 +91,20 @@ public:
     bool getDelayOpenCamera() const;
     void setDelayOpenCamera(bool value);
 
+    AVFrame *getFrameCache() const;
+
+    AVFrame **getFiltedFrame();
+    void releaseFiltedFrame();
+
 signals:
     void onFrame(const QImage &image);
+    void onFrame();
 #ifdef USE_OPENGL
     void onYUVFrame(const unsigned char* y_data, const unsigned char* u_data, const unsigned char* v_data);
 #endif
     void onMessage(const QString text);
+    void onStartRecoing(int width, int height, int pixOut);
+    void onStopRecoding();
 
 protected:
     void run();

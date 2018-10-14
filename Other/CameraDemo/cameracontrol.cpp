@@ -47,6 +47,44 @@ CameraControl::CameraControl(QWidget *parent) :
     ui->label->setVisible(false);
     ui->scrollArea->setVisible(false);
 #endif
+
+    widthOut = 100;
+    heightOut = 100;
+    pixOut = AV_PIX_FMT_YUV420P;
+    pFrameRGB = NULL;
+    imgConvertCtcRGB = NULL;
+    rgbFmt = AV_PIX_FMT_BGR24;
+    rgbBytes = 0;
+    rgbOutBuffer = NULL;
+    hasNewFrame = false;
+    frameTimerId = startTimer(30);
+    hasStopThread = true;
+    hasInitDecodingRecs = false;
+}
+
+CameraControl::~CameraControl()
+{
+    if(frameTimerId > 0)
+    {
+        killTimer(frameTimerId);
+        frameTimerId = 0;
+    }
+    if(restartTimerId > 0)
+    {
+        killTimer(restartTimerId);
+        restartTimerId = 0;
+    }
+    stop();
+    resetDecodingRecs();
+#ifdef USE_OPENGL
+    if(glWidget != NULL)
+    {
+        glWidget->deleteLater();
+        glWidget = NULL;
+    }
+#endif
+    qDebug() << "Remove camera control";
+    delete ui;
 }
 
 void CameraControl::initMenu()
@@ -138,22 +176,69 @@ void CameraControl::disConnectMenu()
     disconnect(fillScreenAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFillScreen()));
 }
 
-CameraControl::~CameraControl()
+void CameraControl::resetDecodingRecs()
 {
-    if(restartTimerId > 0)
+    hasInitDecodingRecs = false;
+    widthOut = 100;
+    heightOut = 100;
+    pixOut = AV_PIX_FMT_YUV420P;
+
+    if(pFrameRGB != NULL)
     {
-        killTimer(restartTimerId);
+        av_frame_free(&pFrameRGB);
     }
-    stop();
-#ifdef USE_OPENGL
-    if(glWidget != NULL)
+    pFrameRGB = NULL;
+    if(imgConvertCtcRGB != NULL)
     {
-        glWidget->deleteLater();
-        glWidget = NULL;
+        sws_freeContext(imgConvertCtcRGB);
     }
-#endif
-    qDebug() << "Remove camera control";
-    delete ui;
+    imgConvertCtcRGB = NULL;
+    rgbFmt = AV_PIX_FMT_BGR24;
+    rgbBytes = 0;
+    if(rgbOutBuffer != NULL)
+    {
+        av_free(rgbOutBuffer);
+    }
+    rgbOutBuffer = NULL;
+    if(!mRGB.empty())
+    {
+        mRGB.release();
+    }
+    if(!temp.empty())
+    {
+        temp.release();
+    }
+}
+
+void CameraControl::initDecodingRecs()
+{
+    pFrameRGB = av_frame_alloc();
+    imgConvertCtcRGB = sws_getContext(widthOut, heightOut,
+                                      pixOut, widthOut, heightOut,
+                                      rgbFmt, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+    rgbBytes = avpicture_get_size(rgbFmt, widthOut, heightOut);
+    rgbOutBuffer = (uint8_t *) av_malloc(rgbBytes * sizeof(uint8_t));
+    avpicture_fill((AVPicture *)pFrameRGB, rgbOutBuffer, rgbFmt,
+                   widthOut, heightOut);
+
+    mRGB = cv::Mat(cv::Size(widthOut, heightOut), CV_8UC3);
+    hasInitDecodingRecs = true;
+}
+
+void CameraControl::decodeFrameAndShow(AVFrame **filtedFrame)
+{
+    sws_scale(imgConvertCtcRGB, (uint8_t const * const *) (*filtedFrame)->data,
+              (*filtedFrame)->linesize, 0, heightOut, pFrameRGB->data,
+              pFrameRGB->linesize);
+
+    mRGB.data =(uchar*)pFrameRGB->data[0];
+    cv::cvtColor(mRGB, temp, CV_BGR2RGB);
+
+    QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+    QImage image(dest);
+    image.detach();
+    onImage(image);
+    av_frame_free(filtedFrame);
 }
 
 QString CameraControl::getCameraUrl() const
@@ -194,7 +279,10 @@ void CameraControl::start(bool delayOpenCamera)
     player->setFixBrighnessByTime(fixBrighnessByTime);
     player->setCheckMog(checkMog);
     player->setSaveOnlyMog(saveOnlyMog);
-    connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)));
+    //connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)));
+    connect(player, SIGNAL(onFrame()), this, SLOT(onFrame()));
+    connect(player, SIGNAL(onStartRecoing(int,int,int)), this, SLOT(onStartRecoing(int,int,int)));
+    connect(player, SIGNAL(onStopRecoding()), this, SLOT(onStopRecoding()));
     player->start();
     lastReceiveImageTime = QDateTime::currentDateTime();
     lastRestart = QDateTime::currentDateTime();
@@ -205,10 +293,12 @@ void CameraControl::start(bool delayOpenCamera)
                 this, SLOT(onYUVFrame(const unsigned char*,const unsigned char*,const unsigned char*)));
     }
 #endif
+    hasStopThread = false;
 }
 
 void CameraControl::stop()
 {
+    hasStopThread = true;
     if(player != Q_NULLPTR)
     {
         qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")
@@ -256,6 +346,12 @@ void CameraControl::onImage(const QImage &image)
     {
         ui->label->setPixmap(QPixmap::fromImage(image));
     }
+}
+
+void CameraControl::onFrame()
+{
+    lastReceiveImageTime = QDateTime::currentDateTime();
+    hasNewFrame = true;
 }
 
 bool CameraControl::getFixBrighnessByTime() const
@@ -310,6 +406,21 @@ void CameraControl::timerEvent(QTimerEvent *event)
                 onMessage("Restart camera (no image) @" + player->getCameraName());
                 stop();
                 start(true);
+            }
+        }
+    }
+    if(event->timerId() == frameTimerId)
+    {
+        if(hasInitDecodingRecs)
+        {
+            if(hasNewFrame && !hasStopThread && player != NULL && player->isRunning())
+            {
+                AVFrame **filtedFrame = player->getFiltedFrame();
+                if(filtedFrame != NULL && (*filtedFrame) != NULL)
+                {
+                    decodeFrameAndShow(filtedFrame);
+                }
+                hasNewFrame = false;
             }
         }
     }
@@ -434,6 +545,22 @@ void CameraControl::onMenuClickFillScreen()
 {
     disConnectMenu();
     fillScreen = !fillScreen;
+}
+
+void CameraControl::onStartRecoing(int width, int height, int pixOut)
+{
+    if(!hasInitDecodingRecs)//only init once, so cannot change thread's width height and pix-format
+    {
+        widthOut = width;
+        heightOut = height;
+        this->pixOut = (AVPixelFormat)pixOut;
+        initDecodingRecs();
+    }
+}
+
+void CameraControl::onStopRecoding()
+{
+    hasStopThread = true;
 }
 
 void CameraControl::onMessage(const QString text)

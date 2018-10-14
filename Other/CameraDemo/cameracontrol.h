@@ -72,6 +72,7 @@ signals:
 
 private slots:
     void onImage(const QImage &image);
+    void onFrame();
     void on_label_customContextMenuRequested(const QPoint &pos);
     void onMenuClickRemove();
     void onMenuClickCheckBrighness();
@@ -80,6 +81,8 @@ private slots:
     void onMenuClickSaveOnlyMog();
     void onMenuClickRestartPre30Min();
     void onMenuClickFillScreen();
+    void onStartRecoing(int width, int height, int pixOut);
+    void onStopRecoding();
 
 private slots:
 #ifdef USE_OPENGL
@@ -109,9 +112,13 @@ private:
     bool saveOnlyMog;
     bool restartCameraPre30Min;
     bool fillScreen;
+    bool hasNewFrame;
+    bool hasStopThread;
+    bool hasInitDecodingRecs;
     QDateTime lastRestart;
     QDateTime lastReceiveImageTime;
     int restartTimerId;
+    int frameTimerId;
     int restartTimeElsp;
     int restartByNoImageElsp;
     void initMenu();
@@ -119,6 +126,21 @@ private:
     QMenu *menu;
     QAction *removeAction, *checkBrighnessAction, *fixBrighnessByTimeAction,
     *checkMogAction, *saveOnlyMogAction, *restartPre30MinAction, *fillScreenAction;
+
+    //decode
+    int widthOut;
+    int heightOut;
+    AVPixelFormat pixOut;
+    AVFrame *pFrameRGB;
+    struct SwsContext *imgConvertCtcRGB;
+    AVPixelFormat rgbFmt;
+    int rgbBytes;
+    uint8_t *rgbOutBuffer;
+    cv::Mat mRGB, temp;
+
+    void resetDecodingRecs();
+    void initDecodingRecs();
+    void decodeFrameAndShow(AVFrame **filtedFrame);
 };
 
 #endif // CAMERACONTROL_H
