@@ -891,8 +891,8 @@ int CameraThreadH264::caputuer()
 
     if(cantainvideo)
     {
-        widthOut = 640;//pOutCodecCtx->width;
-        heightOut = 480;pOutCodecCtx->height;
+        widthOut = pOutCodecCtx->width;
+        heightOut = pOutCodecCtx->height;
         pixOut = pOutCodecCtx->pix_fmt;
     }
 #ifdef USE_OPENGL
