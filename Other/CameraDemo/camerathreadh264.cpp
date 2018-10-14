@@ -1089,26 +1089,29 @@ int CameraThreadH264::caputuer()
 
                 if(filtedFrame != NULL)
                 {
-                    sws_scale(imgConvertCtcRGB, (uint8_t const * const *) filtedFrame->data,
-                              filtedFrame->linesize, 0, heightOut, pFrameRGB->data,
-                              pFrameRGB->linesize);
-
-                    mRGB.data =(uchar*)pFrameRGB->data[0];
-                    cv::cvtColor(mRGB, temp, CV_BGR2RGB);
-
-                    if(checkMog)
+                    if(frameindex % 3 == 0)
                     {
-                        isMoving = CameraCollectorThread::Init->findMogBOOL(currentCameraId, mRGB);
-                    }
-                    else
-                    {
-                        isMoving = true;
-                    }
+                        sws_scale(imgConvertCtcRGB, (uint8_t const * const *) filtedFrame->data,
+                                  filtedFrame->linesize, 0, heightOut, pFrameRGB->data,
+                                  pFrameRGB->linesize);
 
-                    QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-                    QImage image(dest);
-                    image.detach();
-                    emit onFrame(image.copy());//QIMAGE 内存问题
+                        mRGB.data =(uchar*)pFrameRGB->data[0];
+                        cv::cvtColor(mRGB, temp, CV_BGR2RGB);
+
+                        if(checkMog)
+                        {
+                            isMoving = CameraCollectorThread::Init->findMogBOOL(currentCameraId, mRGB);
+                        }
+                        else
+                        {
+                            isMoving = true;
+                        }
+
+                        QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+                        QImage image(dest);
+                        image.detach();
+                        emit onFrame(image.copy());//QIMAGE 内存问题
+                    }
                     av_frame_free(&filtedFrame);
                 }
 
