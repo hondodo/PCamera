@@ -41,6 +41,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(&labelCamDInfo);
     ui->statusBar->addWidget(&labelRingInfo);
     qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
+
+    glesWidget = new GLESWidget(ui->widgetTestYUV);
 }
 
 MainWindow::~MainWindow()
@@ -445,4 +447,10 @@ void MainWindow::onRingThreadFinish()
         ringThread->deleteLater();
         ringThread = NULL;
     }
+}
+
+void MainWindow::on_pushButtonTestYUV_clicked()
+{
+    glesWidget->resize(ui->widgetTestYUV->size());
+    glesWidget->PlayOneFrame();
 }

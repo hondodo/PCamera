@@ -19,6 +19,7 @@
 #include "ringthread.h"
 #include "Core/diskhelper.h"
 #include "checkdiskthread.h"
+#include "3rd/gleswidget.h"
 
 namespace Ui {
 class MainWindow;
@@ -49,6 +50,8 @@ private slots:
     void onKey(int key);
     void onRingThreadFinish();
 
+    void on_pushButtonTestYUV_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool isFirstShow;
@@ -59,6 +62,7 @@ private:
     QString ringFileName;
     DiskHelper diskHelper;
     PathHelper pathHelper;
+    GLESWidget *glesWidget;
     QLabel labelDiskInfo, labelCamAInfo, labelCamBInfo, labelCamCInfo, labelCamDInfo, labelRingInfo;
 
     bool showDateTimeControlToCamerasComtrol;

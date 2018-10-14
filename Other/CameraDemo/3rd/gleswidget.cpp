@@ -33,7 +33,11 @@ void GLESWidget::PlayOneFrame()
     {
         //打开yuv视频文件 注意修改文件路径
         // m_pYuvFile = fopen("F://OpenglYuvDemo//1920_1080.yuv", "rb");
+#ifdef Q_OS_WIN
         m_pYuvFile = fopen("D:/TestRcs/akiyo_cif-352x288.yuv", "rb");
+#else
+        m_pYuvFile = fopen("/home/pi/REC/akiyo_cif-352x288.yuv", "rb");
+#endif
         m_nVideoW = 352;
         m_nVideoH = 288;
         //根据yuv视频数据的分辨率设置宽高,demo当中是1080p，这个地方要注意跟实际数据分辨率对应上
