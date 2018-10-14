@@ -1089,7 +1089,7 @@ int CameraThreadH264::caputuer()
 
                 if(filtedFrame != NULL)
                 {
-                    if(frameindex % 3 == 0)
+                    if(frameindex % 10 == 0)
                     {
                         sws_scale(imgConvertCtcRGB, (uint8_t const * const *) filtedFrame->data,
                                   filtedFrame->linesize, 0, heightOut, pFrameRGB->data,
