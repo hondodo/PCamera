@@ -891,8 +891,8 @@ int CameraThreadH264::caputuer()
 
     if(cantainvideo)
     {
-        widthOut = pOutCodecCtx->width;
-        heightOut = pOutCodecCtx->height;
+        widthOut = 640;//pOutCodecCtx->width;
+        heightOut = 480;pOutCodecCtx->height;
         pixOut = pOutCodecCtx->pix_fmt;
     }
 #ifdef USE_OPENGL
@@ -915,7 +915,7 @@ int CameraThreadH264::caputuer()
     pFrameRGB = av_frame_alloc();
     imgConvertCtcRGB = sws_getContext(widthOut, heightOut,
                                       pixOut, widthOut, heightOut,
-                                      rgbFmt, SWS_BICUBIC, NULL, NULL, NULL);
+                                      rgbFmt, SWS_FAST_BILINEAR, NULL, NULL, NULL);
     rgbBytes = avpicture_get_size(rgbFmt, widthOut, heightOut);
     rgbOutBuffer = (uint8_t *) av_malloc(rgbBytes * sizeof(uint8_t));
     avpicture_fill((AVPicture *)pFrameRGB, rgbOutBuffer, rgbFmt,
@@ -1089,7 +1089,10 @@ int CameraThreadH264::caputuer()
 
                 if(filtedFrame != NULL)
                 {
-                    if(frameindex % 10 == 0)
+#ifdef Q_OS_WIN
+#else
+                    if(frameindex % 3 == 0)
+#endif
                     {
                         sws_scale(imgConvertCtcRGB, (uint8_t const * const *) filtedFrame->data,
                                   filtedFrame->linesize, 0, heightOut, pFrameRGB->data,
