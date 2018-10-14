@@ -64,6 +64,37 @@ void GLESWidget::PlayOneFrame()
     return;
 }
 
+//Shader.frag文件内容
+static const char* FRAG_SHADER =
+    "varying lowp vec2 tc;\n"
+    "uniform sampler2D SamplerY;\n"
+    "uniform sampler2D SamplerU;\n"
+    "uniform sampler2D SamplerV;\n"
+    "void main(void)\n"
+    "{\n"
+        "mediump vec3 yuv;\n"
+        "lowp vec3 rgb;\n"
+        "yuv.x = texture2D(SamplerY, tc).r;\n"
+        "yuv.y = texture2D(SamplerU, tc).r - 0.5;\n"
+        "yuv.z = texture2D(SamplerV, tc).r - 0.5;\n"
+        "rgb = mat3( 1,   1,   1,\n"
+                    "0,       -0.39465,  2.03211,\n"
+                    "1.13983,   -0.58060,  0) * yuv;\n"
+        "gl_FragColor = vec4(rgb, 1);\n"
+    "}\n";
+
+//Shader.vert文件内容
+static const char* VERTEX_SHADER =
+      "attribute vec4 vPosition;    \n"
+      "attribute vec2 a_texCoord;	\n"
+      "varying vec2 tc;		\n"
+      "void main()                  \n"
+      "{                            \n"
+      "   gl_Position = vPosition;  \n"
+      "	  tc = a_texCoord;	\n"
+      "}                            \n";
+
+
 void GLESWidget::initializeGL()
 {
     initializeOpenGLFunctions();
@@ -83,7 +114,7 @@ void GLESWidget::initializeGL()
         textureOut = textureIn; \
     }";
     //编译顶点着色器程序
-    bool bCompile = m_pVSHader->compileSourceCode(vsrc);
+    bool bCompile = m_pVSHader->compileSourceCode(VERTEX_SHADER);
     if(!bCompile)
     {
     }
@@ -107,7 +138,7 @@ void GLESWidget::initializeGL()
         gl_FragColor = vec4(rgb, 1); \
     }";
     //将glsl源码送入编译器编译着色器程序
-    bCompile = m_pFSHader->compileSourceCode(fsrc);
+    bCompile = m_pFSHader->compileSourceCode(FRAG_SHADER);
     if(!bCompile)
     {
     }
@@ -118,18 +149,18 @@ void GLESWidget::initializeGL()
     //将顶点着色器添加到程序容器
     m_pShaderProgram->addShader(m_pVSHader);
     //绑定属性vertexIn到指定位置ATTRIB_VERTEX,该属性在顶点着色源码其中有声明
-    m_pShaderProgram->bindAttributeLocation("vertexIn", ATTRIB_VERTEX);
+    m_pShaderProgram->bindAttributeLocation("vPosition", ATTRIB_VERTEX);
     //绑定属性textureIn到指定位置ATTRIB_TEXTURE,该属性在顶点着色源码其中有声明
-    m_pShaderProgram->bindAttributeLocation("textureIn", ATTRIB_TEXTURE);
+    m_pShaderProgram->bindAttributeLocation("a_texCoord", ATTRIB_TEXTURE);
     //链接所有所有添入到的着色器程序
     m_pShaderProgram->link();
     //激活所有链接
     m_pShaderProgram->bind();
     //读取着色器中的数据变量tex_y, tex_u, tex_v的位置,这些变量的声明可以在
     //片段着色器源码中可以看到
-    textureUniformY = m_pShaderProgram->uniformLocation("tex_y");
-    textureUniformU =  m_pShaderProgram->uniformLocation("tex_u");
-    textureUniformV =  m_pShaderProgram->uniformLocation("tex_v");
+    textureUniformY = m_pShaderProgram->uniformLocation("SamplerY");
+    textureUniformU =  m_pShaderProgram->uniformLocation("SamplerU");
+    textureUniformV =  m_pShaderProgram->uniformLocation("SamplerV");
     // 顶点矩阵
     static const GLfloat vertexVertices[] = {
         -1.0f, -1.0f,
