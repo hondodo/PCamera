@@ -57,7 +57,8 @@ SOURCES += \
     weatherreportcontrol.cpp \
     camerathreadh264.cpp \
     keyboardthread.cpp \
-    checkdiskthread.cpp
+    checkdiskthread.cpp \
+    3rd/gleswidget.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -94,7 +95,8 @@ HEADERS += \
     weatherreportcontrol.h \
     camerathreadh264.h \
     keyboardthread.h \
-    checkdiskthread.h
+    checkdiskthread.h \
+    3rd/gleswidget.h
 
 FORMS += \
         mainwindow.ui \

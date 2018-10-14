@@ -10,15 +10,17 @@ extern "C"
 #include "libavdevice/avdevice.h"
 }
 
+#include "3rd/gleswidget.h"
+
 using namespace std;
 
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
-    av_register_all();
-    unsigned version = avcodec_version();
-    qDebug() << version;
+    //av_register_all();
+    //unsigned version = avcodec_version();
+    //qDebug() << version;
 
     MainWindow w;
     w.show();
