@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QThread>
 #include <QDebug>
+#include <QDateTime>
 #ifdef Q_OS_LINUX
 #include <wiringPi.h>
 #endif
@@ -26,11 +27,19 @@ protected:
 
 signals:
     void onKey(int key);
+    void onDark();
+    void onPeople();
 
 public slots:
 
 private:
     bool _IsRunning;
+
+    bool _isRing;
+    bool _isDark;
+    bool _isPeople;
+
+    QDateTime lastCheckRing, lastCheckDark, lastCheckPeople;
 };
 
 #endif // KEYBOARDTHREAD_H
