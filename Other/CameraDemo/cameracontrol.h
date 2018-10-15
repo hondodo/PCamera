@@ -81,6 +81,7 @@ private slots:
     void onMenuClickSaveOnlyMog();
     void onMenuClickRestartPre30Min();
     void onMenuClickFillScreen();
+    void onMenuClickSkipFrame();
     void onStartRecoing(int width, int height, int pixOut);
     void onStopRecoding();
 
@@ -112,6 +113,7 @@ private:
     bool saveOnlyMog;
     bool restartCameraPre30Min;
     bool fillScreen;
+    bool skipFrame;
     bool hasNewFrame;
     bool hasStopThread;
     bool hasInitDecodingRecs;
@@ -125,7 +127,7 @@ private:
     void disConnectMenu();
     QMenu *menu;
     QAction *removeAction, *checkBrighnessAction, *fixBrighnessByTimeAction,
-    *checkMogAction, *saveOnlyMogAction, *restartPre30MinAction, *fillScreenAction;
+    *checkMogAction, *saveOnlyMogAction, *restartPre30MinAction, *fillScreenAction, *skipFrameAction;
 
     //decode
     int widthOut;

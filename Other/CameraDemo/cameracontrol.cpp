@@ -27,6 +27,8 @@ CameraControl::CameraControl(QWidget *parent) :
     saveOnlyMogAction = NULL;
     restartPre30MinAction = NULL;
     fillScreenAction = NULL;
+    skipFrameAction = NULL;
+    skipFrame = false;
     restartCameraPre30Min = false;
     lastRestart = QDateTime::currentDateTime();
     lastReceiveImageTime = QDateTime::currentDateTime();
@@ -164,6 +166,11 @@ void CameraControl::initMenu()
     fillScreenAction->setCheckable(true);
     fillScreenAction->setChecked(fillScreen);
     connect(fillScreenAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFillScreen()));
+
+    skipFrameAction = menu->addAction("Skip Frame");
+    skipFrameAction->setCheckable(true);
+    skipFrameAction->setChecked(skipFrame);
+    connect(skipFrameAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickSkipFrame()));
 }
 
 void CameraControl::disConnectMenu()
@@ -176,6 +183,7 @@ void CameraControl::disConnectMenu()
     disconnect(saveOnlyMogAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickSaveOnlyMog()));
     disconnect(restartPre30MinAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickRestartPre30Min()));
     disconnect(fillScreenAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickFillScreen()));
+    disconnect(skipFrameAction, SIGNAL(triggered(bool)), this, SLOT(onMenuClickSkipFrame()));
 }
 
 void CameraControl::resetDecodingRecs()
@@ -229,7 +237,7 @@ void CameraControl::initDecodingRecs()
 
 void CameraControl::decodeFrameAndShow(AVFrame **filtedFrame)
 {
-    if(isDecodingTurn)
+    if(!skipFrame || isDecodingTurn)
     {
         sws_scale(imgConvertCtcRGB, (uint8_t const * const *) (*filtedFrame)->data,
                   (*filtedFrame)->linesize, 0, heightOut, pFrameRGB->data,
@@ -243,10 +251,7 @@ void CameraControl::decodeFrameAndShow(AVFrame **filtedFrame)
         image.detach();
         onImage(image);
     }
-#ifdef Q_OS_WIN
-#else
     isDecodingTurn = !isDecodingTurn;
-#endif
     av_frame_free(filtedFrame);
 }
 
@@ -554,6 +559,12 @@ void CameraControl::onMenuClickFillScreen()
 {
     disConnectMenu();
     fillScreen = !fillScreen;
+}
+
+void CameraControl::onMenuClickSkipFrame()
+{
+    disConnectMenu();
+    skipFrame = !skipFrame;
 }
 
 void CameraControl::onStartRecoing(int width, int height, int pixOut)
