@@ -10,7 +10,6 @@
 #include "camerathreadmux.h"
 #include "camerathreadh264.h"
 #include "3rd/gl_widget.h"
-#include "decodingthread.h"
 
 namespace Ui {
 class CameraControl;
@@ -113,9 +112,13 @@ private:
     bool saveOnlyMog;
     bool restartCameraPre30Min;
     bool fillScreen;
+    bool hasNewFrame;
+    bool hasStopThread;
+    bool hasInitDecodingRecs;
     QDateTime lastRestart;
     QDateTime lastReceiveImageTime;
     int restartTimerId;
+    int frameTimerId;
     int restartTimeElsp;
     int restartByNoImageElsp;
     void initMenu();
@@ -124,7 +127,20 @@ private:
     QAction *removeAction, *checkBrighnessAction, *fixBrighnessByTimeAction,
     *checkMogAction, *saveOnlyMogAction, *restartPre30MinAction, *fillScreenAction;
 
-    DecodingThread *decodingThread;
+    //decode
+    int widthOut;
+    int heightOut;
+    AVPixelFormat pixOut;
+    AVFrame *pFrameRGB;
+    struct SwsContext *imgConvertCtcRGB;
+    AVPixelFormat rgbFmt;
+    int rgbBytes;
+    uint8_t *rgbOutBuffer;
+    cv::Mat mRGB, temp;
+
+    void resetDecodingRecs();
+    void initDecodingRecs();
+    void decodeFrameAndShow(AVFrame **filtedFrame);
 };
 
 #endif // CAMERACONTROL_H

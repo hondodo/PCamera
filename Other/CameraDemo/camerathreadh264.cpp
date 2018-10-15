@@ -967,20 +967,6 @@ int CameraThreadH264::caputuer()
     frameTimer.restart();
     while (_isRunning && (recdura >= 0 && recdura < maxDuraMS))//loopindex < maxloop)
     {
-#ifdef USE_FIX_30FPS
-        encodewritetime = av_gettime() - now;
-        sleeptimeus = eachframetime - encodewritetime + 5000;
-        if(sleeptimeus > 0 && sleeptimeus < eachframetime)
-        {
-            av_usleep(sleeptimeus);
-        }
-        else
-        {
-            av_usleep(5000);
-        }
-#else
-        av_usleep(5000);
-#endif
         //recdura = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastRecTime.toMSecsSinceEpoch();
         if(recdura < 0 || recdura > maxDuraMS)
         //if(currentFrame >= maxFrame)

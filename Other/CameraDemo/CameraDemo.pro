@@ -58,8 +58,7 @@ SOURCES += \
     camerathreadh264.cpp \
     keyboardthread.cpp \
     checkdiskthread.cpp \
-    3rd/gleswidget.cpp \
-    decodingthread.cpp
+    3rd/gleswidget.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -97,8 +96,7 @@ HEADERS += \
     camerathreadh264.h \
     keyboardthread.h \
     checkdiskthread.h \
-    3rd/gleswidget.h \
-    decodingthread.h
+    3rd/gleswidget.h
 
 FORMS += \
         mainwindow.ui \
