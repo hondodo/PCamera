@@ -58,7 +58,8 @@ SOURCES += \
     camerathreadh264.cpp \
     keyboardthread.cpp \
     checkdiskthread.cpp \
-    3rd/gleswidget.cpp
+    3rd/gleswidget.cpp \
+    darkform.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -96,7 +97,8 @@ HEADERS += \
     camerathreadh264.h \
     keyboardthread.h \
     checkdiskthread.h \
-    3rd/gleswidget.h
+    3rd/gleswidget.h \
+    darkform.h
 
 FORMS += \
         mainwindow.ui \
@@ -105,7 +107,8 @@ FORMS += \
     cameracontrolopengl.ui \
     datetimecontrol.ui \
     weathercontrol.ui \
-    weatherreportcontrol.ui
+    weatherreportcontrol.ui \
+    darkform.ui
 
 win32:LIBS += -LD:/ffmpeg/dev/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample
 unix:LIBS += -L/usr/local/lib/ -lavcodec -lavformat -lswscale -lavutil -lavdevice -lavfilter -lpostproc -lswresample

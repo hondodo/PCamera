@@ -49,10 +49,14 @@ MainWindow::MainWindow(QWidget *parent) :
     glesWidget = new GLESWidget(ui->widgetTestYUV);
     isDark = false;
     isPeople = false;
+
+    darkForm = new DarkForm();
 }
 
 MainWindow::~MainWindow()
 {
+    darkForm->close();
+    darkForm->deleteLater();
     KeyBoardThread::Init->setStop();
     CheckDiskThread::Init->setStop();
     VideoFileThread::Init->setStop();
@@ -231,6 +235,18 @@ void MainWindow::timerEvent(QTimerEvent *event)
             isPeople = KeyBoardThread::Init->isPeople();
             labelDark.setText(isDark? "Dark" : "Brightness");
             labelPeople.setText(isPeople? "People" : "No People");
+
+            if(isDark && !isPeople)
+            {
+                if(darkForm != NULL)
+                {
+                    darkForm->show();
+                }
+            }
+            else
+            {
+                darkForm->hide();
+            }
         }
 
         timerFrames++;

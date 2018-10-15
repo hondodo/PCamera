@@ -20,6 +20,7 @@
 #include "Core/diskhelper.h"
 #include "checkdiskthread.h"
 #include "3rd/gleswidget.h"
+#include "darkform.h"
 
 namespace Ui {
 class MainWindow;
@@ -83,6 +84,7 @@ private:
     void startNewRingThread();
 
     bool isDark, isPeople;
+    DarkForm *darkForm;
 };
 
 #endif // MAINWINDOW_H
