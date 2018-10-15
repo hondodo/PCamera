@@ -52,6 +52,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
     darkForm = new DarkForm();
     lastPeople = QDateTime::currentDateTime();
+    isFromTestDark = false;
+
+    ui->pushButtonTestDarkScreen->setVisible(false);
+    ui->pushButtonClearTestMark->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -237,25 +241,28 @@ void MainWindow::timerEvent(QTimerEvent *event)
             labelDark.setText(isDark? "Dark" : "Brightness");
             labelPeople.setText(isPeople? "People" : "No People");
 
-            if(isPeople)
+            if(!isFromTestDark)
             {
-                lastPeople = QDateTime::currentDateTime();
-            }
-
-            qint64 nopeopleels = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastPeople.toMSecsSinceEpoch();
-
-            if(isDark && !isPeople && nopeopleels > 20000)//无人后20秒后
-            {
-                if(darkForm != NULL && darkForm->isHidden())
+                if(isPeople)
                 {
-                    darkForm->show();
+                    lastPeople = QDateTime::currentDateTime();
                 }
-            }
-            else
-            {
-                if(darkForm != NULL && !darkForm->isHidden())
+
+                qint64 nopeopleels = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastPeople.toMSecsSinceEpoch();
+
+                if(isDark && !isPeople && nopeopleels > 20000)//无人后20秒后
                 {
-                    darkForm->hide();
+                    if(darkForm != NULL && darkForm->isHidden())
+                    {
+                        darkForm->show();
+                    }
+                }
+                else
+                {
+                    if(darkForm != NULL && (!darkForm->isHidden() && !darkForm->getRequestHide()))
+                    {
+                        darkForm->hideForm();
+                    }
                 }
             }
         }
@@ -492,4 +499,25 @@ void MainWindow::on_pushButtonTestYUV_clicked()
 {
     glesWidget->resize(ui->widgetTestYUV->size());
     glesWidget->PlayOneFrame();
+}
+
+void MainWindow::on_pushButtonTestDarkScreen_clicked()
+{
+    isFromTestDark = true;
+    if(darkForm != NULL)
+    {
+        if(!darkForm->isHidden())
+        {
+            darkForm->hide();
+        }
+        else
+        {
+            darkForm->showNormal();
+        }
+    }
+}
+
+void MainWindow::on_pushButtonClearTestMark_clicked()
+{
+    isFromTestDark = false;
 }

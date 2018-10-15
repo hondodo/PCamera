@@ -52,6 +52,9 @@ private slots:
     void onRingThreadFinish();
 
     void on_pushButtonTestYUV_clicked();
+    void on_pushButtonTestDarkScreen_clicked();
+
+    void on_pushButtonClearTestMark_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -86,6 +89,7 @@ private:
     bool isDark, isPeople;
     QDateTime lastPeople;
     DarkForm *darkForm;
+    bool isFromTestDark;
 };
 
 #endif // MAINWINDOW_H

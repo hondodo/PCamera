@@ -37,5 +37,7 @@
         <file>Rcs/tstorm2.png</file>
         <file>Rcs/tstorm2_night.png</file>
         <file>Rcs/tstorm3.png</file>
+        <file>Rcs/hello.png</file>
+        <file>Rcs/light.png</file>
     </qresource>
 </RCC>
