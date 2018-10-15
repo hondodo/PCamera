@@ -63,7 +63,8 @@ private:
     DiskHelper diskHelper;
     PathHelper pathHelper;
     GLESWidget *glesWidget;
-    QLabel labelDiskInfo, labelCamAInfo, labelCamBInfo, labelCamCInfo, labelCamDInfo, labelRingInfo;
+    QLabel labelDiskInfo, labelCamAInfo, labelCamBInfo, labelCamCInfo, labelCamDInfo, labelRingInfo,
+    labelPeople, labelDark;
 
     bool showDateTimeControlToCamerasComtrol;
     bool showWeathControl;
@@ -80,6 +81,8 @@ private:
     WeatherControl *weatherControl;
     void deleteRingThread();
     void startNewRingThread();
+
+    bool isDark, isPeople;
 };
 
 #endif // MAINWINDOW_H

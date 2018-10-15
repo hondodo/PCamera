@@ -34,15 +34,21 @@ MainWindow::MainWindow(QWidget *parent) :
     labelCamCInfo.setText("");
     labelCamDInfo.setText("");
     labelRingInfo.setText("");
+    labelDark.setText("");
+    labelPeople.setText("");
     ui->statusBar->addWidget(&labelDiskInfo);
     ui->statusBar->addWidget(&labelCamAInfo);
     ui->statusBar->addWidget(&labelCamBInfo);
     ui->statusBar->addWidget(&labelCamCInfo);
     ui->statusBar->addWidget(&labelCamDInfo);
     ui->statusBar->addWidget(&labelRingInfo);
+    ui->statusBar->addWidget(&labelPeople);
+    ui->statusBar->addWidget(&labelDark);
     qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
 
     glesWidget = new GLESWidget(ui->widgetTestYUV);
+    isDark = false;
+    isPeople = false;
 }
 
 MainWindow::~MainWindow()
@@ -220,6 +226,11 @@ void MainWindow::timerEvent(QTimerEvent *event)
                         labelCamDInfo.setText("");
                 }
             }
+
+            isDark = KeyBoardThread::Init->isDark();
+            isPeople = KeyBoardThread::Init->isPeople();
+            labelDark.setText(isDark? "Dark" : "Brightness");
+            labelPeople.setText(isPeople? "People" : "No People");
         }
 
         timerFrames++;

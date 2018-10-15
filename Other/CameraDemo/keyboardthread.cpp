@@ -41,17 +41,44 @@ void KeyBoardThread::run()
             lastCheckRing = now;
             emit onKey(0);
         }
-        if((peopleels < 0 || peopleels > 1000) && digitalRead(P1) == 1)
+        if((peopleels < 0 || peopleels > 1000))
         {
-            lastCheckPeople = now;
-            emit onPeople();
+            if(digitalRead(P1) == 1)
+            {
+                lastCheckPeople = now;
+                _isPeople = true;
+                emit onPeople();
+            }
+            else
+            {
+                _isPeople = false;
+            }
         }
-        if((darkels < 0 || darkels > 1000) && digitalRead(P2) == 1)
+        if((darkels < 0 || darkels > 1000))
         {
-            lastCheckDark = now;
-            emit onDark();
+            if(digitalRead(P2) == 1)
+            {
+                lastCheckDark = now;
+                _isDark = true;
+                emit onDark();
+            }
+            else
+            {
+                _isDark = false;
+            }
         }
         this->msleep(20);
     }
 #endif
+}
+
+bool KeyBoardThread::isPeople() const
+{
+    return _isPeople;
+}
+
+
+bool KeyBoardThread::isDark() const
+{
+    return _isDark;
 }

@@ -22,6 +22,10 @@ public:
     static KeyBoardThread *Init;
     void setStop();
 
+    bool isDark() const;
+
+    bool isPeople() const;
+
 protected:
     void run();
 
