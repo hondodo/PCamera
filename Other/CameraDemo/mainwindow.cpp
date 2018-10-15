@@ -51,6 +51,7 @@ MainWindow::MainWindow(QWidget *parent) :
     isPeople = false;
 
     darkForm = new DarkForm();
+    lastPeople = QDateTime::currentDateTime();
 }
 
 MainWindow::~MainWindow()
@@ -236,16 +237,26 @@ void MainWindow::timerEvent(QTimerEvent *event)
             labelDark.setText(isDark? "Dark" : "Brightness");
             labelPeople.setText(isPeople? "People" : "No People");
 
-            if(isDark && !isPeople)
+            if(isPeople)
             {
-                if(darkForm != NULL)
+                lastPeople = QDateTime::currentDateTime();
+            }
+
+            qint64 nopeopleels = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastPeople.toMSecsSinceEpoch();
+
+            if(isDark && !isPeople && nopeopleels > 20000)//无人后20秒后
+            {
+                if(darkForm != NULL && darkForm->isHidden())
                 {
                     darkForm->show();
                 }
             }
             else
             {
-                darkForm->hide();
+                if(darkForm != NULL && !darkForm->isHidden())
+                {
+                    darkForm->hide();
+                }
             }
         }
 

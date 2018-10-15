@@ -84,6 +84,7 @@ private:
     void startNewRingThread();
 
     bool isDark, isPeople;
+    QDateTime lastPeople;
     DarkForm *darkForm;
 };
 
