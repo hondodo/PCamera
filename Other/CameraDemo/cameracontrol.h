@@ -141,6 +141,8 @@ private:
     void resetDecodingRecs();
     void initDecodingRecs();
     void decodeFrameAndShow(AVFrame **filtedFrame);
+
+    bool isDecodingTurn;
 };
 
 #endif // CAMERACONTROL_H

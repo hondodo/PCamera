@@ -60,6 +60,8 @@ CameraControl::CameraControl(QWidget *parent) :
     frameTimerId = startTimer(30);
     hasStopThread = true;
     hasInitDecodingRecs = false;
+
+    isDecodingTurn = true;
 }
 
 CameraControl::~CameraControl()
@@ -227,17 +229,24 @@ void CameraControl::initDecodingRecs()
 
 void CameraControl::decodeFrameAndShow(AVFrame **filtedFrame)
 {
-    sws_scale(imgConvertCtcRGB, (uint8_t const * const *) (*filtedFrame)->data,
-              (*filtedFrame)->linesize, 0, heightOut, pFrameRGB->data,
-              pFrameRGB->linesize);
+    if(isDecodingTurn)
+    {
+        sws_scale(imgConvertCtcRGB, (uint8_t const * const *) (*filtedFrame)->data,
+                  (*filtedFrame)->linesize, 0, heightOut, pFrameRGB->data,
+                  pFrameRGB->linesize);
 
-    mRGB.data =(uchar*)pFrameRGB->data[0];
-    cv::cvtColor(mRGB, temp, CV_BGR2RGB);
+        mRGB.data =(uchar*)pFrameRGB->data[0];
+        cv::cvtColor(mRGB, temp, CV_BGR2RGB);
 
-    QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-    QImage image(dest);
-    image.detach();
-    onImage(image);
+        QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+        QImage image(dest);
+        image.detach();
+        onImage(image);
+    }
+#ifdef Q_OS_WIN
+#else
+    isDecodingTurn = !isDecodingTurn;
+#endif
     av_frame_free(filtedFrame);
 }
 
