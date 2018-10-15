@@ -39,7 +39,7 @@ private:
     bool _isDark;
     bool _isPeople;
 
-    QDateTime lastCheckRing, lastCheckDark, lastCheckPeople;
+    qint64 lastCheckRing, lastCheckDark, lastCheckPeople;
 };
 
 #endif // KEYBOARDTHREAD_H

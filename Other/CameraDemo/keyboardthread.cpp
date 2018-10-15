@@ -7,7 +7,7 @@ KeyBoardThread::KeyBoardThread(QObject *parent) : QThread(parent)
     _isRing = false;
     _isDark = false;
     _isPeople = false;
-    lastCheckRing = lastCheckDark = lastCheckPeople = QDateTime::currentDateTime();
+    lastCheckRing = lastCheckDark = lastCheckPeople = QDateTime::currentDateTime().toMSecsSinceEpoch();
 }
 
 void KeyBoardThread::setStop()
@@ -28,19 +28,27 @@ void KeyBoardThread::run()
     pullUpDnControl(P1, PUD_UP);//红外 有人为1
     pullUpDnControl(P2, PUD_UP);//光感 暗为1
     pullUpDnControl(P3, PUD_UP);
+    qint64 ringels = 0, peopleels = 0, darkels = 0;
+    qint64 now = 0;
     while(_IsRunning)
     {
-        if(digitalRead(P0) == 0)
+        now = QDateTime::currentDateTime().toMSecsSinceEpoch();
+        ringels = now - lastCheckRing;
+        peopleels = now - lastCheckPeople;
+        darkels = now - lastCheckDark;
+        if((ringels < 0 || ringels > 1000) && digitalRead(P0) == 0)
         {
+            lastCheckRing = now;
             emit onKey(0);
-            this->msleep(1000);
         }
-        if(digitalRead(P1) == 1)
+        if((peopleels < 0 || peopleels > 1000) && digitalRead(P1) == 1)
         {
+            lastCheckPeople = now;
             emit onPeople();
         }
-        if(digitalRead(P2) == 1)
+        if((darkels < 0 || darkels > 1000) && digitalRead(P2) == 1)
         {
+            lastCheckDark = now;
             emit onDark();
         }
         this->msleep(20);
