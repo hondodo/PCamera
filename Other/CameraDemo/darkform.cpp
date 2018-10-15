@@ -6,7 +6,7 @@ DarkForm::DarkForm(QWidget *parent) :
     ui(new Ui::DarkForm)
 {
     ui->setupUi(this);
-    //this->setWindowState(Qt::WindowFullScreen);
+    this->setWindowState(Qt::WindowFullScreen);
     timeId = startTimer(500);
     showLight = false;
     showHello = false;
@@ -56,7 +56,7 @@ void DarkForm::timerEvent(QTimerEvent *event)
             if(requestHide)
             {
                 qint64 elsp = QDateTime::currentDateTime().toMSecsSinceEpoch() - hideTime.toMSecsSinceEpoch();
-                if(elsp >= 0 && elsp < 4000)
+                if(elsp >= 0 && elsp < 3000)
                 {
                     ui->widget->setVisible(false);
                     if(elsp < 2000)
