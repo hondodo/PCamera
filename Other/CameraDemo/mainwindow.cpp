@@ -473,6 +473,7 @@ void MainWindow::onCameraControlRequestRemove()
 void MainWindow::onKey(int key)
 {
     Q_UNUSED(key);
+    lastPeople = QDateTime::currentDateTime();//也当做有人
     startNewRingThread();
 }
 
