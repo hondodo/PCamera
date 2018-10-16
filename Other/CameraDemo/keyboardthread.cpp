@@ -27,7 +27,7 @@ void KeyBoardThread::setStop()
 
 void KeyBoardThread::run()
 {
-//#ifdef Q_OS_LINUX
+#ifdef Q_OS_LINUX
     _isSetup = wiringPiSetup() == 0;
     pinMode(P0, INPUT);
     pinMode(P1, INPUT);
