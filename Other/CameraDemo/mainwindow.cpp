@@ -280,6 +280,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
                     }
                 }
             }
+            ui->pushButtonTurnOnLight->setText(lightisturnon? tr("Turn Off Light") : tr("Turn On Light"));
         }
 
         timerFrames++;
