@@ -53,10 +53,11 @@ private slots:
 
     void on_pushButtonTestYUV_clicked();
     void on_pushButtonTestDarkScreen_clicked();
-
     void on_pushButtonClearTestMark_clicked();
-
     void on_pushButtonTurnOnLight_clicked();
+    void on_pushButtonMiniForm_clicked();
+    void on_pushButtonNormalForm_clicked();
+    void on_pushButtonFullScreen_clicked();
 
 private:
     Ui::MainWindow *ui;
@@ -70,7 +71,7 @@ private:
     PathHelper pathHelper;
     GLESWidget *glesWidget;
     QLabel labelDiskInfo, labelCamAInfo, labelCamBInfo, labelCamCInfo, labelCamDInfo, labelRingInfo,
-    labelPeople, labelDark;
+    labelPeople, labelDark, labelLight;
 
     bool showDateTimeControlToCamerasComtrol;
     bool showWeathControl;
@@ -92,6 +93,8 @@ private:
     QDateTime lastPeople;
     DarkForm *darkForm;
     bool isFromTestDark;
+
+    Qt::WindowStates lastState;
 };
 
 #endif // MAINWINDOW_H

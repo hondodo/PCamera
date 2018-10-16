@@ -13,6 +13,8 @@ AddCameraForm::AddCameraForm(QWidget *parent) :
 #else
     ui->comboBoxSize->setCurrentIndex(3);
 #endif
+    setWindowTitle(tr("Add Camera"));
+    this->setWindowFlag(Qt::WindowStaysOnTopHint, true);
 }
 
 AddCameraForm::~AddCameraForm()
@@ -35,6 +37,12 @@ void AddCameraForm::showEvent(QShowEvent *event)
         ui->labelError->setText("");
         ui->labelError->setVisible(false);
     }
+}
+
+void AddCameraForm::closeEvent(QCloseEvent *event)
+{
+    Q_UNUSED(event);
+    emit onClose(state);
 }
 
 void AddCameraForm::on_comboBoxType_currentIndexChanged(int index)
@@ -185,7 +193,7 @@ void AddCameraForm::on_pushButtonOK_clicked()
         return;
     }
     this->close();
-    emit onClose(state);
+    //emit onClose(state);
 }
 
 void AddCameraForm::on_lineEditUrl_textChanged(const QString &arg1)

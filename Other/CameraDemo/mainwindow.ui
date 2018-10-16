@@ -392,99 +392,130 @@
           <attribute name="title">
            <string>Settings</string>
           </attribute>
-          <widget class="QPushButton" name="pushButtonAddCamera">
-           <property name="geometry">
-            <rect>
-             <x>90</x>
-             <y>100</y>
-             <width>161</width>
-             <height>28</height>
-            </rect>
-           </property>
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="text">
-            <string>Add Camera</string>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="checkBoxTimeControl">
-           <property name="geometry">
-            <rect>
-             <x>90</x>
-             <y>30</y>
-             <width>231</width>
-             <height>19</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Time Control</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-          <widget class="QCheckBox" name="checkBoxWeatherControl">
-           <property name="geometry">
-            <rect>
-             <x>90</x>
-             <y>70</y>
-             <width>181</width>
-             <height>19</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Weather Control</string>
-           </property>
-           <property name="checked">
-            <bool>true</bool>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pushButtonTestDarkScreen">
-           <property name="geometry">
-            <rect>
-             <x>90</x>
-             <y>150</y>
-             <width>161</width>
-             <height>28</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Test Dark Screen</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pushButtonClearTestMark">
-           <property name="geometry">
-            <rect>
-             <x>260</x>
-             <y>150</y>
-             <width>151</width>
-             <height>28</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Clear Test Mark</string>
-           </property>
-          </widget>
-          <widget class="QPushButton" name="pushButtonTurnOnLight">
-           <property name="geometry">
-            <rect>
-             <x>260</x>
-             <y>100</y>
-             <width>151</width>
-             <height>28</height>
-            </rect>
-           </property>
-           <property name="text">
-            <string>Turn On Light</string>
-           </property>
-           <property name="checked">
-            <bool>false</bool>
-           </property>
-          </widget>
+          <layout class="QGridLayout" name="gridLayout_13">
+           <item row="0" column="0">
+            <layout class="QGridLayout" name="gridLayout_12">
+             <item row="0" column="0">
+              <widget class="QCheckBox" name="checkBoxTimeControl">
+               <property name="text">
+                <string>Time Control</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="2">
+              <widget class="QPushButton" name="pushButtonMiniForm">
+               <property name="text">
+                <string>Minimun</string>
+               </property>
+              </widget>
+             </item>
+             <item row="1" column="0">
+              <widget class="QCheckBox" name="checkBoxWeatherControl">
+               <property name="text">
+                <string>Weather Control</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="0">
+              <widget class="QCheckBox" name="checkBoxAutoDarkForm">
+               <property name="text">
+                <string>Auto Dark Form</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="0">
+              <widget class="QPushButton" name="pushButtonTurnOnLight">
+               <property name="text">
+                <string>Turn On Light</string>
+               </property>
+               <property name="checked">
+                <bool>false</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QPushButton" name="pushButtonTestDarkScreen">
+               <property name="text">
+                <string>Test Dark Screen</string>
+               </property>
+              </widget>
+             </item>
+             <item row="3" column="0">
+              <widget class="QPushButton" name="pushButtonAddCamera">
+               <property name="text">
+                <string>Add Camera</string>
+               </property>
+              </widget>
+             </item>
+             <item row="4" column="1">
+              <widget class="QCheckBox" name="checkBoxAutoLight">
+               <property name="text">
+                <string>Auto Light</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="2">
+              <widget class="QPushButton" name="pushButtonClearTestMark">
+               <property name="text">
+                <string>Clear Test Mark</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="3">
+              <widget class="QPushButton" name="pushButtonNormalForm">
+               <property name="text">
+                <string>Normal</string>
+               </property>
+              </widget>
+             </item>
+             <item row="0" column="4">
+              <widget class="QPushButton" name="pushButtonFullScreen">
+               <property name="text">
+                <string>Full Screen</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
+           </item>
+           <item row="0" column="1">
+            <spacer name="horizontalSpacer">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="1" column="0">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+          </layout>
          </widget>
         </widget>
        </item>

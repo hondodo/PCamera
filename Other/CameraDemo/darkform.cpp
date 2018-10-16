@@ -14,6 +14,8 @@ DarkForm::DarkForm(QWidget *parent) :
     requestHide = false;
     lightImage = QImage(":/Rcs/light.png");
     helloImage = QImage(":/Rcs/hello.png");
+    setWindowTitle(tr("Time Form"));
+    this->setWindowFlag(Qt::WindowStaysOnTopHint, true);
 }
 
 DarkForm::~DarkForm()

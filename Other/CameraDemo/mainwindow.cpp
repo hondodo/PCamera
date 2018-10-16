@@ -36,6 +36,7 @@ MainWindow::MainWindow(QWidget *parent) :
     labelRingInfo.setText("");
     labelDark.setText("");
     labelPeople.setText("");
+    labelLight.setText("");
     ui->statusBar->addWidget(&labelDiskInfo);
     ui->statusBar->addWidget(&labelCamAInfo);
     ui->statusBar->addWidget(&labelCamBInfo);
@@ -44,6 +45,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->statusBar->addWidget(&labelRingInfo);
     ui->statusBar->addWidget(&labelPeople);
     ui->statusBar->addWidget(&labelDark);
+    ui->statusBar->addWidget(&labelLight);
     qsrand(QTime(0, 0, 0).secsTo(QTime::currentTime()));
 
     glesWidget = new GLESWidget(ui->widgetTestYUV);
@@ -56,6 +58,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->pushButtonTestDarkScreen->setVisible(false);
     ui->pushButtonClearTestMark->setVisible(false);
+
+    setWindowTitle(tr("Potatokid Camera"));
+    lastState = this->windowState();
 }
 
 MainWindow::~MainWindow()
@@ -93,6 +98,7 @@ void MainWindow::showEvent(QShowEvent *event)
         connect(KeyBoardThread::Init, SIGNAL(onKey(int)), this, SLOT(onKey(int)));
         diskHelper.setPath(pathHelper.getRootPath());
         CheckDiskThread::Init->start();
+        this->setWindowState(Qt::WindowFullScreen);
     }
 }
 
@@ -242,15 +248,15 @@ void MainWindow::timerEvent(QTimerEvent *event)
             labelPeople.setText(isPeople? "People" : "No People");
             bool lightisturnon = KeyBoardThread::Init->lightIsTurnOn();
 
-            if(!isFromTestDark)
+            if(isPeople)
             {
-                if(isPeople)
-                {
-                    lastPeople = QDateTime::currentDateTime();
-                }
+                lastPeople = QDateTime::currentDateTime();
+            }
 
-                qint64 nopeopleels = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastPeople.toMSecsSinceEpoch();
+            qint64 nopeopleels = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastPeople.toMSecsSinceEpoch();
 
+            if(!isFromTestDark && ui->checkBoxAutoDarkForm->isChecked())
+            {
                 if((isDark && !isPeople && nopeopleels > 20000)//无光照，超过20秒无人
                         || (!isDark && !isPeople && nopeopleels > 600000))//有光照，超过10分钟无人
                 {
@@ -268,6 +274,9 @@ void MainWindow::timerEvent(QTimerEvent *event)
                         KeyBoardThread::Init->setIsShowingDarkForm(false);
                     }
                 }
+            }
+            if(ui->checkBoxAutoLight->isChecked())
+            {
                 if(isDark && nopeopleels < 60000)//无光，60秒无人，开继电器
                 {
                     if(!lightisturnon)
@@ -284,6 +293,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
                 }
             }
             ui->pushButtonTurnOnLight->setText(lightisturnon? tr("Turn Off Light") : tr("Turn On Light"));
+            labelLight.setText(lightisturnon? tr("Light On") : tr("Light Off"));
         }
 
         timerFrames++;
@@ -301,6 +311,11 @@ void MainWindow::timerEvent(QTimerEvent *event)
 
 void MainWindow::on_pushButtonAddCamera_clicked()
 {
+    lastState = this->windowState();
+    if(lastState == Qt::WindowFullScreen)
+    {
+        this->showMaximized();
+    }
     AddCameraForm *form = new AddCameraForm();
     form->setExistsCameraUrls(existsCameraUrls);
     connect(form, SIGNAL(onClose(int)), this, SLOT(onAddCameraFormClose(int)));
@@ -338,6 +353,7 @@ void MainWindow::onAddCameraFormClose(int code)
         form->deleteLater();
         form = Q_NULLPTR;
     }
+    this->setWindowState(lastState);
 }
 
 void MainWindow::showCamera()
@@ -545,4 +561,19 @@ void MainWindow::on_pushButtonTurnOnLight_clicked()
 {
     bool lightisturnon = KeyBoardThread::Init->lightIsTurnOn();
     KeyBoardThread::Init->setLightIsTurnOn(!lightisturnon);
+}
+
+void MainWindow::on_pushButtonMiniForm_clicked()
+{
+    this->showMinimized();
+}
+
+void MainWindow::on_pushButtonNormalForm_clicked()
+{
+    this->showNormal();
+}
+
+void MainWindow::on_pushButtonFullScreen_clicked()
+{
+    this->showFullScreen();
 }
