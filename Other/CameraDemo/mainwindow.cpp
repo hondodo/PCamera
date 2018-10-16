@@ -256,6 +256,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
                     if(darkForm != NULL && darkForm->isHidden())
                     {
                         darkForm->show();
+                        KeyBoardThread::Init->setIsShowingDarkForm(true);
                     }
                 }
                 else
@@ -263,6 +264,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
                     if(darkForm != NULL && (!darkForm->isHidden() && !darkForm->getRequestHide()))
                     {
                         darkForm->hideForm();
+                        KeyBoardThread::Init->setIsShowingDarkForm(false);
                     }
                 }
             }

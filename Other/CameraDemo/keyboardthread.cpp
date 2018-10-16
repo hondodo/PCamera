@@ -7,6 +7,7 @@ KeyBoardThread::KeyBoardThread(QObject *parent) : QThread(parent)
     _isRing = false;
     _isDark = false;
     _isPeople = true;
+    _isShowingDarkForm = false;
     lastCheckRing = lastCheckDark = lastCheckPeople = QDateTime::currentDateTime().toMSecsSinceEpoch();
 }
 
@@ -70,6 +71,16 @@ void KeyBoardThread::run()
         this->msleep(20);
     }
 #endif
+}
+
+bool KeyBoardThread::isShowingDarkForm() const
+{
+    return _isShowingDarkForm;
+}
+
+void KeyBoardThread::setIsShowingDarkForm(bool isShowingDarkForm)
+{
+    _isShowingDarkForm = isShowingDarkForm;
 }
 
 bool KeyBoardThread::isPeople() const

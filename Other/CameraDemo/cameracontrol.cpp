@@ -237,21 +237,24 @@ void CameraControl::initDecodingRecs()
 
 void CameraControl::decodeFrameAndShow(AVFrame **filtedFrame)
 {
-    if(!skipFrame || isDecodingTurn)
+    if(!KeyBoardThread::Init->isShowingDarkForm())
     {
-        sws_scale(imgConvertCtcRGB, (uint8_t const * const *) (*filtedFrame)->data,
-                  (*filtedFrame)->linesize, 0, heightOut, pFrameRGB->data,
-                  pFrameRGB->linesize);
+        if(!skipFrame || isDecodingTurn)
+        {
+            sws_scale(imgConvertCtcRGB, (uint8_t const * const *) (*filtedFrame)->data,
+                      (*filtedFrame)->linesize, 0, heightOut, pFrameRGB->data,
+                      pFrameRGB->linesize);
 
-        mRGB.data =(uchar*)pFrameRGB->data[0];
-        cv::cvtColor(mRGB, temp, CV_BGR2RGB);
+            mRGB.data =(uchar*)pFrameRGB->data[0];
+            cv::cvtColor(mRGB, temp, CV_BGR2RGB);
 
-        QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
-        QImage image(dest);
-        image.detach();
-        onImage(image);
+            QImage dest((uchar*) temp.data, temp.cols, temp.rows, temp.step, QImage::Format_RGB888);
+            QImage image(dest);
+            image.detach();
+            onImage(image);
+        }
+        isDecodingTurn = !isDecodingTurn;
     }
-    isDecodingTurn = !isDecodingTurn;
     av_frame_free(filtedFrame);
 }
 
@@ -337,6 +340,12 @@ void CameraControl::stop()
 void CameraControl::onImage(const QImage &image)
 {
     lastReceiveImageTime = QDateTime::currentDateTime();
+
+    if(KeyBoardThread::Init->isShowingDarkForm())
+    {
+        return;
+    }
+
     if(image.isNull())
     {
         return;

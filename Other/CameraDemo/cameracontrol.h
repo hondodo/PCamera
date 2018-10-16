@@ -10,6 +10,7 @@
 #include "camerathreadmux.h"
 #include "camerathreadh264.h"
 #include "3rd/gl_widget.h"
+#include "keyboardthread.h"
 
 namespace Ui {
 class CameraControl;

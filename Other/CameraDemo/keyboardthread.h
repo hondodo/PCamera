@@ -21,10 +21,11 @@ public:
     explicit KeyBoardThread(QObject *parent = 0);
     static KeyBoardThread *Init;
     void setStop();
-
     bool isDark() const;
-
     bool isPeople() const;
+
+    bool isShowingDarkForm() const;
+    void setIsShowingDarkForm(bool isShowingDarkForm);
 
 protected:
     void run();
@@ -42,6 +43,8 @@ private:
     bool _isRing;
     bool _isDark;
     bool _isPeople;
+
+    bool _isShowingDarkForm;
 
     qint64 lastCheckRing, lastCheckDark, lastCheckPeople;
 };
