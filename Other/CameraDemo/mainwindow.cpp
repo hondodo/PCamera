@@ -250,7 +250,8 @@ void MainWindow::timerEvent(QTimerEvent *event)
 
                 qint64 nopeopleels = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastPeople.toMSecsSinceEpoch();
 
-                if(isDark && !isPeople && nopeopleels > 20000)//无人后20秒后
+                if((isDark && !isPeople && nopeopleels > 20000)//无光照，超过20秒无人
+                        || (!isDark && isPeople && nopeopleels > 600000))//有光照，超过10分钟无人
                 {
                     if(darkForm != NULL && darkForm->isHidden())
                     {

@@ -6,7 +6,7 @@ KeyBoardThread::KeyBoardThread(QObject *parent) : QThread(parent)
     _IsRunning = false;
     _isRing = false;
     _isDark = false;
-    _isPeople = false;
+    _isPeople = true;
     lastCheckRing = lastCheckDark = lastCheckPeople = QDateTime::currentDateTime().toMSecsSinceEpoch();
 }
 
