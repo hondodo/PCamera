@@ -268,7 +268,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
                         KeyBoardThread::Init->setIsShowingDarkForm(false);
                     }
                 }
-                if(isDark && nopeopleels < 20000)
+                if(isDark && nopeopleels < 60000)//无光，60秒无人，开继电器
                 {
                     if(!lightisturnon)
                     {
