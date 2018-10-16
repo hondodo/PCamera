@@ -268,9 +268,12 @@ void MainWindow::timerEvent(QTimerEvent *event)
                         KeyBoardThread::Init->setIsShowingDarkForm(false);
                     }
                 }
-                if(isDark && nopeopleels < 20000 && !lightisturnon)
+                if(isDark && nopeopleels < 20000)
                 {
-                    KeyBoardThread::Init->setLightIsTurnOn(true);
+                    if(!lightisturnon)
+                    {
+                        KeyBoardThread::Init->setLightIsTurnOn(true);
+                    }
                 }
                 else
                 {
