@@ -8,29 +8,38 @@ KeyBoardThread::KeyBoardThread(QObject *parent) : QThread(parent)
     _isDark = false;
     _isPeople = true;
     _isShowingDarkForm = false;
+    _lightIsTurnOn = false;
+    _isSetup = false;
     lastCheckRing = lastCheckDark = lastCheckPeople = QDateTime::currentDateTime().toMSecsSinceEpoch();
 }
 
 void KeyBoardThread::setStop()
 {
+    if(_isSetup)
+    {
+#ifdef Q_OS_LINUX
+        digitalWrite(P3, 0);
+#endif
+    }
     _IsRunning = false;
+    _isSetup = false;
 }
 
 void KeyBoardThread::run()
 {
 #ifdef Q_OS_LINUX
-    _IsRunning = true;
-    wiringPiSetup();
+    _isSetup = wiringPiSetup() == 0;
     pinMode(P0, INPUT);
     pinMode(P1, INPUT);
     pinMode(P2, INPUT);
-    pinMode(P3, INPUT);
+    pinMode(P3, OUTPUT);
     pullUpDnControl(P0, PUD_UP);//门铃 按下为0
     pullUpDnControl(P1, PUD_UP);//红外 有人为1
     pullUpDnControl(P2, PUD_UP);//光感 暗为1
-    pullUpDnControl(P3, PUD_UP);
+    pullUpDnControl(P3, PUD_DOWN);//继电器 1 为接通
     qint64 ringels = 0, peopleels = 0, darkels = 0;
     qint64 now = 0;
+    _IsRunning = true;
     while(_IsRunning)
     {
         now = QDateTime::currentDateTime().toMSecsSinceEpoch();
@@ -68,9 +77,27 @@ void KeyBoardThread::run()
                 _isDark = false;
             }
         }
+        _lightIsTurnOn = digitalRead(P3) == 1;
         this->msleep(20);
     }
+    _IsRunning = false;
 #endif
+}
+
+bool KeyBoardThread::lightIsTurnOn() const
+{
+    return _lightIsTurnOn;
+}
+
+void KeyBoardThread::setLightIsTurnOn(bool lightIsTurnOn)
+{
+    if(_isSetup && _IsRunning)
+    {
+#ifdef Q_OS_LINUX
+        digitalWrite(P3, lightIsTurnOn? 1 : 0);
+#endif
+    }
+    _lightIsTurnOn = lightIsTurnOn;
 }
 
 bool KeyBoardThread::isShowingDarkForm() const

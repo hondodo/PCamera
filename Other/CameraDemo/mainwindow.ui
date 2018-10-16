@@ -469,6 +469,22 @@
             <string>Clear Test Mark</string>
            </property>
           </widget>
+          <widget class="QPushButton" name="pushButtonTurnOnLight">
+           <property name="geometry">
+            <rect>
+             <x>260</x>
+             <y>100</y>
+             <width>151</width>
+             <height>28</height>
+            </rect>
+           </property>
+           <property name="text">
+            <string>Turn On Light</string>
+           </property>
+           <property name="checked">
+            <bool>false</bool>
+           </property>
+          </widget>
          </widget>
         </widget>
        </item>

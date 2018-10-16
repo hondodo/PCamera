@@ -240,6 +240,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
             isPeople = KeyBoardThread::Init->isPeople();
             labelDark.setText(isDark? "Dark" : "Brightness");
             labelPeople.setText(isPeople? "People" : "No People");
+            bool lightisturnon = KeyBoardThread::Init->lightIsTurnOn();
 
             if(!isFromTestDark)
             {
@@ -265,6 +266,17 @@ void MainWindow::timerEvent(QTimerEvent *event)
                     {
                         darkForm->hideForm();
                         KeyBoardThread::Init->setIsShowingDarkForm(false);
+                    }
+                }
+                if(isDark && nopeopleels < 20000 && !lightisturnon)
+                {
+                    KeyBoardThread::Init->setLightIsTurnOn(true);
+                }
+                else
+                {
+                    if(lightisturnon)
+                    {
+                        KeyBoardThread::Init->setLightIsTurnOn(false);
                     }
                 }
             }
@@ -523,4 +535,10 @@ void MainWindow::on_pushButtonTestDarkScreen_clicked()
 void MainWindow::on_pushButtonClearTestMark_clicked()
 {
     isFromTestDark = false;
+}
+
+void MainWindow::on_pushButtonTurnOnLight_clicked()
+{
+    bool lightisturnon = KeyBoardThread::Init->lightIsTurnOn();
+    KeyBoardThread::Init->setLightIsTurnOn(!lightisturnon);
 }

@@ -27,6 +27,9 @@ public:
     bool isShowingDarkForm() const;
     void setIsShowingDarkForm(bool isShowingDarkForm);
 
+    bool lightIsTurnOn() const;
+    void setLightIsTurnOn(bool lightIsTurnOn);
+
 protected:
     void run();
 
@@ -39,10 +42,13 @@ public slots:
 
 private:
     bool _IsRunning;
+    bool _isSetup;
 
     bool _isRing;
     bool _isDark;
     bool _isPeople;
+
+    bool _lightIsTurnOn;
 
     bool _isShowingDarkForm;
 

@@ -56,6 +56,8 @@ private slots:
 
     void on_pushButtonClearTestMark_clicked();
 
+    void on_pushButtonTurnOnLight_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool isFirstShow;
