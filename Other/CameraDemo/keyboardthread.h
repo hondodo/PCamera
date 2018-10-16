@@ -52,7 +52,7 @@ private:
 
     bool _isShowingDarkForm;
 
-    qint64 lastCheckRing, lastCheckDark, lastCheckPeople;
+    qint64 lastCheckRing, lastCheckDark, lastCheckPeople, lastCheckLight;
 };
 
 #endif // KEYBOARDTHREAD_H
