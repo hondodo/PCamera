@@ -14,7 +14,7 @@ AddCameraForm::AddCameraForm(QWidget *parent) :
     ui->comboBoxSize->setCurrentIndex(3);
 #endif
     setWindowTitle(tr("Add Camera"));
-    this->setWindowFlag(Qt::WindowStaysOnTopHint, true);
+//    this->setWindowFlag(Qt::WindowStaysOnTopHint, true);
 }
 
 AddCameraForm::~AddCameraForm()
