@@ -581,3 +581,8 @@ void MainWindow::on_pushButtonFullScreen_clicked()
 {
     this->showFullScreen();
 }
+
+void MainWindow::on_pushButtonClose_clicked()
+{
+    this->close();
+}

@@ -59,6 +59,8 @@ private slots:
     void on_pushButtonNormalForm_clicked();
     void on_pushButtonFullScreen_clicked();
 
+    void on_pushButtonClose_clicked();
+
 private:
     Ui::MainWindow *ui;
     bool isFirstShow;
