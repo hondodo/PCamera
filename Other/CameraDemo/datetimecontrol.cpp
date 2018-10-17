@@ -146,17 +146,18 @@ QString DateTimeControl::buildHtmlText()
     //ui->labelShengXiaoXinZuo->setText(yearname + QString("年") + " " + shengxiao + " " + xinzuo);
 
     QString timetext = time.toString("hh:mm:ss");
+    QString xinqitext = lunarstring + " 星期" + XinQi[time.date().dayOfWeek()];
     if(showTemperature)
     {
         if(temperatureXiaoShuWei < 0 || temperatureXiaoShuWei > 3)
         {
             temperatureXiaoShuWei = 0;
         }
-        timetext += " " + QString::number(temperature, 'f', temperatureXiaoShuWei) + "℃";
+        xinqitext += " " + QString::number(temperature, 'f', temperatureXiaoShuWei) + "℃";
     }
     QString html = buildHtmlParagraph(time.toString("yyyy-MM-dd"), dateFontSize) +
             buildHtmlParagraph(timetext, timeFontSize) +
-            buildHtmlParagraph(lunarstring + " 星期" + XinQi[time.date().dayOfWeek()], weekFontSize) +
+            buildHtmlParagraph(xinqitext, weekFontSize) +
             buildHtmlParagraph(yearname + QString("年") + " " + shengxiao + " " + xinzuo, yearFontSize);
 
     return html;
