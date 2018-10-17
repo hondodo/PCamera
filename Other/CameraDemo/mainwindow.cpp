@@ -53,7 +53,7 @@ MainWindow::MainWindow(QWidget *parent) :
     isPeople = false;
 
     darkForm = new DarkForm();
-    lastPeople = QDateTime::currentDateTime().addDays(-1);
+    lastPeople = QDateTime::currentDateTime();
     lastTurnOnLight = QDateTime::currentDateTime().addDays(-1);
     isFromTestDark = false;
 
