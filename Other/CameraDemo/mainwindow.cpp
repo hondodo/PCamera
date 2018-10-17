@@ -53,7 +53,8 @@ MainWindow::MainWindow(QWidget *parent) :
     isPeople = false;
 
     darkForm = new DarkForm();
-    lastPeople = QDateTime::currentDateTime();
+    lastPeople = QDateTime::currentDateTime().addDays(-1);
+    lastTurnOnLight = QDateTime::currentDateTime().addDays(-1);
     isFromTestDark = false;
 
     ui->pushButtonTestDarkScreen->setVisible(false);
@@ -275,13 +276,16 @@ void MainWindow::timerEvent(QTimerEvent *event)
                     }
                 }
             }
+
+            qint64 turnonlight = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastTurnOnLight.toMSecsSinceEpoch();
             if(ui->checkBoxAutoLight->isChecked())
             {
-                if(isDark && nopeopleels < 60000)//无光，60秒无人，开继电器
+                if((isDark && nopeopleels < 60000) || turnonlight < 10000)//无光，60秒无人，开继电器，继电器至少开启10秒
                 {
                     if(!lightisturnon)
                     {
                         KeyBoardThread::Init->setLightIsTurnOn(true);
+                        lastTurnOnLight = QDateTime::currentDateTime();
                     }
                 }
                 else

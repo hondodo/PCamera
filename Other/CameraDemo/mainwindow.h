@@ -91,6 +91,7 @@ private:
 
     bool isDark, isPeople;
     QDateTime lastPeople;
+    QDateTime lastTurnOnLight;
     DarkForm *darkForm;
     bool isFromTestDark;
 
