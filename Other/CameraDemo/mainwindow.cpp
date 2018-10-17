@@ -90,6 +90,7 @@ void MainWindow::showEvent(QShowEvent *event)
         ui->checkBoxShowTemperature->setChecked(false);
 #endif
         timeControl->setShowTemperature(ui->checkBoxShowTemperature->isChecked());
+        timeControl->setTemperatureXiaoShuWei(ui->spinBoxXiaoShuWei->value());
         ui->verticalLayoutTime->addWidget(timeControl);
         timeControl->start();
         weatherControl = new WeatherControl();
@@ -298,6 +299,14 @@ void MainWindow::timerEvent(QTimerEvent *event)
                     {
                         KeyBoardThread::Init->setLightIsTurnOn(false);
                     }
+                }
+            }
+
+            if(ui->checkBoxShowTemperature->isChecked())
+            {
+                if(timeControl != NULL)
+                {
+                    timeControl->setTemperature(KeyBoardThread::Init->getTemperature());
                 }
             }
             ui->pushButtonTurnOnLight->setText(lightisturnon? tr("Turn Off Light") : tr("Turn On Light"));
@@ -597,5 +606,13 @@ void MainWindow::on_checkBoxShowTemperature_stateChanged(int arg1)
     if(timeControl != NULL)
     {
         timeControl->setShowTemperature(ui->checkBoxShowTemperature->isChecked());
+    }
+}
+
+void MainWindow::on_spinBoxXiaoShuWei_valueChanged(int arg1)
+{
+    if(timeControl != NULL)
+    {
+        timeControl->setTemperatureXiaoShuWei(arg1);
     }
 }

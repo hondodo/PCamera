@@ -28,6 +28,9 @@ public:
     bool getShowTemperature() const;
     void setShowTemperature(bool value);
 
+    int getTemperatureXiaoShuWei() const;
+    void setTemperatureXiaoShuWei(int value);
+
 protected:
     void timerEvent(QTimerEvent *event);
     void resizeEvent(QResizeEvent *event);
@@ -49,6 +52,7 @@ private:
     void resizeFontSize();
     bool showTemperature;
     float temperature;
+    int temperatureXiaoShuWei;
 };
 
 #endif // DATETIMECONTROL_H

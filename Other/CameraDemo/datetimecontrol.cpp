@@ -18,6 +18,7 @@ DateTimeControl::DateTimeControl(QWidget *parent) :
     yearFontSize = 52;
     temperature = 0;
     showTemperature = true;
+    temperatureXiaoShuWei = 0;
     setMinimumSize(QSize(10, 10));
     setMaximumSize(QSize(2048, 2048));
 }
@@ -147,7 +148,11 @@ QString DateTimeControl::buildHtmlText()
     QString timetext = time.toString("hh:mm:ss");
     if(showTemperature)
     {
-        timetext += " " + QString::number(temperature, 'f', 0) + "℃";
+        if(temperatureXiaoShuWei < 0 || temperatureXiaoShuWei > 3)
+        {
+            temperatureXiaoShuWei = 0;
+        }
+        timetext += " " + QString::number(temperature, 'f', temperatureXiaoShuWei) + "℃";
     }
     QString html = buildHtmlParagraph(time.toString("yyyy-MM-dd"), dateFontSize) +
             buildHtmlParagraph(timetext, timeFontSize) +
@@ -219,6 +224,16 @@ void DateTimeControl::resizeFontSize()
         wheight = dateFontSize + timeFontSize + weekFontSize + yearFontSize;
     }
     //ui->label->setText(buildHtmlText());
+}
+
+int DateTimeControl::getTemperatureXiaoShuWei() const
+{
+    return temperatureXiaoShuWei;
+}
+
+void DateTimeControl::setTemperatureXiaoShuWei(int value)
+{
+    temperatureXiaoShuWei = value;
 }
 
 bool DateTimeControl::getShowTemperature() const

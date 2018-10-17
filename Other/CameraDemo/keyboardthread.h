@@ -31,8 +31,8 @@ public:
     bool lightIsTurnOn() const;
     void setLightIsTurnOn(bool lightIsTurnOn);
 
-    double getTemperature() const;
-    void setTemperature(double value);
+    float getTemperature() const;
+    void setTemperature(float value);
 
 protected:
     void run();

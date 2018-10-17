@@ -63,6 +63,8 @@ private slots:
 
     void on_checkBoxShowTemperature_stateChanged(int arg1);
 
+    void on_spinBoxXiaoShuWei_valueChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     bool isFirstShow;
