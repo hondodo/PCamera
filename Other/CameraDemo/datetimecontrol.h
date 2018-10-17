@@ -22,6 +22,12 @@ public:
 
     void start();
 
+    float getTemperature() const;
+    void setTemperature(float value);
+
+    bool getShowTemperature() const;
+    void setShowTemperature(bool value);
+
 protected:
     void timerEvent(QTimerEvent *event);
     void resizeEvent(QResizeEvent *event);
@@ -41,6 +47,8 @@ private:
     bool isCanDown();
     bool isCanUp();
     void resizeFontSize();
+    bool showTemperature;
+    float temperature;
 };
 
 #endif // DATETIMECONTROL_H

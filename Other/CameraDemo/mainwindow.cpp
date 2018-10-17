@@ -86,6 +86,10 @@ void MainWindow::showEvent(QShowEvent *event)
     {
         isFirstShow = false;
         timeControl = new DateTimeControl();
+#ifdef Q_OS_WIN
+        ui->checkBoxShowTemperature->setChecked(false);
+#endif
+        timeControl->setShowTemperature(ui->checkBoxShowTemperature->isChecked());
         ui->verticalLayoutTime->addWidget(timeControl);
         timeControl->start();
         weatherControl = new WeatherControl();
@@ -585,4 +589,13 @@ void MainWindow::on_pushButtonFullScreen_clicked()
 void MainWindow::on_pushButtonClose_clicked()
 {
     this->close();
+}
+
+void MainWindow::on_checkBoxShowTemperature_stateChanged(int arg1)
+{
+    Q_UNUSED(arg1);
+    if(timeControl != NULL)
+    {
+        timeControl->setShowTemperature(ui->checkBoxShowTemperature->isChecked());
+    }
 }

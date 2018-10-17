@@ -61,6 +61,8 @@ private slots:
 
     void on_pushButtonClose_clicked();
 
+    void on_checkBoxShowTemperature_stateChanged(int arg1);
+
 private:
     Ui::MainWindow *ui;
     bool isFirstShow;

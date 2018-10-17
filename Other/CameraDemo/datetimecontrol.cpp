@@ -13,9 +13,11 @@ DateTimeControl::DateTimeControl(QWidget *parent) :
     ringThread = Q_NULLPTR;
     nextTipTime = QDateTime::currentDateTime().addMSecs(1000 * 60 * 60).time().hour();
     dateFontSize = 62;
-    timeFontSize = 150;
+    timeFontSize = 120;
     weekFontSize = 62;
     yearFontSize = 52;
+    temperature = 0;
+    showTemperature = true;
     setMinimumSize(QSize(10, 10));
     setMaximumSize(QSize(2048, 2048));
 }
@@ -142,8 +144,13 @@ QString DateTimeControl::buildHtmlText()
     QString yearname = ChineseYear::GetYearName(lunaryear);
     //ui->labelShengXiaoXinZuo->setText(yearname + QString("年") + " " + shengxiao + " " + xinzuo);
 
+    QString timetext = time.toString("hh:mm:ss");
+    if(showTemperature)
+    {
+        timetext += " " + QString::number(temperature, 'f', 0) + "℃";
+    }
     QString html = buildHtmlParagraph(time.toString("yyyy-MM-dd"), dateFontSize) +
-            buildHtmlParagraph(time.toString("hh:mm:ss"), timeFontSize) +
+            buildHtmlParagraph(timetext, timeFontSize) +
             buildHtmlParagraph(lunarstring + " 星期" + XinQi[time.date().dayOfWeek()], weekFontSize) +
             buildHtmlParagraph(yearname + QString("年") + " " + shengxiao + " " + xinzuo, yearFontSize);
 
@@ -212,4 +219,24 @@ void DateTimeControl::resizeFontSize()
         wheight = dateFontSize + timeFontSize + weekFontSize + yearFontSize;
     }
     //ui->label->setText(buildHtmlText());
+}
+
+bool DateTimeControl::getShowTemperature() const
+{
+    return showTemperature;
+}
+
+void DateTimeControl::setShowTemperature(bool value)
+{
+    showTemperature = value;
+}
+
+float DateTimeControl::getTemperature() const
+{
+    return temperature;
+}
+
+void DateTimeControl::setTemperature(float value)
+{
+    temperature = value;
 }
