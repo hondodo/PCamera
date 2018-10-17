@@ -258,7 +258,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
 
             if(!isFromTestDark && ui->checkBoxAutoDarkForm->isChecked())
             {
-                if((isDark && !isPeople && nopeopleels > 20000)//无光照，超过20秒无人
+                if((isDark && !isPeople && nopeopleels > 60000)//无光照，超过60秒无人
                         || (!isDark && !isPeople && nopeopleels > 600000))//有光照，超过10分钟无人
                 {
                     if(darkForm != NULL && darkForm->isHidden())
@@ -280,7 +280,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
             qint64 turnonlight = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastTurnOnLight.toMSecsSinceEpoch();
             if(ui->checkBoxAutoLight->isChecked())
             {
-                if((isDark && nopeopleels < 60000) || turnonlight < 10000)//无光，60秒无人，开继电器，继电器至少开启10秒
+                if((isDark && nopeopleels < 60000) || turnonlight < 20000)//无光，60秒无人，开继电器，继电器至少开启20秒
                 {
                     if(!lightisturnon)
                     {
