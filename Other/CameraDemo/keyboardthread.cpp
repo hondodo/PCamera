@@ -87,17 +87,7 @@ void KeyBoardThread::run()
             temperature = getTemp(P4);
 #endif
         }
-        
-        
-        float KeyBoardThread::getTemperature() const
-        {
-            return temperature;
-        }
-        
-        void KeyBoardThread::setTemperature(float value)
-        {
-            temperature = value;
-        }       this->msleep(20);
+        this->msleep(20);
     }
     _IsRunning = false;
 #endif
