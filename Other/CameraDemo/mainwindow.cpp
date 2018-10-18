@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent) :
     camBigIndex = -1;
     timerId = 0;
     timerFrames = 0;
-    timerId = startTimer(100);
     camBigShowingWidget = Q_NULLPTR;
     ui->widgetHide->setVisible(false);
     VideoFileThread::Init->start();
@@ -105,6 +104,7 @@ void MainWindow::showEvent(QShowEvent *event)
         diskHelper.setPath(pathHelper.getRootPath());
         CheckDiskThread::Init->start();
         this->setWindowState(Qt::WindowFullScreen);
+        timerId = startTimer(100);
     }
 }
 
@@ -323,6 +323,12 @@ void MainWindow::timerEvent(QTimerEvent *event)
         if(timerFrames % 100 == 0)
         {
             weatherControl->switchView();
+        }
+
+        if(timerFrames % 600 == 0)
+        {
+            qDebug() << "update weather";
+            weatherControl->updateWeather();
         }
     }
 }

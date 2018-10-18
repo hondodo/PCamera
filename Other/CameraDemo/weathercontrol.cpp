@@ -150,6 +150,10 @@ void WeatherControl::dealMessage(QByteArray array)
                                 if(!casts.isEmpty() && casts.count() > 0)
                                 {
                                     canShowReport = true;
+                                    int controlindex = 0;
+                                    QDate nowdate = QDateTime::currentDateTime().date();
+                                    QTime tmptime = QTime(0, 0, 0, 0);
+                                    QDateTime todaytime = QDateTime(nowdate, tmptime);
                                     for(int i = 0; i < 4; i++)
                                     {
                                         if(casts.count() >= (i + 1))
@@ -157,38 +161,44 @@ void WeatherControl::dealMessage(QByteArray array)
                                             QJsonObject cast = casts.at(i).toObject();
                                             if(!cast.isEmpty())
                                             {
-                                                QString date = QDate::fromString(cast["date"].toString(), "yyyy-MM-dd").toString("MM-dd");
-                                                int index = cast["week"].toString().toInt();
-                                                if(index < 0 || index > 7)
+                                                QDate datetime = QDate::fromString(cast["date"].toString(), "yyyy-MM-dd");
+                                                QDateTime gettime = QDateTime(datetime, tmptime);
+                                                if(gettime.toMSecsSinceEpoch() >= todaytime.toMSecsSinceEpoch())
                                                 {
-                                                    index = 0;
-                                                }
-                                                //QString week = QString("周") + XinQi[index];
-                                                QString daytemp = cast["daytemp"].toString();
-                                                QString dayweather = cast["dayweather"].toString();
-                                                QString nighttemp = cast["nighttemp"].toString();
-                                                QString nightweather = cast["nightweather"].toString();
-                                                if(i == 0)
-                                                {
-                                                    ui->widgetTodayReport->SetWeather(date, index, daytemp, dayweather, nighttemp,
-                                                                                      nightweather, true);
-                                                    ui->widgetWeatherDay0->SetWeather(date, index, daytemp, dayweather, nighttemp,
-                                                                                      nightweather, false, tr("今天"));
-                                                }
-                                                else if(i == 1)
-                                                {
-                                                    ui->widgetWeatherDay1->SetWeather(date, index, daytemp, dayweather, nighttemp,
-                                                                                      nightweather, false, tr("明天"));
-                                                }
-                                                else if(i == 2)
-                                                {
-                                                    ui->widgetWeatherDay2->SetWeather(date, index, daytemp, dayweather, nighttemp,
-                                                                                      nightweather, false);
-                                                }
-                                                else if(i == 3)
-                                                {
-                                                    ui->widgetWeatherDay3->SetWeather(date, index, daytemp, dayweather, nighttemp,
-                                                                                      nightweather, false);
+                                                    QString date = datetime.toString("MM-dd");
+                                                    int index = cast["week"].toString().toInt();
+                                                    if(index < 0 || index > 7)
+                                                    {
+                                                        index = 0;
+                                                    }
+                                                    //QString week = QString("周") + XinQi[index];
+                                                    QString daytemp = cast["daytemp"].toString();
+                                                    QString dayweather = cast["dayweather"].toString();
+                                                    QString nighttemp = cast["nighttemp"].toString();
+                                                    QString nightweather = cast["nightweather"].toString();
+                                                    if(controlindex == 0)
+                                                    {
+                                                        ui->widgetTodayReport->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                          nightweather, true);
+                                                        ui->widgetWeatherDay0->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                          nightweather, false, tr("今天"));
+                                                    }
+                                                    else if(controlindex == 1)
+                                                    {
+                                                        ui->widgetWeatherDay1->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                          nightweather, false, tr("明天"));
+                                                    }
+                                                    else if(controlindex == 2)
+                                                    {
+                                                        ui->widgetWeatherDay2->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                          nightweather, false);
+                                                    }
+                                                    else if(controlindex == 3)
+                                                    {
+                                                        ui->widgetWeatherDay3->SetWeather(date, index, daytemp, dayweather, nighttemp,
+                                                                                          nightweather, false);
+                                                    }
+                                                    controlindex++;
                                                 }
                                             }
                                         }
