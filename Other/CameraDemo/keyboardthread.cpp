@@ -123,7 +123,11 @@ void KeyBoardThread::setTemperature(float value)
         float avrg = totalTemp / count;
         float deltemp = (value - avrg);
         float delsqr = deltemp * deltemp / count;
-        qDebug() << "Temp sqr:" << value << delsqr << count;
+        if(delsqr < 0.2)
+        {
+            temperature = value;
+        }
+        //qDebug() << "Temp sqr:" << value << delsqr << count;
     }
     else
     {
