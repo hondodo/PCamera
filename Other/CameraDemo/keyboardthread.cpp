@@ -11,6 +11,9 @@ KeyBoardThread::KeyBoardThread(QObject *parent) : QThread(parent)
     _lightIsTurnOn = false;
     _isSetup = false;
     temperature = 0;
+    tempMax = 125.0;
+    tempMin = -55.0;
+    tempList.clear();
     lastCheckRing = lastCheckDark = lastCheckPeople = lastCheckLight = QDateTime::currentDateTime().toMSecsSinceEpoch();
 }
 
@@ -84,7 +87,11 @@ void KeyBoardThread::run()
             lightels = now;
             _lightIsTurnOn = digitalRead(P3) == 1;
 #ifdef Q_OS_LINUX
-            temperature = getTemp(P4);
+            float tmptemp = getTemp(P4);
+            if(tmptemp >= tempMin && tmptemp <= tempMax)
+            {
+                setTemperature(tmptemp);
+            }
 #endif
         }
         this->msleep(20);
@@ -100,7 +107,28 @@ float KeyBoardThread::getTemperature() const
 
 void KeyBoardThread::setTemperature(float value)
 {
-    temperature = value;
+    tempList.append(value);
+    while (tempList.count() > 100)
+    {
+        tempList.dequeue();
+    }
+    if(tempList.count() > 10)
+    {
+        int count  = tempList.count();
+        float totalTemp = 0.0;
+        for(int i = 0; i < count; i++)
+        {
+            totalTemp += tempList.at(i);
+        }
+        float avrg = totalTemp / count;
+        float deltemp = (value - avrg);
+        float delsqr = deltemp * deltemp / count;
+        qDebug() << "Temp sqr:" << value << delsqr << count;
+    }
+    else
+    {
+        temperature = value;
+    }
 }
 
 bool KeyBoardThread::lightIsTurnOn() const

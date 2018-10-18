@@ -5,6 +5,7 @@
 #include <QThread>
 #include <QDebug>
 #include <QDateTime>
+#include <QQueue>
 #ifdef Q_OS_LINUX
 #include <wiringPi.h>
 #endif
@@ -56,6 +57,8 @@ private:
 
     bool _isShowingDarkForm;
     float temperature;
+    float tempMax, tempMin;
+    QQueue<float> tempList;
 
     qint64 lastCheckRing, lastCheckDark, lastCheckPeople, lastCheckLight;
 
