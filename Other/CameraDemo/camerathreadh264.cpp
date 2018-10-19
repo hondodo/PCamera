@@ -11,6 +11,7 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
     videoindex = 0;
     audioindex = 0;
     recdura = 0;
+    lastReadInterrupTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
     delayOpenCamera = false;
 
     ifmt_ctx = NULL;
@@ -222,6 +223,29 @@ void CameraThreadH264::releaseFiltedFrame()
     }
 }
 
+int CameraThreadH264::AVInterruptCallBackFun(void *ctx)
+{
+    if(ctx == NULL)
+    {
+        return 0;
+    }
+    else
+    {
+        CameraThreadH264 *obj = (CameraThreadH264*)ctx;
+        if(obj == NULL)
+        {
+            return 0;
+        }
+        qint64 timeout = QDateTime::currentDateTime().toMSecsSinceEpoch() - obj->lastReadInterrupTime;
+        if(timeout > 5000)
+        {
+            obj->emitMessage("Read frame timeout");
+            return 1;//超时
+        }
+    }
+    return 0;
+}
+
 CAMERASIZE CameraThreadH264::getCurrentCameraSize() const
 {
     return currentCameraSize;
@@ -240,10 +264,20 @@ void CameraThreadH264::setCameraSize(const CAMERASIZE &value)
 
 int CameraThreadH264::open_input_file(const char *filename)
 {
+    ifmt_ctx = NULL;
+#ifdef Q_OS_WIN
+#else
+    QFile file(filename);
+    if(!file.exists())
+    {
+        emitMessage(tr("camera file not exists"));
+        return CANNOT_OPEN_INPUTFILE;
+    }
+#endif
+
     int ret;
     unsigned int i;
     
-    ifmt_ctx = NULL;
     avdevice_register_all();
     AVInputFormat *inputFmt = NULL;
     inputFmt = av_find_input_format("dshow");
@@ -251,6 +285,7 @@ int CameraThreadH264::open_input_file(const char *filename)
     av_dict_set(&avdic, "max_delay", "100", 0);
     av_dict_set(&avdic, "framerate", "30", 0);
     av_dict_set(&avdic, "input_format", "mjpeg", 0);
+    av_dict_set(&avdic, "timeout", "3000000", 0);//设置超时3秒
 
     int csize = (int)currentCameraSize;
     int minsize = (int)CAMERASIZE_640x480;
@@ -891,6 +926,10 @@ int CameraThreadH264::caputuer()
         //return ret;
         goto end;
     }
+    //注册超时回调
+    ifmt_ctx->interrupt_callback.callback = AVInterruptCallBackFun;
+    ifmt_ctx->interrupt_callback.opaque = this;
+
     emitMessage("open camera success");
     pathHelper.creatNewFileName();
     emitMessage("open optput file");
@@ -1057,6 +1096,7 @@ int CameraThreadH264::caputuer()
             frameindex = 0;
         }
         frameindex++;
+        lastReadInterrupTime = QDateTime::currentDateTime().toMSecsSinceEpoch();
         if ((ret = av_read_frame(ifmt_ctx, &packet)) < 0)
             break;
 

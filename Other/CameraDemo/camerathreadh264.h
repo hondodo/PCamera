@@ -96,6 +96,10 @@ public:
     AVFrame **getFiltedFrame();
     void releaseFiltedFrame();
 
+    static int AVInterruptCallBackFun(void *ctx);
+    qint64 lastReadInterrupTime;
+    void emitMessage(const QString text);
+
 signals:
     void onFrame(const QImage &image);
     void onFrame();
@@ -149,7 +153,7 @@ private:
     int caputuer();
     //void closeContext(AVFrame **frame);
     void closeOutPut();
-    void emitMessage(const QString text);
+
 
     AVCodecContext *pCodecCtx;
     bool cantainvideo, cantainaudio;
