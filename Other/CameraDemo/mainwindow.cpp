@@ -257,7 +257,10 @@ void MainWindow::timerEvent(QTimerEvent *event)
             if(isPeople)
             {
                 lastPeople = QDateTime::currentDateTime();
+#ifdef Q_OS_WIN
+#else
                 qDebug() << lastPeople;
+#endif
             }
 
             qint64 nopeopleels = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastPeople.toMSecsSinceEpoch();

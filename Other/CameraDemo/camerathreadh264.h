@@ -100,6 +100,8 @@ public:
     qint64 lastReadInterrupTime;
     void emitMessage(const QString text);
 
+    void freeContext();
+
 signals:
     void onFrame(const QImage &image);
     void onFrame();
@@ -159,6 +161,10 @@ private:
     bool cantainvideo, cantainaudio;
     int videoindex, audioindex;
     qint64 recdura;
+
+    AVPacket cameraPacket;
+    AVFrame *cameraFrame;
+
 };
 
 #endif // CAMERATHREADH264_H
