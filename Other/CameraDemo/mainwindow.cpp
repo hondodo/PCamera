@@ -289,7 +289,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
             qint64 turnonlight = QDateTime::currentDateTime().toMSecsSinceEpoch() - lastTurnOnLight.toMSecsSinceEpoch();
             if(ui->checkBoxAutoLight->isChecked())
             {
-                if((isDark && nopeopleels < 60000) || turnonlight < 20000)//无光，60秒无人，开继电器，继电器至少开启20秒
+                if((isDark && nopeopleels < 120000) || turnonlight < 20000)//无光，120秒无人，开继电器，继电器至少开启20秒
                 {
                     if(!lightisturnon)
                     {
