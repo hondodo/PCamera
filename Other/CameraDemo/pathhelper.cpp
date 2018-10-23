@@ -18,7 +18,7 @@ PathHelper::PathHelper(QObject *parent) : QObject(parent)
     QDir adir("media/pi/data/");
     if(adir.exists())
     {
-        setRootPath("media/pi/data/");
+        setRootPath("/media/pi/data/");
     }
     else
     {
