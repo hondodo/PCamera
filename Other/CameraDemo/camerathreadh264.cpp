@@ -8,6 +8,7 @@ CameraThreadH264::CameraThreadH264(QObject *parent) : QThread(parent)
     saveOnlyMog = false;
     cantainaudio = false;
     cantainvideo = false;
+    isTv = false;
     videoindex = 0;
     audioindex = 0;
     recdura = 0;
@@ -282,50 +283,68 @@ int CameraThreadH264::open_input_file(const char *filename)
     
     avdevice_register_all();
     AVInputFormat *inputFmt = NULL;
+#ifdef Q_OS_WIN
     inputFmt = av_find_input_format("dshow");
+#else
+    inputFmt = av_find_input_format("video4linux2");
+#endif
     AVDictionary *avdic = NULL;
-    av_dict_set(&avdic, "max_delay", "100", 0);
-    av_dict_set(&avdic, "framerate", "30", 0);
-    av_dict_set(&avdic, "input_format", "mjpeg", 0);
-    av_dict_set(&avdic, "timeout", "3000000", 0);//设置超时3秒
 
-    int csize = (int)currentCameraSize;
-    int minsize = (int)CAMERASIZE_640x480;
-    if(csize < 0 || csize > minsize)
+    if(isTv)
     {
-        currentCameraSize = CAMERASIZE_AUTO;
+        av_dict_set(&avdic, "video_size", "720x576", 0);
     }
-    if(currentCameraSize == CAMERASIZE_AUTO)
+    else
     {
-        currentCameraSize = CAMERASIZE_1920x1080;
+        av_dict_set(&avdic, "max_delay", "100", 0);
+        av_dict_set(&avdic, "framerate", "30", 0);
+        av_dict_set(&avdic, "input_format", "mjpeg", 0);
+        av_dict_set(&avdic, "timeout", "3000000", 0);//设置超时3秒
     }
-    while (csize <= minsize)
+    if(isTv)
     {
-        if(currentCameraSize == CAMERASIZE_1920x1080)
+        ret = avformat_open_input(&ifmt_ctx, filename, inputFmt, &avdic);
+    }
+    else
+    {
+        int csize = (int)currentCameraSize;
+        int minsize = (int)CAMERASIZE_640x480;
+        if(csize < 0 || csize > minsize)
         {
-            av_dict_set(&avdic, "video_size", "1920x1080", 0);
+            currentCameraSize = CAMERASIZE_AUTO;
         }
-        else if(currentCameraSize == CAMERASIZE_1280x720)
+        if(currentCameraSize == CAMERASIZE_AUTO)
         {
-            av_dict_set(&avdic, "video_size", "1280x720", 0);
+            currentCameraSize = CAMERASIZE_1920x1080;
         }
-        else if(currentCameraSize == CAMERASIZE_640x480)
+        while (csize <= minsize)
         {
-            av_dict_set(&avdic, "video_size", "640x480", 0);
-        }
-        if ((ret = avformat_open_input(&ifmt_ctx, filename, inputFmt, &avdic)) < 0)
-        {
-            qDebug() << "Cannot open for current size:" << currentCameraSize << cameraName;
-            csize++;
-            if(csize <= minsize)
+            if(currentCameraSize == CAMERASIZE_1920x1080)
             {
-                currentCameraSize = (CAMERASIZE)csize;
+                av_dict_set(&avdic, "video_size", "1920x1080", 0);
             }
-        }
-        else
-        {
-            qDebug() << "Open for current size:" << currentCameraSize << "success" << cameraName;
-            break;
+            else if(currentCameraSize == CAMERASIZE_1280x720)
+            {
+                av_dict_set(&avdic, "video_size", "1280x720", 0);
+            }
+            else if(currentCameraSize == CAMERASIZE_640x480)
+            {
+                av_dict_set(&avdic, "video_size", "640x480", 0);
+            }
+            if ((ret = avformat_open_input(&ifmt_ctx, filename, inputFmt, &avdic)) < 0)
+            {
+                qDebug() << "Cannot open for current size:" << currentCameraSize << cameraName;
+                csize++;
+                if(csize <= minsize)
+                {
+                    currentCameraSize = (CAMERASIZE)csize;
+                }
+            }
+            else
+            {
+                qDebug() << "Open for current size:" << currentCameraSize << "success" << cameraName;
+                break;
+            }
         }
     }
 
@@ -727,13 +746,20 @@ int CameraThreadH264::init_filters()
 
         if (ifmt_ctx->streams[i]->codecpar->codec_type == AVMEDIA_TYPE_VIDEO)
         {
+            if(isTv)
+            {
+                filter_spec = "null";
+            }
+            else
+            {
 #ifdef Q_OS_WIN
-            //filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
-            filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hue=h=360:s=2[out]";
+                //filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
+                filter_spec = "[in]drawtext=fontfile=D\\\\:font.ttf:fontcolor=white:fontsize=40:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hue=h=360:s=2[out]";
 #else
-            filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=20:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hue=h=360:s=2[out]"; /* passthrough (dummy) filter for video */
-            //filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=20:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
+                filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=20:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hue=h=360:s=2[out]"; /* passthrough (dummy) filter for video */
+                //filter_spec = "[in]drawtext=fontfile=/home/pi/Font/font.ttf:fontcolor=white:fontsize=20:text='%{localtime}':x=20:y=20:shadowcolor=black:shadowx=2:shadowy=2[a];[a]hqdn3d[a];[a]unsharp=5:5:2[out]";
 #endif
+            }
         }
         else
             filter_spec = "anull"; /* passthrough (dummy) filter for audio */
@@ -794,7 +820,10 @@ int CameraThreadH264::encode_write_frame(AVFrame *filt_frame, unsigned int strea
 
     av_log(NULL, AV_LOG_DEBUG, "Muxing frame\n");
     /* mux encoded frame */
-    ret = av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
+    if(!isTv)
+    {
+        ret = av_interleaved_write_frame(ofmt_ctx, &enc_pkt);
+    }
     av_packet_unref(&enc_pkt);
     return ret;
 }
@@ -1378,6 +1407,16 @@ void CameraThreadH264::closeOutPut()
     filter_ctx = NULL;
     stream_ctx_out = NULL;
     ofmt_ctx = NULL;
+}
+
+bool CameraThreadH264::getIsTv() const
+{
+    return isTv;
+}
+
+void CameraThreadH264::setIsTv(bool value)
+{
+    isTv = value;
 }
 
 void CameraThreadH264::emitMessage(const QString text)

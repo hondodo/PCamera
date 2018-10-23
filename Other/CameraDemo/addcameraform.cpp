@@ -209,3 +209,8 @@ void AddCameraForm::on_comboBoxUrl_currentIndexChanged(int index)
     ui->labelError->setVisible(false);
     initCameraName();
 }
+
+bool AddCameraForm::getIsTv() const
+{
+    return ui->checkBoxIsTV->isChecked();
+}

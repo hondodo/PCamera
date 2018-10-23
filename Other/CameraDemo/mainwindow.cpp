@@ -369,6 +369,7 @@ void MainWindow::onAddCameraFormClose(int code)
                     control->setCameraType(form->getCameraType());
                     control->setCameraName(form->getCameraName());
                     control->setCameraSize(form->getCameraSize());
+                    control->setIsTv(form->getIsTv());
                     control->start();
                     ui->verticalLayoutHide->removeWidget(camBigShowingWidget);
                     camBigShowingWidget = control;
@@ -407,6 +408,8 @@ void MainWindow::showCamera()
                 if(!isshowedtimecontrol && showDateTimeControlToCamerasComtrol)
                 {
                     isshowedtimecontrol = true;
+                    ui->verticalLayoutTime->removeWidget(timeControl);
+                    timeControl->resize(400, 300);
                     if(i == 0) ui->verticalLayoutCams1->addWidget(timeControl);
                     if(i == 1) ui->verticalLayoutCams2->addWidget(timeControl);
                     if(i == 2) ui->verticalLayoutCams3->addWidget(timeControl);

@@ -8,6 +8,7 @@ CameraControl::CameraControl(QWidget *parent) :
     ui->setupUi(this);
     cameraType = CAMERATYPE_LOCAL;
     cameraSize = CAMERASIZE_AUTO;
+    isTv = false;
     cameraUrl = "video=";
     imageWidth = 640;
     imageHeight = 480;
@@ -296,6 +297,7 @@ void CameraControl::start(bool delayOpenCamera)
     player->setFixBrighnessByTime(fixBrighnessByTime);
     player->setCheckMog(checkMog);
     player->setSaveOnlyMog(saveOnlyMog);
+    player->setIsTv(isTv);
     //connect(player, SIGNAL(onFrame(QImage)), this, SLOT(onImage(QImage)));
     connect(player, SIGNAL(onFrame()), this, SLOT(onFrame()));
     connect(player, SIGNAL(onStartRecoing(int,int,int)), this, SLOT(onStartRecoing(int,int,int)));
@@ -335,7 +337,7 @@ void CameraControl::stop()
             }
             player->freeContext();//
         }
-         qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")
+        qDebug() << QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss")
                   << "thread delete later:" << cameraName;
         player->deleteLater();
         player = Q_NULLPTR;
@@ -600,6 +602,16 @@ void CameraControl::onStopRecoding()
 void CameraControl::onMessage(const QString text)
 {
     setMessage(text);
+}
+
+bool CameraControl::getIsTv() const
+{
+    return isTv;
+}
+
+void CameraControl::setIsTv(bool value)
+{
+    isTv = value;
 }
 
 QString CameraControl::getMessage() const

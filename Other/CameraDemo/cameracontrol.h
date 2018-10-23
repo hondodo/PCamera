@@ -63,6 +63,9 @@ public:
     QString getMessage() const;
     void setMessage(const QString &value);
 
+    bool getIsTv() const;
+    void setIsTv(bool value);
+
 protected:
     bool eventFilter(QObject *watched, QEvent *event);
     void timerEvent(QTimerEvent *event);
@@ -107,6 +110,7 @@ private:
 #else
     CameraThreadMUX *player;
 #endif
+    bool isTv;
     int imageWidth, imageHeight;
     bool checkBrighness;
     bool fixBrighnessByTime;

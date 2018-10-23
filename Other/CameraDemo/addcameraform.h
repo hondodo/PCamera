@@ -28,6 +28,8 @@ public:
 
     CAMERASIZE getCameraSize() const;
 
+    bool getIsTv() const;
+
 protected:
     void showEvent(QShowEvent *event);
     void closeEvent(QCloseEvent *event);

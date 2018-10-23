@@ -102,6 +102,9 @@ public:
 
     void freeContext();
 
+    bool getIsTv() const;
+    void setIsTv(bool value);
+
 signals:
     void onFrame(const QImage &image);
     void onFrame();
@@ -165,6 +168,7 @@ private:
     AVPacket cameraPacket;
     AVFrame *cameraFrame;
 
+    bool isTv;//720×576
 };
 
 #endif // CAMERATHREADH264_H
