@@ -250,8 +250,8 @@ void MainWindow::timerEvent(QTimerEvent *event)
 
             isDark = KeyBoardThread::Init->isDark();
             isPeople = KeyBoardThread::Init->isPeople();
-            labelDark.setText(isDark? "Dark" : "Brightness");
-            labelPeople.setText(isPeople? "People" : "No People");
+            labelDark.setText(isDark? "光线不足" : "光线充足");
+            labelPeople.setText(isPeople? "有人经过" : "无人经过");
             bool lightisturnon = KeyBoardThread::Init->lightIsTurnOn();
 
             if(isPeople)
@@ -313,8 +313,8 @@ void MainWindow::timerEvent(QTimerEvent *event)
                     timeControl->setTemperature(KeyBoardThread::Init->getTemperature());
                 }
             }
-            ui->pushButtonTurnOnLight->setText(lightisturnon? tr("Turn Off Light") : tr("Turn On Light"));
-            labelLight.setText(lightisturnon? tr("Light On") : tr("Light Off"));
+            ui->pushButtonTurnOnLight->setText(lightisturnon? tr("关灯") : tr("开灯"));
+            labelLight.setText(lightisturnon? tr("已开灯") : tr("已关灯"));
         }
 
         timerFrames++;
