@@ -398,7 +398,7 @@
              <item row="0" column="0">
               <widget class="QCheckBox" name="checkBoxTimeControl">
                <property name="text">
-                <string>Time Control</string>
+                <string>日期</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -408,14 +408,14 @@
              <item row="0" column="2">
               <widget class="QPushButton" name="pushButtonMiniForm">
                <property name="text">
-                <string>Minimun</string>
+                <string>最小化</string>
                </property>
               </widget>
              </item>
              <item row="1" column="0">
               <widget class="QCheckBox" name="checkBoxWeatherControl">
                <property name="text">
-                <string>Weather Control</string>
+                <string>天气</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -425,7 +425,7 @@
              <item row="2" column="0">
               <widget class="QCheckBox" name="checkBoxAutoDarkForm">
                <property name="text">
-                <string>Auto Dark Form</string>
+                <string>自动屏保</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -435,7 +435,7 @@
              <item row="4" column="0">
               <widget class="QPushButton" name="pushButtonTurnOnLight">
                <property name="text">
-                <string>Turn On Light</string>
+                <string>开灯</string>
                </property>
                <property name="checked">
                 <bool>false</bool>
@@ -451,15 +451,21 @@
              </item>
              <item row="3" column="0">
               <widget class="QPushButton" name="pushButtonAddCamera">
+               <property name="minimumSize">
+                <size>
+                 <width>0</width>
+                 <height>60</height>
+                </size>
+               </property>
                <property name="text">
-                <string>Add Camera</string>
+                <string>添加摄像头</string>
                </property>
               </widget>
              </item>
              <item row="4" column="1">
               <widget class="QCheckBox" name="checkBoxAutoLight">
                <property name="text">
-                <string>Auto Light</string>
+                <string>自动开灯</string>
                </property>
                <property name="checked">
                 <bool>true</bool>
@@ -476,21 +482,21 @@
              <item row="0" column="3">
               <widget class="QPushButton" name="pushButtonNormalForm">
                <property name="text">
-                <string>Normal</string>
+                <string>常规窗口</string>
                </property>
               </widget>
              </item>
              <item row="0" column="4">
               <widget class="QPushButton" name="pushButtonFullScreen">
                <property name="text">
-                <string>Full Screen</string>
+                <string>全屏</string>
                </property>
               </widget>
              </item>
              <item row="1" column="4">
               <widget class="QPushButton" name="pushButtonClose">
                <property name="text">
-                <string>Close</string>
+                <string>退出</string>
                </property>
               </widget>
              </item>
@@ -503,10 +509,22 @@
                 </size>
                </property>
                <layout class="QGridLayout" name="gridLayout_14">
+                <property name="leftMargin">
+                 <number>0</number>
+                </property>
+                <property name="topMargin">
+                 <number>0</number>
+                </property>
+                <property name="rightMargin">
+                 <number>0</number>
+                </property>
+                <property name="bottomMargin">
+                 <number>0</number>
+                </property>
                 <item row="0" column="0">
                  <widget class="QCheckBox" name="checkBoxShowTemperature">
                   <property name="text">
-                   <string>Show Temperature</string>
+                   <string>室温</string>
                   </property>
                   <property name="checked">
                    <bool>true</bool>
@@ -531,6 +549,16 @@
                  </widget>
                 </item>
                </layout>
+              </widget>
+             </item>
+             <item row="1" column="1">
+              <widget class="QCheckBox" name="checkBoxDoorRing">
+               <property name="text">
+                <string>门铃</string>
+               </property>
+               <property name="checked">
+                <bool>true</bool>
+               </property>
               </widget>
              </item>
             </layout>

@@ -54,7 +54,7 @@ void KeyBoardThread::run()
         if((ringels < 0 || ringels > 1000) && digitalRead(P0) == 0)
         {
             lastCheckRing = now;
-            //emit onKey(0);//取消门铃2018-10-19
+            emit onKey(0);
         }
         if((peopleels < 0 || peopleels > 1000))
         {
