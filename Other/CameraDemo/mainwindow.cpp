@@ -213,7 +213,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
         {
             qint64 free = diskHelper.bytesAvailable();//.bytesFree();
             qint64 total = diskHelper.bytesTotal();
-            QString diskinfo = QString("Free: %0 / Total: %1").arg(diskHelper.toSizeInfo(free), diskHelper.toSizeInfo(total));
+            QString diskinfo = QString("剩余: %0 / 总共: %1").arg(diskHelper.toSizeInfo(free), diskHelper.toSizeInfo(total));
             labelDiskInfo.setText(diskinfo);
 
             for(int i = 0; i < 4; i++)
