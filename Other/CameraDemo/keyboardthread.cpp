@@ -13,6 +13,7 @@ KeyBoardThread::KeyBoardThread(QObject *parent) : QThread(parent)
     temperature = 0;
     tempMax = 125.0;
     tempMin = -55.0;
+    ringKeyOnCount = 0;
     tempList.clear();
     lastCheckRing = lastCheckDark = lastCheckPeople = lastCheckLight = QDateTime::currentDateTime().toMSecsSinceEpoch();
 }
@@ -51,10 +52,24 @@ void KeyBoardThread::run()
         peopleels = now - lastCheckPeople;
         darkels = now - lastCheckDark;
         lightels = now - lastCheckLight;
-        if((ringels < 0 || ringels > 1000) && digitalRead(P0) == 0)
+        if((ringels < 0 || ringels > 1000))
         {
-            lastCheckRing = now;
-            emit onKey(0);
+            if(digitalRead(P0) == 0)
+            {
+                if(ringKeyOnCount > 5)//至少持续5*20=100ms
+                {
+                    lastCheckRing = now;
+                    emit onKey(0);
+                }
+                else
+                {
+                    ringKeyOnCount++;
+                }
+            }
+            else
+            {
+                ringKeyOnCount = 0;
+            }
         }
         if((peopleels < 0 || peopleels > 1000))
         {

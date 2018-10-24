@@ -55,6 +55,8 @@ private:
 
     bool _lightIsTurnOn;
 
+    int ringKeyOnCount;
+
     bool _isShowingDarkForm;
     float temperature;
     float tempMax, tempMin;
