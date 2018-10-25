@@ -32,7 +32,7 @@ void KeyBoardThread::setStop()
 
 void KeyBoardThread::run()
 {
-ifdef Q_OS_LINUX
+#ifdef Q_OS_LINUX
     _isSetup = wiringPiSetup() == 0;
     pinMode(P0, INPUT);
     pinMode(P1, INPUT);
@@ -56,7 +56,7 @@ ifdef Q_OS_LINUX
         {
             if(digitalRead(P0) == 0)
             {
-                if(ringKeyOnCount >= 2)//至少持续2*20=40ms
+                if(ringKeyOnCount >= 3)//至少持续3*5=15ms
                 {
                     lastCheckRing = now;
                     emit onKey(0);
