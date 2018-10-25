@@ -56,7 +56,7 @@ void KeyBoardThread::run()
         {
             if(digitalRead(P0) == 0)
             {
-                if(ringKeyOnCount > 2)//至少持续2*20=40ms
+                if(ringKeyOnCount >= 2)//至少持续2*20=40ms
                 {
                     lastCheckRing = now;
                     emit onKey(0);
