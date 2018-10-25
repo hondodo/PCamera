@@ -52,6 +52,7 @@ void KeyBoardThread::run()
         peopleels = now - lastCheckPeople;
         darkels = now - lastCheckDark;
         lightels = now - lastCheckLight;
+        /*
         if((ringels < 0 || ringels > 1000))
         {
             if(digitalRead(P0) == 0)
@@ -72,7 +73,7 @@ void KeyBoardThread::run()
             {
                 ringKeyOnCount = 0;
             }
-        }
+        }*/
         if((peopleels < 0 || peopleels > 1000))
         {
             if(digitalRead(P1) == 1)
