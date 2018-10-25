@@ -259,7 +259,7 @@ void MainWindow::timerEvent(QTimerEvent *event)
                 lastPeople = QDateTime::currentDateTime();
 #ifdef Q_OS_WIN
 #else
-                qDebug() << lastPeople;
+                //qDebug() << lastPeople;
 #endif
             }
 
