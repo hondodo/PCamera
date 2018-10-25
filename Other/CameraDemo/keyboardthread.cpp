@@ -56,7 +56,7 @@ void KeyBoardThread::run()
         {
             if(digitalRead(P0) == 0)
             {
-                if(ringKeyOnCount >= 3)//至少持续3*5=15ms
+                if(ringKeyOnCount >= 5)//至少持续3*5=15ms
                 {
                     lastCheckRing = now;
                     emit onKey(0);
@@ -65,7 +65,7 @@ void KeyBoardThread::run()
                 {
                     ringKeyOnCount++;
                 }
-                this->msleep(5);
+                delayMicroseconds(30);
                 continue;
             }
             else
